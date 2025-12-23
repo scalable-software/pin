@@ -85,6 +85,10 @@ composition("Template", () => {
         then("div with class icon contains an svg with class pinned", () => {
           expect(template.innerHTML).toContain('<svg class="pinned"');
         });
+
+        then("div with class icon contains an svg with class pinned", () => {
+          expect(template.innerHTML).toContain('<svg class="unpinned"');
+        });
       });
 
       and("a new component is added to DOM", () => {
