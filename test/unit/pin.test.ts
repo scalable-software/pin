@@ -75,6 +75,12 @@ composition("Template", () => {
         expect(template).toBeDefined();
       });
 
+      and("template is defined", () => {
+        then("template contains a div with class icon", () => {
+          expect(template.innerHTML).toContain('<div class="icon">');
+        });
+      });
+
       and("a new component is added to DOM", () => {
         let component: Pin;
         beforeEach(() => {
