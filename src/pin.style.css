@@ -38,3 +38,56 @@
     --svg-hover-fill-color: #ffffff;
   }
 }
+
+/* =======================
+  Icon Styles
+======================= */
+.icon {
+  position: relative;
+  margin: var(--icon-margin);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  background-color: var(--button-background-color);
+  border: 1px solid var(--button-border-color);
+  border-radius: var(--button-radius);
+  box-shadow: var(--button-shadow);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+/* Active state styles for the icon (when clicked or tapped) */
+.icon:active {
+  background-color: var(--button-active-background-color);
+  border-color: var(--button-border-hover-color);
+  box-shadow: none;
+}
+
+/* =======================
+  Icon Hover Styles
+======================= */
+@media (hover: hover) {
+  .icon:hover {
+    background-color: var(--button-hover-background-color);
+    border-color: var(--button-border-hover-color);
+    box-shadow: var(--button-shadow-hover);
+  }
+}
+
+/* =======================
+  SVG Icon Styles
+======================= */
+svg {
+  margin: var(--svg-margin);
+  width: var(--svg-size);
+  height: var(--svg-size);
+  fill: var(--svg-fill-color);
+  transition: fill 0.2s, opacity 0.2s;
+}
+/* Hover effect for the SVG icons */
+@media (hover: hover) {
+  .icon:hover svg {
+    fill: var(--svg-hover-fill-color);
+  }
+}
