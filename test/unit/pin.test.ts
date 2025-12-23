@@ -75,6 +75,22 @@ composition("Template", () => {
         expect(template).toBeDefined();
       });
 
+      and("template is defined", () => {
+        then("template contains a div with class icon", () => {
+          expect(template.innerHTML).toContain('<div class="icon">');
+        });
+      });
+
+      and("template contains a div with class icon", () => {
+        then("div with class icon contains an svg with class pinned", () => {
+          expect(template.innerHTML).toContain('<svg class="pinned"');
+        });
+
+        then("div with class icon contains an svg with class pinned", () => {
+          expect(template.innerHTML).toContain('<svg class="unpinned"');
+        });
+      });
+
       and("a new component is added to DOM", () => {
         let component: Pin;
         beforeEach(() => {
