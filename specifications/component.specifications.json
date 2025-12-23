@@ -1,0 +1,11 @@
+{
+  "Component": "<Class>",
+  "Package": "<Package>",
+  "Description": "<Description>",
+  "Tag": "<Tag>",
+  "Composition": {},
+  "States": {},
+  "Operations": {},
+  "Events": {},
+  "Gestures": {}
+}
