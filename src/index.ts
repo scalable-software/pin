@@ -7,6 +7,6 @@ export {
   Operation,
   Event,
   Gesture,
-} from "./component.meta.js";
+} from "./pin.meta.js";
 
-export { ComponentTemplate } from "./component.js";
+export { Pin } from "./pin.js";

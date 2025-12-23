@@ -1,0 +1,123 @@
+import { Template } from "@scalable.software/component";
+
+import { Pin, Tag, Attributes } from "@scalable.software/pin";
+
+configuration("Tag", () => {
+  and("Pin imported", () => {
+    then("Pin is defined", () => {
+      expect(Pin).toBeDefined();
+    });
+
+    and("Pin is defined", () => {
+      then("Pin.Tag static getter is defined", () => {
+        expect(Pin.Tag).toBeDefined();
+      });
+
+      and("Pin.Tag static getter is defined", () => {
+        then("Pin.Tag is Tag", () => {
+          expect(Pin.Tag).toBe(Tag);
+        });
+      });
+    });
+  });
+});
+
+configuration("ATTRIBUTE", () => {
+  and("Pin imported", () => {
+    then("Pin is defined", () => {
+      expect(Pin).toBeDefined();
+    });
+
+    and("Pin is defined", () => {
+      then("Pin.Attributes static getter is defined", () => {
+        expect(Pin.Attributes).toBeDefined();
+      });
+
+      and("Pin.Attributes static getter is defined", () => {
+        then("Pin.Attributes is Attribute", () => {
+          expect(Pin.Attributes).toBe(Attributes);
+        });
+      });
+    });
+  });
+});
+
+utility("TEMPLATE", () => {
+  then("Pin.Template static property is defined", () => {
+    expect(Pin.Template).toBeDefined();
+  });
+
+  and("Pin.Template static property is defined", () => {
+    then("Pin.Template is a Template", () => {
+      expect(Pin.Template).toBeInstanceOf(Template);
+    });
+  });
+});
+
+composition("Template", () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      let template: HTMLTemplateElement;
+      beforeEach(async () => {
+        template = (await Pin.Template.load(
+          "pin.template.html"
+        )) as HTMLTemplateElement;
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      then("template is defined", () => {
+        expect(template).toBeDefined();
+      });
+
+      and("a new component is added to DOM", () => {
+        let component: Pin;
+        beforeEach(() => {
+          component = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          component.remove();
+        });
+
+        then("component.root contents contains template contents", () => {
+          expect(component.root.innerHTML).toContain(template.innerHTML);
+        });
+      });
+    });
+  });
+});
+
+composition("CSS", () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new component is added to DOM", () => {
+        let component: Pin;
+        beforeEach(() => {
+          component = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          component.remove();
+        });
+
+        then("component.root contents contains a link to stylesheet", () => {
+          expect(component.root.innerHTML).toContain("stylesheet");
+        });
+      });
+    });
+  });
+});

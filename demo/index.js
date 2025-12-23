@@ -1,5 +1,5 @@
-import { ComponentTemplate } from "@scalable.software/component.template";
+import { Pin } from "@scalable.software/pin";
 
-await ComponentTemplate.Template.load("component.template.html");
+await Pin.Template.load("pin.template.html");
 
-customElements.define(ComponentTemplate.Tag, ComponentTemplate);
+customElements.define(Pin.Tag, Pin);
