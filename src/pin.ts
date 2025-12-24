@@ -71,6 +71,13 @@ export class Pin extends Component {
    */
   private _onhide: Handler = null;
 
+  /**
+   * onshow triggered when pin visibility changes to visible
+   * @category Events
+   * @hidden
+   */
+  private _onshow: Handler = null;
+
   constructor() {
     super(configuration);
   }
@@ -92,6 +99,8 @@ export class Pin extends Component {
 
       visible === Visible.NO &&
         this._dispatchEvent(Event.ON_HIDE, { detail: { visible } });
+      visible === Visible.YES &&
+        this._dispatchEvent(Event.ON_SHOW, { detail: { visible } });
     }
   }
 
@@ -111,7 +120,11 @@ export class Pin extends Component {
    * @event
    * @category Events
    */
-  public set onshow(handler: Handler) {}
+  public set onshow(handler: Handler) {
+    this._onshow && this.removeEventListener(Event.ON_SHOW, this._onshow);
+    this._onshow = handler;
+    this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
+  }
 
   /**
    * Hide the pin button when it is visible
