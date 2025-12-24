@@ -374,6 +374,55 @@ events(Event.ON_SHOW, () => {
         then("pin.onshow setter is defined", () => {
           expect(hasSetter(pin, Event.ON_SHOW)).toBeTrue();
         });
+
+        and("pin.visible is set to Visible.NO", () => {
+          beforeEach(() => {
+            pin.visible = Visible.NO;
+          });
+
+          and("pin.onshow setter is defined", () => {
+            let onshow: jasmine.Spy;
+            beforeEach(() => {
+              onshow = jasmine.createSpy("onshow");
+              pin.onshow = onshow;
+            });
+
+            when("pin.visible set to Visible.YES", () => {
+              beforeEach(() => {
+                pin.visible = Visible.YES;
+              });
+
+              then("onshow is called", () => {
+                expect(onshow).toHaveBeenCalled();
+              });
+              then("onshow is called with `visible: Visible.YES`", () => {
+                expect(onshow).toHaveBeenCalledWith(
+                  jasmine.objectContaining({ detail: { visible: Visible.YES } })
+                );
+              });
+            });
+
+            and("pin.onshow is set to new listener ", () => {
+              let onshow2: jasmine.Spy;
+              beforeEach(() => {
+                onshow2 = jasmine.createSpy("onshow2");
+                pin.onshow = onshow2;
+              });
+
+              when("pin.visible set to Visible.YES", () => {
+                beforeEach(() => {
+                  pin.visible = Visible.YES;
+                });
+                then("onshow is not called", () => {
+                  expect(onshow).not.toHaveBeenCalled();
+                });
+                then("onshow2 is called", () => {
+                  expect(onshow2).toHaveBeenCalled();
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
