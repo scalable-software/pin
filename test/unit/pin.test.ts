@@ -1,6 +1,6 @@
 import { Template } from "@scalable.software/component";
 
-import { Pin, Tag, Attributes, State } from "@scalable.software/pin";
+import { Pin, Tag, Attributes, State, Visible } from "@scalable.software/pin";
 
 configuration("Tag", () => {
   and("Pin imported", () => {
@@ -163,6 +163,12 @@ state(State.VISIBLE, () => {
 
         then("pin.visible getter is defined", () => {
           expect(pin.visible).toBeDefined();
+        });
+
+        and("pin.visible getter is defined", () => {
+          then("pin.visible is Visible.YES", () => {
+            expect(pin.visible).toBe(Visible.YES);
+          });
         });
       });
     });
