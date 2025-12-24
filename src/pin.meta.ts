@@ -38,7 +38,9 @@ export type State = (typeof State)[keyof typeof State];
  * @category Metadata: State
  * @enum
  */
-export const Visible = {} as const;
+export const Visible = {
+  YES: "yes",
+} as const;
 /**
  * Visible state used to show or hide the component
  * @category Metadata: State
