@@ -221,6 +221,18 @@ operation(Operation.HIDE, () => {
         then("pin.hide() method is defined", () => {
           expect(pin.hide).toBeDefined();
         });
+
+        and("pin.hide() method is defined", () => {
+          when("pin.hide() is called", () => {
+            beforeEach(() => {
+              pin.hide();
+            });
+
+            then("pin.visible is Visible.NO", () => {
+              expect(pin.visible).toBe(Visible.NO);
+            });
+          });
+        });
       });
     });
   });
