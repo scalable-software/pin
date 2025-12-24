@@ -26,6 +26,12 @@ metadata("Attributes", () => {
         expect(typeof Attributes).toBe("object");
       });
     });
+
+    and("Attributes is an object", () => {
+      then("Attributes has VISIBLE", () => {
+        expect(Attributes.VISIBLE).toBe("visible");
+      });
+    });
   });
 });
 
@@ -38,6 +44,12 @@ metadata("States", () => {
     and("State is defined", () => {
       then("State is an object", () => {
         expect(typeof State).toBe("object");
+      });
+    });
+
+    and("State is an object", () => {
+      then("State has VISIBLE", () => {
+        expect(State.VISIBLE).toBe("visible");
       });
     });
   });
