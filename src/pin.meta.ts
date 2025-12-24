@@ -54,6 +54,7 @@ export type Visible = (typeof Visible)[keyof typeof Visible];
  */
 export const Operation = {
   HIDE: "hide",
+  SHOW: "show",
 } as const;
 
 /**
