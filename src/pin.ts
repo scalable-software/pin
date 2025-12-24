@@ -77,6 +77,11 @@ export class Pin extends Component {
       ? (this.getAttribute(Attributes.VISIBLE) as Visible)
       : this._visible;
   }
+  public set visible(visible: Visible) {
+    if (this._visible !== visible) {
+      this._visible = visible;
+    }
+  }
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
