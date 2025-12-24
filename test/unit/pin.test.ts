@@ -179,6 +179,9 @@ state(State.VISIBLE, () => {
           then("pin.visible is Visible.NO", () => {
             expect(pin.visible).toBe(Visible.NO);
           });
+          then("visible attribute is set to Visible.NO", () => {
+            expect(pin.getAttribute(Attributes.VISIBLE)).toBe(Visible.NO);
+          });
         });
       });
     });
