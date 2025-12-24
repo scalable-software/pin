@@ -9,7 +9,9 @@ export const Tag = "pin-button" as const;
  * @category Metadata: State
  * @enum
  */
-export const Attributes = {} as const;
+export const Attributes = {
+  VISIBLE: "visible",
+} as const;
 /**
  * HTML Attributes available to set
  * @category Metadata: State
@@ -32,10 +34,28 @@ export const State = {
 export type State = (typeof State)[keyof typeof State];
 
 /**
+ * Visible state used to show or hide the component
+ * @category Metadata: State
+ * @enum
+ */
+export const Visible = {
+  YES: "yes",
+  NO: "no",
+} as const;
+/**
+ * Visible state used to show or hide the component
+ * @category Metadata: State
+ */
+export type Visible = (typeof Visible)[keyof typeof Visible];
+
+/**
  * @category Metadata: Operations
  * @enum
  */
-export const Operation = {} as const;
+export const Operation = {
+  HIDE: "hide",
+  SHOW: "show",
+} as const;
 
 /**
  * @category Metadata: Operations
@@ -46,7 +66,10 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
  * @category Metadata: Events
  * @enum
  */
-export const Event = {} as const;
+export const Event = {
+  ON_HIDE: "onhide",
+  ON_SHOW: "onshow",
+} as const;
 /**
  * @category Metadata: Events
  */

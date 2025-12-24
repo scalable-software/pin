@@ -2,6 +2,7 @@ import {
   Tag,
   Attributes,
   State,
+  Visible,
   Operation,
   Event,
   Gesture,
@@ -26,6 +27,12 @@ metadata("Attributes", () => {
         expect(typeof Attributes).toBe("object");
       });
     });
+
+    and("Attributes is an object", () => {
+      then("Attributes has VISIBLE", () => {
+        expect(Attributes.VISIBLE).toBe("visible");
+      });
+    });
   });
 });
 
@@ -38,6 +45,28 @@ metadata("States", () => {
     and("State is defined", () => {
       then("State is an object", () => {
         expect(typeof State).toBe("object");
+      });
+    });
+
+    and("State is an object", () => {
+      then("State has VISIBLE", () => {
+        expect(State.VISIBLE).toBe("visible");
+      });
+    });
+  });
+
+  and("Visible imported", () => {
+    then("Visible is defined", () => {
+      expect(Visible).toBeDefined();
+    });
+
+    and("Visible is defined", () => {
+      then("Visible.YES is defined", () => {
+        expect(Visible.YES).toBeDefined();
+      });
+
+      then("Visible.NO is defined", () => {
+        expect(Visible.NO).toBeDefined();
       });
     });
   });
@@ -53,6 +82,16 @@ metadata("Operations", () => {
       then("Operation is an object", () => {
         expect(typeof Operation).toBe("object");
       });
+
+      and("Operation is an object", () => {
+        then("Operation.HIDE is defined", () => {
+          expect(Operation.HIDE).toBeDefined();
+        });
+
+        then("Operation.SHOW is defined", () => {
+          expect(Operation.SHOW).toBeDefined();
+        });
+      });
     });
   });
 });
@@ -66,6 +105,16 @@ metadata("Events", () => {
     and("Event is defined", () => {
       then("Event is an object", () => {
         expect(typeof Event).toBe("object");
+      });
+
+      and("Event is an object", () => {
+        then("Event.ON_HIDE is defined", () => {
+          expect(Event.ON_HIDE).toBeDefined();
+        });
+
+        then("Event.ON_SHOW is defined", () => {
+          expect(Event.ON_SHOW).toBeDefined();
+        });
       });
     });
   });

@@ -91,3 +91,10 @@ svg {
     fill: var(--svg-hover-fill-color);
   }
 }
+
+/* =======================
+  State Visibility
+======================= */
+:host([visible="no"]) {
+  display: none;
+}

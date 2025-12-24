@@ -4,6 +4,7 @@ export {
   Tag,
   Attributes,
   State,
+  Visible,
   Operation,
   Event,
   Gesture,
