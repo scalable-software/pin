@@ -66,7 +66,9 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
  * @category Metadata: Events
  * @enum
  */
-export const Event = {} as const;
+export const Event = {
+  ON_HIDE: "onhide",
+} as const;
 /**
  * @category Metadata: Events
  */
