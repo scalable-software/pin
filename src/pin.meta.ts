@@ -9,7 +9,9 @@ export const Tag = "pin-button" as const;
  * @category Metadata: State
  * @enum
  */
-export const Attributes = {} as const;
+export const Attributes = {
+  VISIBLE: "visible",
+} as const;
 /**
  * HTML Attributes available to set
  * @category Metadata: State
