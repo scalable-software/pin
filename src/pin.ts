@@ -2,7 +2,7 @@
  * @module Component
  */
 import { Component, Template } from "@scalable.software/component";
-import { type Configuration } from "@scalable.software/component";
+import { type Configuration, type Handler } from "@scalable.software/component";
 
 import { Tag, Attributes, Visible } from "./pin.meta.js";
 
@@ -84,6 +84,13 @@ export class Pin extends Component {
       visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
     }
   }
+
+  /**
+   * Triggered via `.hide()`
+   * @event
+   * @category Events
+   */
+  public set onhide(handler: Handler) {}
 
   /**
    * Hide the pin button when it is visible
