@@ -61,6 +61,14 @@ export class Pin extends Component {
   }
 
   /**
+   * Get and Sets the visibility of the pin button
+   * @category State
+   */
+  public get visible() {
+    return "";
+  }
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
