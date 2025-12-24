@@ -59,6 +59,12 @@ metadata("States", () => {
     then("Visible is defined", () => {
       expect(Visible).toBeDefined();
     });
+
+    and("Visible is defined", () => {
+      then("Visible.YES is defined", () => {
+        expect(Visible.YES).toBeDefined();
+      });
+    });
   });
 });
 
