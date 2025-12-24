@@ -8,7 +8,7 @@ import {
 } from "@scalable.software/pin";
 
 metadata("Tag", () => {
-  when("Tag imported", () => {
+  and("Tag imported", () => {
     then("Tag is defined", () => {
       expect(Tag).toBeDefined();
     });
@@ -21,7 +21,7 @@ metadata("Attributes", () => {
       expect(Attributes).toBeDefined();
     });
 
-    when("Attributes is defined", () => {
+    and("Attributes is defined", () => {
       then("Attributes is an object", () => {
         expect(typeof Attributes).toBe("object");
       });
@@ -35,7 +35,7 @@ metadata("States", () => {
       expect(State).toBeDefined();
     });
 
-    when("State is defined", () => {
+    and("State is defined", () => {
       then("State is an object", () => {
         expect(typeof State).toBe("object");
       });
@@ -49,7 +49,7 @@ metadata("Operations", () => {
       expect(Operation).toBeDefined();
     });
 
-    when("Operation is defined", () => {
+    and("Operation is defined", () => {
       then("Operation is an object", () => {
         expect(typeof Operation).toBe("object");
       });
@@ -63,7 +63,7 @@ metadata("Events", () => {
       expect(Event).toBeDefined();
     });
 
-    when("Event is defined", () => {
+    and("Event is defined", () => {
       then("Event is an object", () => {
         expect(typeof Event).toBe("object");
       });
@@ -77,7 +77,7 @@ metadata("Gestures", () => {
       expect(Gesture).toBeDefined();
     });
 
-    when("Gesture is defined", () => {
+    and("Gesture is defined", () => {
       then("Gesture is an object", () => {
         expect(typeof Gesture).toBe("object");
       });
