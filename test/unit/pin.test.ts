@@ -170,6 +170,16 @@ state(State.VISIBLE, () => {
             expect(pin.visible).toBe(Visible.YES);
           });
         });
+
+        when("pin.visible is set to Visible.NO", () => {
+          beforeEach(() => {
+            pin.visible = Visible.NO;
+          });
+
+          then("pin.visible is Visible.NO", () => {
+            expect(pin.visible).toBe(Visible.NO);
+          });
+        });
       });
     });
   });
