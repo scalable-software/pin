@@ -111,6 +111,10 @@ metadata("Events", () => {
         then("Event.ON_HIDE is defined", () => {
           expect(Event.ON_HIDE).toBeDefined();
         });
+
+        then("Event.ON_SHOW is defined", () => {
+          expect(Event.ON_SHOW).toBeDefined();
+        });
       });
     });
   });
