@@ -314,6 +314,35 @@ events(Event.ON_HIDE, () => {
         then("pin.onhide setter is defined", () => {
           expect(hasSetter(pin, Event.ON_HIDE)).toBeTrue();
         });
+
+        and("pin.onhide setter is defined", () => {
+          let onhide: jasmine.Spy;
+          beforeEach(() => {
+            onhide = jasmine.createSpy("onhide");
+            pin.onhide = onhide;
+          });
+
+          and("pin.onhide is set to new listener ", () => {
+            let onhide2: jasmine.Spy;
+            beforeEach(() => {
+              onhide2 = jasmine.createSpy("onhide2");
+              pin.onhide = onhide2;
+            });
+
+            when("pin.visible set to Visible.NO", () => {
+              beforeEach(() => {
+                pin.visible = Visible.NO;
+              });
+
+              then("onhide is not called", () => {
+                expect(onhide).not.toHaveBeenCalled();
+              });
+              then("onhide2 is called", () => {
+                expect(onhide2).toHaveBeenCalled();
+              });
+            });
+          });
+        });
       });
     });
   });
