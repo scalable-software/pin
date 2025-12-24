@@ -87,6 +87,10 @@ metadata("Operations", () => {
         then("Operation.HIDE is defined", () => {
           expect(Operation.HIDE).toBeDefined();
         });
+
+        then("Operation.SHOW is defined", () => {
+          expect(Operation.SHOW).toBeDefined();
+        });
       });
     });
   });
