@@ -82,6 +82,12 @@ metadata("Operations", () => {
       then("Operation is an object", () => {
         expect(typeof Operation).toBe("object");
       });
+
+      and("Operation is an object", () => {
+        then("Operation.HIDE is defined", () => {
+          expect(Operation.HIDE).toBeDefined();
+        });
+      });
     });
   });
 });
