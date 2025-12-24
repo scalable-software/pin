@@ -264,6 +264,24 @@ operation(Operation.SHOW, () => {
         then("pin.show() method is defined", () => {
           expect(pin.show).toBeDefined();
         });
+
+        and("pin.visible is set to Visible.NO", () => {
+          beforeEach(() => {
+            pin.visible = Visible.NO;
+          });
+          then("pin.visible is Visible.NO", () => {
+            expect(pin.visible).toBe(Visible.NO);
+          });
+
+          when("pin.show() is called", () => {
+            beforeEach(() => {
+              pin.show();
+            });
+            then("pin.visible is Visible.YES", () => {
+              expect(pin.visible).toBe(Visible.YES);
+            });
+          });
+        });
       });
     });
   });
