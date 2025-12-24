@@ -80,6 +80,8 @@ export class Pin extends Component {
   public set visible(visible: Visible) {
     if (this._visible !== visible) {
       this._visible = visible;
+      visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
+      visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
     }
   }
 
