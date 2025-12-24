@@ -40,6 +40,7 @@ export type State = (typeof State)[keyof typeof State];
  */
 export const Visible = {
   YES: "yes",
+  NO: "no",
 } as const;
 /**
  * Visible state used to show or hide the component
