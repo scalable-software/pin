@@ -4,7 +4,7 @@
 import { Component, Template } from "@scalable.software/component";
 import { type Configuration, type Handler } from "@scalable.software/component";
 
-import { Tag, Attributes, Visible } from "./pin.meta.js";
+import { Tag, Attributes, Visible, Event } from "./pin.meta.js";
 
 /**
  * Configuration required for components with custom layout and style
@@ -64,6 +64,13 @@ export class Pin extends Component {
    */
   private _visible: Visible = Visible.YES;
 
+  /**
+   * onhide triggered when pin visibility changes to hidden
+   * @category Events
+   * @hidden
+   */
+  private _onhide: Handler = null;
+
   constructor() {
     super(configuration);
   }
@@ -82,6 +89,9 @@ export class Pin extends Component {
       this._visible = visible;
       visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
       visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
+
+      visible === Visible.NO &&
+        this._dispatchEvent(Event.ON_HIDE, { detail: { visible } });
     }
   }
 
@@ -90,7 +100,11 @@ export class Pin extends Component {
    * @event
    * @category Events
    */
-  public set onhide(handler: Handler) {}
+  public set onhide(handler: Handler) {
+    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = handler;
+    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+  }
 
   /**
    * Hide the pin button when it is visible
