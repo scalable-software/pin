@@ -86,6 +86,12 @@ export class Pin extends Component {
   }
 
   /**
+   * Hide the pin button when it is visible
+   * @category Operations
+   */
+  public hide = () => {};
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
