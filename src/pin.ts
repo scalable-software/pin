@@ -107,6 +107,13 @@ export class Pin extends Component {
   }
 
   /**
+   * Triggered via `.show()`
+   * @event
+   * @category Events
+   */
+  public set onshow(handler: Handler) {}
+
+  /**
    * Hide the pin button when it is visible
    * @category Operations
    */
