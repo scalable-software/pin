@@ -145,6 +145,10 @@ metadata("Events", () => {
       });
 
       and("Event is an object", () => {
+        then("Event.ON is defined", () => {
+          expect(Event.ON).toBeDefined();
+        });
+
         then("Event.ON_HIDE is defined", () => {
           expect(Event.ON_HIDE).toBeDefined();
         });

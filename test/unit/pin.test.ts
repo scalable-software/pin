@@ -512,6 +512,77 @@ operation(Operation.TOGGLE, () => {
   });
 });
 
+events(Event.ON, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("pin.on setter is defined", () => {
+          expect(hasSetter(pin, Event.ON)).toBeTrue();
+        });
+
+        and("pin.on setter is defined", () => {
+          let on: jasmine.Spy;
+          beforeEach(() => {
+            on = jasmine.createSpy("on");
+            pin.on = on;
+          });
+
+          when("pin.visible set to Visible.NO", () => {
+            beforeEach(() => {
+              pin.visible = Visible.NO;
+            });
+
+            then("on is called with `visible: Visible.NO`", () => {
+              expect(on).toHaveBeenCalledWith(
+                jasmine.objectContaining({ detail: { visible: Visible.NO } })
+              );
+            });
+          });
+          and("pin.on is set to new listener ", () => {
+            let on2: jasmine.Spy;
+            beforeEach(() => {
+              on2 = jasmine.createSpy("on2");
+              pin.on = on2;
+            });
+
+            when("pin.visible set to Visible.NO", () => {
+              beforeEach(() => {
+                pin.visible = Visible.NO;
+              });
+
+              then("on is not called", () => {
+                expect(on).not.toHaveBeenCalled();
+              });
+              then("on2 is called", () => {
+                expect(on2).toHaveBeenCalled();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
 events(Event.ON_HIDE, () => {
   and("Pin is defined in custom element registry", () => {
     beforeEach(() => {

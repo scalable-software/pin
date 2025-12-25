@@ -80,6 +80,13 @@ export class Pin extends Component {
   private _status: Status = Status.UNPINNED;
 
   /**
+   * on triggered when any event is triggered
+   * @category Events
+   * @hidden
+   */
+  private _on: Handler = null;
+
+  /**
    * onhide triggered when pin visibility changes to hidden
    * @category Events
    * @hidden
@@ -153,6 +160,27 @@ export class Pin extends Component {
       status === Status.UNPINNED &&
         this._dispatchEvent(Event.ON_UNPIN, { detail: { status } });
     }
+  }
+
+  /**
+   * Triggered on any event
+   * @event
+   * @category Events
+   */
+  public set on(handler: Handler) {
+    Object.values(Event)
+      .filter((event): event is Event => event !== Event.ON)
+      .forEach((event: Event) => {
+        this._on && this.removeEventListener(event, this._on);
+      });
+
+    this._on = handler;
+
+    Object.values(Event)
+      .filter((event): event is Event => event !== Event.ON)
+      .forEach((event: Event) => {
+        this._on && this.addEventListener(event, this._on);
+      });
   }
 
   /**
