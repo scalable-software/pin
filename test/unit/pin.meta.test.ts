@@ -3,6 +3,7 @@ import {
   Attributes,
   State,
   Visible,
+  Status,
   Operation,
   Event,
   Gesture,
@@ -76,6 +77,12 @@ metadata("States", () => {
       then("Visible.NO is defined", () => {
         expect(Visible.NO).toBeDefined();
       });
+    });
+  });
+
+  and("Status imported", () => {
+    then("Status is defined", () => {
+      expect(Status).toBeDefined();
     });
   });
 });
