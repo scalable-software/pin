@@ -179,6 +179,10 @@ state(State.VISIBLE, () => {
           });
         });
 
+        then("visible attribute is null", () => {
+          expect(pin.getAttribute(Attributes.VISIBLE)).toBeNull();
+        });
+
         when("pin.visible is set to Visible.NO", () => {
           beforeEach(() => {
             pin.visible = Visible.NO;
@@ -189,6 +193,16 @@ state(State.VISIBLE, () => {
           });
           then("visible attribute is set to Visible.NO", () => {
             expect(pin.getAttribute(Attributes.VISIBLE)).toBe(Visible.NO);
+          });
+        });
+
+        when("visible attribute is set to Visible.NO", () => {
+          beforeEach(() => {
+            pin.setAttribute(Attributes.VISIBLE, Visible.NO);
+          });
+
+          then("pin.visible is Visible.NO", () => {
+            expect(pin.visible).toBe(Visible.NO);
           });
         });
       });
