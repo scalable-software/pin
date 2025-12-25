@@ -6,6 +6,7 @@ import {
   Attributes,
   State,
   Visible,
+  Status,
   Operation,
   Event,
 } from "@scalable.software/pin";
@@ -235,6 +236,12 @@ state(State.STATUS, () => {
 
         then("pin.status getter is defined", () => {
           expect(pin.status).toBeDefined();
+        });
+
+        and("pin.status getter is defined", () => {
+          then("pin.status is Status.UNPINNED", () => {
+            expect(pin.status).toBe(Status.UNPINNED);
+          });
         });
       });
     });
