@@ -170,6 +170,12 @@ export class Pin extends Component {
   public pin = () => {};
 
   /**
+   * Unpin the pin button when it is pinned
+   * @category Operations
+   */
+  public unpin = () => {};
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
