@@ -175,6 +175,12 @@ metadata("Gestures", () => {
       then("Gesture is an object", () => {
         expect(typeof Gesture).toBe("object");
       });
+
+      and("Gesture is an object", () => {
+        then("Gesture.CLICK is defined", () => {
+          expect(Gesture.CLICK).toBeDefined();
+        });
+      });
     });
   });
 });
