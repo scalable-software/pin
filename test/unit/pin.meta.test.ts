@@ -116,6 +116,10 @@ metadata("Operations", () => {
         then("Operation.SHOW is defined", () => {
           expect(Operation.SHOW).toBeDefined();
         });
+
+        then("Operation.PIN is defined", () => {
+          expect(Operation.PIN).toBeDefined();
+        });
       });
     });
   });
