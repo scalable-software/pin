@@ -71,6 +71,7 @@ export const Operation = {
   SHOW: "show",
   PIN: "pin",
   UNPIN: "unpin",
+  TOGGLE: "toggle",
 } as const;
 
 /**
