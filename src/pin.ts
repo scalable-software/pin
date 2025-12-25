@@ -152,6 +152,13 @@ export class Pin extends Component {
   }
 
   /**
+   * Triggered via `.pin()`
+   * @event
+   * @category Events
+   */
+  public set onpin(handler: Handler) {}
+
+  /**
    * Hide the pin button when it is visible
    * @category Operations
    */
