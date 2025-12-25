@@ -4,7 +4,14 @@
 import { Component, Template } from "@scalable.software/component";
 import { type Configuration, type Handler } from "@scalable.software/component";
 
-import { Tag, Attributes, Visible, Status, Event } from "./pin.meta.js";
+import {
+  Tag,
+  Attributes,
+  Visible,
+  Status,
+  Event,
+  Gesture,
+} from "./pin.meta.js";
 
 /**
  * Configuration required for components with custom layout and style
@@ -54,7 +61,7 @@ export class Pin extends Component {
    * @category State
    * @hidden
    */
-  protected elements: {} = {};
+  protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
   /**
    * Internal Visibility state of the component
@@ -249,19 +256,30 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _cache = () => {};
+  protected _cache = () => {
+    this.elements.icon = this.root.querySelector(".icon");
+  };
 
   /**
    * Called by the connectedCallback prototypical method
    * @category Configuration
    * @hidden
    */
-  protected _addEventListeners = () => {};
+  protected _addEventListeners = () =>
+    this.elements.icon.addEventListener(Gesture.CLICK, this._handleClick);
 
   /**
    * Called by the disconnectedCallback prototypical method
    * @category Configuration
    * @hidden
    */
-  protected _removeEventListeners = () => {};
+  protected _removeEventListeners = () =>
+    this.elements.icon.removeEventListener(Gesture.CLICK, this._handleClick);
+
+  /**
+   * Handles the click event
+   * @category Gesture
+   * @hidden
+   */
+  private _handleClick = (event: MouseEvent | TouchEvent) => this.toggle();
 }
