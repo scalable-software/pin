@@ -70,6 +70,7 @@ export const Operation = {
   HIDE: "hide",
   SHOW: "show",
   PIN: "pin",
+  UNPIN: "unpin",
 } as const;
 
 /**
