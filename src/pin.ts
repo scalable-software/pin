@@ -179,7 +179,9 @@ export class Pin extends Component {
    * Toggle the pin button between pinned and unpinned
    * @category Operations
    */
-  public toggle = () => {};
+  public toggle = () =>
+    (this.status =
+      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
