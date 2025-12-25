@@ -84,6 +84,7 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
  * @enum
  */
 export const Event = {
+  ON: "on",
   ON_HIDE: "onhide",
   ON_SHOW: "onshow",
   ON_PIN: "onpin",
