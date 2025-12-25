@@ -86,6 +86,13 @@ export class Pin extends Component {
    */
   private _onshow: Handler = null;
 
+  /**
+   * onpin triggered when pin status changes to pinned
+   * @category Events
+   * @hidden
+   */
+  private _onpin: Handler = null;
+
   constructor() {
     super(configuration);
   }
@@ -126,6 +133,9 @@ export class Pin extends Component {
     if (this._status !== status) {
       this._status = status;
       this.setAttribute(Attributes.STATUS, status);
+
+      status === Status.PINNED &&
+        this._dispatchEvent(Event.ON_PIN, { detail: { status } });
     }
   }
 
@@ -156,7 +166,11 @@ export class Pin extends Component {
    * @event
    * @category Events
    */
-  public set onpin(handler: Handler) {}
+  public set onpin(handler: Handler) {
+    this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
+    this._onpin = handler;
+    this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+  }
 
   /**
    * Triggered via `.unpin()`
