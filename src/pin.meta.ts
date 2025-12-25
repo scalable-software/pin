@@ -86,6 +86,7 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
 export const Event = {
   ON_HIDE: "onhide",
   ON_SHOW: "onshow",
+  ON_PIN: "onpin",
 } as const;
 /**
  * @category Metadata: Events
