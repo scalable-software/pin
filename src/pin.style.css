@@ -98,3 +98,36 @@ svg {
 :host([visible="no"]) {
   display: none;
 }
+
+/* =======================
+  State Status
+======================= */
+.pinned {
+  display: none;
+}
+.unpinned {
+  display: inline-block;
+}
+
+/* =======================
+  State Status: Pinned
+======================= */
+:host([status="pinned"]) .icon {
+  background-color: var(--button-active-background-color);
+  border-color: var(--button-border-hover-color);
+}
+:host([status="pinned"]) .pinned {
+  display: inline-block;
+}
+:host([status="pinned"]) .unpinned {
+  display: none;
+}
+/* =======================
+  State Status: Unpinned
+======================= */
+:host([status="unpinned"]) .pinned {
+  display: none;
+}
+:host([status="unpinned"]) .unpinned {
+  display: inline-block;
+}
