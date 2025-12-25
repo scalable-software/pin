@@ -244,6 +244,10 @@ state(State.STATUS, () => {
           });
         });
 
+        then("status attribute is Status.UNPINNED", () => {
+          expect(pin.getAttribute(Attributes.STATUS)).toBe(Status.UNPINNED);
+        });
+
         when("pin.status is set to Status.PINNED", () => {
           beforeEach(() => {
             pin.status = Status.PINNED;
