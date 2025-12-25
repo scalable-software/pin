@@ -106,6 +106,14 @@ export class Pin extends Component {
   }
 
   /**
+   * Get and Sets the status of the pin button
+   * @category State
+   */
+  public get status() {
+    return "";
+  }
+
+  /**
    * Triggered via `.hide()`
    * @event
    * @category Events
