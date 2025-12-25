@@ -50,6 +50,16 @@ export const Visible = {
 export type Visible = (typeof Visible)[keyof typeof Visible];
 
 /**
+ * @category Metadata: State
+ * @enum
+ */
+export const Status = {} as const;
+/**
+ * @category Metadata: State
+ */
+export type Status = (typeof Status)[keyof typeof Status];
+
+/**
  * @category Metadata: Operations
  * @enum
  */
