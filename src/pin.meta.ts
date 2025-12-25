@@ -55,6 +55,7 @@ export type Visible = (typeof Visible)[keyof typeof Visible];
  */
 export const Status = {
   PINNED: "pinned",
+  UNPINNED: "unpinned",
 } as const;
 /**
  * @category Metadata: State
