@@ -9,6 +9,7 @@ import {
   Status,
   Operation,
   Event,
+  Gesture,
 } from "@scalable.software/pin";
 
 configuration("Tag", () => {
@@ -794,6 +795,67 @@ events(Event.ON_UNPIN, () => {
                   expect(onunpin2).toHaveBeenCalled();
                 });
               });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+gesture(Gesture.CLICK, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        when("user click on icon", () => {
+          let onpin: jasmine.Spy;
+          beforeEach(() => {
+            onpin = jasmine.createSpy("onpin");
+            pin.onpin = onpin;
+            const icon = pin.root.querySelector(".icon") as HTMLElement;
+            icon.click();
+          });
+
+          then("pin.status is State.PINNED", () => {
+            expect(pin.status).toEqual(Status.PINNED);
+          });
+          then("onpin is called", () => {
+            expect(onpin).toHaveBeenCalled();
+          });
+
+          and("user clicks on pin", () => {
+            let onunpin: jasmine.Spy;
+            beforeEach(() => {
+              onunpin = jasmine.createSpy("onunpin");
+              pin.onunpin = onunpin;
+              const icon = pin.root.querySelector(".icon") as HTMLElement;
+              icon.click();
+            });
+
+            then("pin.status is Status.UNPINNED", () => {
+              expect(pin.status).toEqual(Status.UNPINNED);
+            });
+            then("onunpin is called", () => {
+              expect(onunpin).toHaveBeenCalled();
             });
           });
         });
