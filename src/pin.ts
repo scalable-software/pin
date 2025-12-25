@@ -4,7 +4,7 @@
 import { Component, Template } from "@scalable.software/component";
 import { type Configuration, type Handler } from "@scalable.software/component";
 
-import { Tag, Attributes, Visible, Event } from "./pin.meta.js";
+import { Tag, Attributes, Visible, Status, Event } from "./pin.meta.js";
 
 /**
  * Configuration required for components with custom layout and style
@@ -65,6 +65,14 @@ export class Pin extends Component {
   private _visible: Visible = Visible.YES;
 
   /**
+   * Internal Status state of the component
+   * @category State
+   * @default
+   * @hidden
+   */
+  private _status: Status = Status.UNPINNED;
+
+  /**
    * onhide triggered when pin visibility changes to hidden
    * @category Events
    * @hidden
@@ -109,8 +117,10 @@ export class Pin extends Component {
    * Get and Sets the status of the pin button
    * @category State
    */
-  public get status() {
-    return "";
+  public get status(): Status {
+    return this.hasAttribute(Attributes.STATUS)
+      ? (this.getAttribute(Attributes.STATUS) as Status)
+      : this._status;
   }
 
   /**
