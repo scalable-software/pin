@@ -164,6 +164,12 @@ export class Pin extends Component {
   public show = () => (this.visible = Visible.YES);
 
   /**
+   * Pin the pin button when it is unpinned
+   * @category Operations
+   */
+  public pin = () => {};
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
