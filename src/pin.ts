@@ -122,6 +122,11 @@ export class Pin extends Component {
       ? (this.getAttribute(Attributes.STATUS) as Status)
       : this._status;
   }
+  public set status(status: Status) {
+    if (this._status !== status) {
+      this._status = status;
+    }
+  }
 
   /**
    * Triggered via `.hide()`
