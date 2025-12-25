@@ -92,6 +92,7 @@ export class Pin extends Component {
       : this._visible;
   }
   public set visible(visible: Visible) {
+    visible = visible ?? Visible.YES;
     if (this._visible !== visible) {
       this._visible = visible;
       visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
@@ -143,7 +144,9 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _attributeHandlers = {};
+  protected _attributeHandlers = {
+    [Attributes.VISIBLE]: (value) => (this.visible = value),
+  };
 
   /**
    * Initialize component attributes with default values
