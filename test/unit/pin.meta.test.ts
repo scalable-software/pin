@@ -32,6 +32,10 @@ metadata("Attributes", () => {
       then("Attributes has VISIBLE", () => {
         expect(Attributes.VISIBLE).toBe("visible");
       });
+
+      then("Attributes has STATUS", () => {
+        expect(Attributes.STATUS).toBe("status");
+      });
     });
   });
 });
@@ -51,6 +55,10 @@ metadata("States", () => {
     and("State is an object", () => {
       then("State has VISIBLE", () => {
         expect(State.VISIBLE).toBe("visible");
+      });
+
+      then("State has STATUS", () => {
+        expect(State.STATUS).toBe("status");
       });
     });
   });
