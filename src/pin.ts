@@ -176,6 +176,12 @@ export class Pin extends Component {
   public unpin = () => {};
 
   /**
+   * Toggle the pin button between pinned and unpinned
+   * @category Operations
+   */
+  public toggle = () => {};
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
