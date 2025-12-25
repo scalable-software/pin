@@ -69,6 +69,7 @@ export type Status = (typeof Status)[keyof typeof Status];
 export const Operation = {
   HIDE: "hide",
   SHOW: "show",
+  PIN: "pin",
 } as const;
 
 /**
