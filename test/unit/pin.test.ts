@@ -399,6 +399,37 @@ operation(Operation.PIN, () => {
   });
 });
 
+operation(Operation.UNPIN, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("pin.unpin() method is defined", () => {
+          expect(pin.unpin).toBeDefined();
+        });
+      });
+    });
+  });
+});
+
 events(Event.ON_HIDE, () => {
   and("Pin is defined in custom element registry", () => {
     beforeEach(() => {
