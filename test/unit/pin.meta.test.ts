@@ -124,6 +124,10 @@ metadata("Operations", () => {
         then("Operation.UNPIN is defined", () => {
           expect(Operation.UNPIN).toBeDefined();
         });
+
+        then("Operation.TOGGLE is defined", () => {
+          expect(Operation.TOGGLE).toBeDefined();
+        });
       });
     });
   });
