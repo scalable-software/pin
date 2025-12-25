@@ -243,6 +243,16 @@ state(State.STATUS, () => {
             expect(pin.status).toBe(Status.UNPINNED);
           });
         });
+
+        when("pin.status is set to Status.PINNED", () => {
+          beforeEach(() => {
+            pin.status = Status.PINNED;
+          });
+
+          then("pin.status is Status.PINNED", () => {
+            expect(pin.status).toBe(Status.PINNED);
+          });
+        });
       });
     });
   });
