@@ -748,6 +748,55 @@ events(Event.ON_UNPIN, () => {
         then("pin.onunpin setter is defined", () => {
           expect(hasSetter(pin, Event.ON_UNPIN)).toBeTrue();
         });
+
+        and("pin.status is set to Status.PINNED", () => {
+          beforeEach(() => {
+            pin.status = Status.PINNED;
+          });
+
+          and("pin.onunpin setter is defined", () => {
+            let onunpin: jasmine.Spy;
+            beforeEach(() => {
+              onunpin = jasmine.createSpy("onunpin");
+              pin.onunpin = onunpin;
+            });
+
+            when("pin.status set to Status.UNPINNED", () => {
+              beforeEach(() => {
+                pin.status = Status.UNPINNED;
+              });
+
+              then("onunpin is called with `status: Status.UNPINNED`", () => {
+                expect(onunpin).toHaveBeenCalledWith(
+                  jasmine.objectContaining({
+                    detail: { status: Status.UNPINNED },
+                  })
+                );
+              });
+            });
+
+            and("pin.onunpin is set to new listener ", () => {
+              let onunpin2: jasmine.Spy;
+              beforeEach(() => {
+                onunpin2 = jasmine.createSpy("onunpin2");
+                pin.onunpin = onunpin2;
+              });
+
+              when("pin.status set to Status.UNPINNED", () => {
+                beforeEach(() => {
+                  pin.status = Status.UNPINNED;
+                });
+
+                then("onunpin is not called", () => {
+                  expect(onunpin).not.toHaveBeenCalled();
+                });
+                then("onunpin2 is called", () => {
+                  expect(onunpin2).toHaveBeenCalled();
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
