@@ -177,7 +177,10 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _initialize = () => {};
+  protected _initialize = () => {
+    !this.hasAttribute(Attributes.STATUS) &&
+      this.setAttribute(Attributes.STATUS, this._status);
+  };
 
   /**
    * Cache element references to improve performance
