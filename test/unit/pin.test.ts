@@ -538,6 +538,46 @@ events(Event.ON, () => {
         then("pin.on setter is defined", () => {
           expect(hasSetter(pin, Event.ON)).toBeTrue();
         });
+
+        and("pin.on setter is defined", () => {
+          let on: jasmine.Spy;
+          beforeEach(() => {
+            on = jasmine.createSpy("on");
+            pin.on = on;
+          });
+
+          when("pin.visible set to Visible.NO", () => {
+            beforeEach(() => {
+              pin.visible = Visible.NO;
+            });
+
+            then("on is called with `visible: Visible.NO`", () => {
+              expect(on).toHaveBeenCalledWith(
+                jasmine.objectContaining({ detail: { visible: Visible.NO } })
+              );
+            });
+          });
+          and("pin.on is set to new listener ", () => {
+            let on2: jasmine.Spy;
+            beforeEach(() => {
+              on2 = jasmine.createSpy("on2");
+              pin.on = on2;
+            });
+
+            when("pin.visible set to Visible.NO", () => {
+              beforeEach(() => {
+                pin.visible = Visible.NO;
+              });
+
+              then("on is not called", () => {
+                expect(on).not.toHaveBeenCalled();
+              });
+              then("on2 is called", () => {
+                expect(on2).toHaveBeenCalled();
+              });
+            });
+          });
+        });
       });
     });
   });
