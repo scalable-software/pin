@@ -156,6 +156,10 @@ metadata("Events", () => {
         then("Event.ON_PIN is defined", () => {
           expect(Event.ON_PIN).toBeDefined();
         });
+
+        then("Event.ON_UNPIN is defined", () => {
+          expect(Event.ON_UNPIN).toBeDefined();
+        });
       });
     });
   });
