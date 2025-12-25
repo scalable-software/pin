@@ -156,6 +156,13 @@ export class Pin extends Component {
   }
 
   /**
+   * Triggered on any event
+   * @event
+   * @category Events
+   */
+  public set on(handler: Handler) {}
+
+  /**
    * Triggered via `.hide()`
    * @event
    * @category Events
