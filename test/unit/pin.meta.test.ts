@@ -3,6 +3,7 @@ import {
   Attributes,
   State,
   Visible,
+  Status,
   Operation,
   Event,
   Gesture,
@@ -32,6 +33,10 @@ metadata("Attributes", () => {
       then("Attributes has VISIBLE", () => {
         expect(Attributes.VISIBLE).toBe("visible");
       });
+
+      then("Attributes has STATUS", () => {
+        expect(Attributes.STATUS).toBe("status");
+      });
     });
   });
 });
@@ -52,6 +57,10 @@ metadata("States", () => {
       then("State has VISIBLE", () => {
         expect(State.VISIBLE).toBe("visible");
       });
+
+      then("State has STATUS", () => {
+        expect(State.STATUS).toBe("status");
+      });
     });
   });
 
@@ -67,6 +76,22 @@ metadata("States", () => {
 
       then("Visible.NO is defined", () => {
         expect(Visible.NO).toBeDefined();
+      });
+    });
+  });
+
+  and("Status imported", () => {
+    then("Status is defined", () => {
+      expect(Status).toBeDefined();
+    });
+
+    and("Status is defined", () => {
+      then("Status.PINNED is defined", () => {
+        expect(Status.PINNED).toBeDefined();
+      });
+
+      then("Status.UNPINNED is defined", () => {
+        expect(Status.UNPINNED).toBeDefined();
       });
     });
   });
@@ -91,6 +116,18 @@ metadata("Operations", () => {
         then("Operation.SHOW is defined", () => {
           expect(Operation.SHOW).toBeDefined();
         });
+
+        then("Operation.PIN is defined", () => {
+          expect(Operation.PIN).toBeDefined();
+        });
+
+        then("Operation.UNPIN is defined", () => {
+          expect(Operation.UNPIN).toBeDefined();
+        });
+
+        then("Operation.TOGGLE is defined", () => {
+          expect(Operation.TOGGLE).toBeDefined();
+        });
       });
     });
   });
@@ -114,6 +151,14 @@ metadata("Events", () => {
 
         then("Event.ON_SHOW is defined", () => {
           expect(Event.ON_SHOW).toBeDefined();
+        });
+
+        then("Event.ON_PIN is defined", () => {
+          expect(Event.ON_PIN).toBeDefined();
+        });
+
+        then("Event.ON_UNPIN is defined", () => {
+          expect(Event.ON_UNPIN).toBeDefined();
         });
       });
     });

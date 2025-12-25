@@ -5,6 +5,7 @@ export {
   Attributes,
   State,
   Visible,
+  Status,
   Operation,
   Event,
   Gesture,

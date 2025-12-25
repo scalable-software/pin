@@ -11,6 +11,7 @@ export const Tag = "pin-button" as const;
  */
 export const Attributes = {
   VISIBLE: "visible",
+  STATUS: "status",
 } as const;
 /**
  * HTML Attributes available to set
@@ -49,12 +50,28 @@ export const Visible = {
 export type Visible = (typeof Visible)[keyof typeof Visible];
 
 /**
+ * @category Metadata: State
+ * @enum
+ */
+export const Status = {
+  PINNED: "pinned",
+  UNPINNED: "unpinned",
+} as const;
+/**
+ * @category Metadata: State
+ */
+export type Status = (typeof Status)[keyof typeof Status];
+
+/**
  * @category Metadata: Operations
  * @enum
  */
 export const Operation = {
   HIDE: "hide",
   SHOW: "show",
+  PIN: "pin",
+  UNPIN: "unpin",
+  TOGGLE: "toggle",
 } as const;
 
 /**
@@ -69,6 +86,8 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
 export const Event = {
   ON_HIDE: "onhide",
   ON_SHOW: "onshow",
+  ON_PIN: "onpin",
+  ON_UNPIN: "onunpin",
 } as const;
 /**
  * @category Metadata: Events
