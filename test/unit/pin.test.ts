@@ -677,6 +677,46 @@ events(Event.ON_PIN, () => {
         then("pin.onpin setter is defined", () => {
           expect(hasSetter(pin, Event.ON_PIN)).toBeTrue();
         });
+
+        and("pin.onpin setter is defined", () => {
+          let onpin: jasmine.Spy;
+          beforeEach(() => {
+            onpin = jasmine.createSpy("onpin");
+            pin.onpin = onpin;
+          });
+
+          when("pin.status set to Status.PINNED", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            then("onpin is called with `status: Status.PINNED`", () => {
+              expect(onpin).toHaveBeenCalledWith(
+                jasmine.objectContaining({ detail: { status: Status.PINNED } })
+              );
+            });
+          });
+          and("pin.onpin is set to new listener ", () => {
+            let onpin2: jasmine.Spy;
+            beforeEach(() => {
+              onpin2 = jasmine.createSpy("onpin2");
+              pin.onpin = onpin2;
+            });
+
+            when("pin.status set to Status.PINNED", () => {
+              beforeEach(() => {
+                pin.status = Status.PINNED;
+              });
+
+              then("onpin is not called", () => {
+                expect(onpin).not.toHaveBeenCalled();
+              });
+              then("onpin2 is called", () => {
+                expect(onpin2).toHaveBeenCalled();
+              });
+            });
+          });
+        });
       });
     });
   });
