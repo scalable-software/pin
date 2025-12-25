@@ -125,6 +125,7 @@ export class Pin extends Component {
   public set status(status: Status) {
     if (this._status !== status) {
       this._status = status;
+      this.setAttribute(Attributes.STATUS, status);
     }
   }
 
