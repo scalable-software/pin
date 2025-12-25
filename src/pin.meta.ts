@@ -11,6 +11,7 @@ export const Tag = "pin-button" as const;
  */
 export const Attributes = {
   VISIBLE: "visible",
+  STATUS: "status",
 } as const;
 /**
  * HTML Attributes available to set
