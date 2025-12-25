@@ -89,6 +89,10 @@ metadata("States", () => {
       then("Status.PINNED is defined", () => {
         expect(Status.PINNED).toBeDefined();
       });
+
+      then("Status.UNPINNED is defined", () => {
+        expect(Status.UNPINNED).toBeDefined();
+      });
     });
   });
 });
