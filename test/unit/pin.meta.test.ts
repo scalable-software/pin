@@ -120,6 +120,10 @@ metadata("Operations", () => {
         then("Operation.PIN is defined", () => {
           expect(Operation.PIN).toBeDefined();
         });
+
+        then("Operation.UNPIN is defined", () => {
+          expect(Operation.UNPIN).toBeDefined();
+        });
       });
     });
   });
