@@ -152,15 +152,15 @@ export class Pin extends Component {
       : this._status;
   }
   public set status(status: Status) {
-    if (this._status !== status) {
-      this._status = status;
-      this.setAttribute(Attributes.STATUS, status);
+    if (this._status === status) return;
 
-      status === Status.PINNED &&
-        this._dispatchEvent(Event.ON_PIN, { detail: { status } });
-      status === Status.UNPINNED &&
-        this._dispatchEvent(Event.ON_UNPIN, { detail: { status } });
-    }
+    this._status = status;
+    this.setAttribute(Attributes.STATUS, status);
+
+    status === Status.PINNED &&
+      this._dispatchEvent(Event.ON_PIN, { detail: { status } });
+    status === Status.UNPINNED &&
+      this._dispatchEvent(Event.ON_UNPIN, { detail: { status } });
   }
 
   /**
