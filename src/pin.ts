@@ -129,16 +129,17 @@ export class Pin extends Component {
   }
   public set visible(visible: Visible) {
     visible = visible ?? Visible.YES;
-    if (this._visible !== visible) {
-      this._visible = visible;
-      visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
-      visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
 
-      visible === Visible.NO &&
-        this._dispatchEvent(Event.ON_HIDE, { detail: { visible } });
-      visible === Visible.YES &&
-        this._dispatchEvent(Event.ON_SHOW, { detail: { visible } });
-    }
+    if (this._visible === visible) return;
+
+    this._visible = visible;
+    visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
+    visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
+
+    visible === Visible.NO &&
+      this._dispatchEvent(Event.ON_HIDE, { detail: { visible } });
+    visible === Visible.YES &&
+      this._dispatchEvent(Event.ON_SHOW, { detail: { visible } });
   }
 
   /**
