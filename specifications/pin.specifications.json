@@ -42,7 +42,7 @@
       }
     },
     "status": {
-      "type": "Statuses",
+      "type": "Status",
       "description": "Indicates the current status of the pin.",
       "values": ["pinned", "unpinned"],
       "default": "unpinned",
