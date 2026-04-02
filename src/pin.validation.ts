@@ -2,8 +2,8 @@ import { Visible } from "./pin.meta.js";
 
 export class Validate {
   /**
-   * Validates that the value is a member of the `Visibility` enum.
-   * Throws if the value is not a recognized visibility state.
+   * Validates that the value is a member of the `Visible` enum.
+   * Throws if the value is not a recognized visible state.
    * @category Validation
    */
   public static visible = (value: string) => {
