@@ -85,6 +85,41 @@ globalThis.metadata = (metadata, spec) => {
   });
 };
 
+globalThis.validation = (state, spec) => {
+  describe(`Validation.${state} test`, () => {
+    beforeEach(() => {
+      setSpecProperty("type", "Validation");
+      setSpecProperty("spec", state);
+    });
+
+    spec();
+  });
+};
+
+globalThis.Metadata = {
+  TAG: "tag",
+  ATTRIBUTE: "attribute",
+  STATE: "state",
+  OPERATION: "operation",
+  EVENT: "event",
+  GESTURE: "gesture",
+};
+
+globalThis.Configuration = {
+  TAG: "Tag",
+  ATTRIBUTES: "Attributes",
+};
+
+globalThis.Utilities = {
+  GET: "get",
+  TEMPLATE: "template",
+};
+
+globalThis.Composition = {
+  TEMPLATE: "Template",
+  CSS: "CSS",
+};
+
 // Helper functions for testing
 const create = (tag) => document.createElement(tag);
 const append = (element) => document.body.appendChild(element);
@@ -94,7 +129,7 @@ globalThis.define = (tag, component) =>
 
 globalThis.add = (tag, attributes) =>
   append(
-    attributes != null ? setAttributes(create(tag), attributes) : create(tag)
+    attributes != null ? setAttributes(create(tag), attributes) : create(tag),
   );
 
 globalThis.remove = (id) => document.getElementById(id).remove();

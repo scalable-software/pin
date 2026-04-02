@@ -9,7 +9,7 @@ import {
   Gesture,
 } from "@scalable.software/pin";
 
-metadata("Tag", () => {
+metadata(Metadata.TAG, () => {
   and("Tag imported", () => {
     then("Tag is defined", () => {
       expect(Tag).toBeDefined();
@@ -17,7 +17,7 @@ metadata("Tag", () => {
   });
 });
 
-metadata("Attributes", () => {
+metadata(Metadata.ATTRIBUTE, () => {
   and("Attribute imported", () => {
     then("Attributes is defined", () => {
       expect(Attributes).toBeDefined();
@@ -41,7 +41,7 @@ metadata("Attributes", () => {
   });
 });
 
-metadata("States", () => {
+metadata(Metadata.STATE, () => {
   and("State imported", () => {
     then("State is defined", () => {
       expect(State).toBeDefined();
@@ -97,7 +97,7 @@ metadata("States", () => {
   });
 });
 
-metadata("Operations", () => {
+metadata(Metadata.OPERATION, () => {
   and("Operation imported", () => {
     then("Operation is defined", () => {
       expect(Operation).toBeDefined();
@@ -133,7 +133,7 @@ metadata("Operations", () => {
   });
 });
 
-metadata("Events", () => {
+metadata(Metadata.EVENT, () => {
   and("Event imported", () => {
     then("Event is defined", () => {
       expect(Event).toBeDefined();
@@ -169,7 +169,7 @@ metadata("Events", () => {
   });
 });
 
-metadata("Gestures", () => {
+metadata(Metadata.GESTURE, () => {
   and("Gesture imported", () => {
     then("Gesture is defined", () => {
       expect(Gesture).toBeDefined();
