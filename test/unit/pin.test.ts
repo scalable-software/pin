@@ -12,7 +12,7 @@ import {
   Gesture,
 } from "@scalable.software/pin";
 
-configuration("Tag", () => {
+configuration(Configuration.TAG, () => {
   and("Pin imported", () => {
     then("Pin is defined", () => {
       expect(Pin).toBeDefined();
@@ -32,7 +32,7 @@ configuration("Tag", () => {
   });
 });
 
-configuration("ATTRIBUTE", () => {
+configuration(Configuration.ATTRIBUTES, () => {
   and("Pin imported", () => {
     then("Pin is defined", () => {
       expect(Pin).toBeDefined();
@@ -52,7 +52,7 @@ configuration("ATTRIBUTE", () => {
   });
 });
 
-utility("TEMPLATE", () => {
+utility(Utilities.TEMPLATE, () => {
   then("Pin.Template static property is defined", () => {
     expect(Pin.Template).toBeDefined();
   });
@@ -64,7 +64,7 @@ utility("TEMPLATE", () => {
   });
 });
 
-composition("Template", () => {
+composition(Composition.TEMPLATE, () => {
   given("Pin is defined in custom element registry", () => {
     beforeEach(() => {
       define(Pin.Tag, Pin);
@@ -118,7 +118,7 @@ composition("Template", () => {
   });
 });
 
-composition("CSS", () => {
+composition(Composition.CSS, () => {
   given("Pin is defined in custom element registry", () => {
     beforeEach(() => {
       define(Pin.Tag, Pin);
