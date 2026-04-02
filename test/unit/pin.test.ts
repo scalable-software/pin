@@ -297,6 +297,30 @@ state(State.STATUS, () => {
             expect(pin.status).toBe(Status.PINNED);
           });
         });
+
+        when("pin.status is set to invalid value", () => {
+          let value: any;
+          let error;
+          beforeEach(() => {
+            value = "invalid";
+            try {
+              pin.status = value;
+            } catch (err) {
+              error = err;
+            }
+          });
+          then("pin.status setter throws", () => {
+            expect(error).not.toBeUndefined();
+          });
+
+          and("pin.status setter throws", () => {
+            then("error message contains 'Invalid status value'", () => {
+              expect((error as Error).message).toEqual(
+                "Invalid status value: invalid",
+              );
+            });
+          });
+        });
       });
     });
   });
