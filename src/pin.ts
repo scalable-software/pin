@@ -137,6 +137,7 @@ export class Pin extends Component {
     if (this._visible === visible) return;
 
     this._visible = visible;
+
     visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
     visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
 
@@ -161,6 +162,7 @@ export class Pin extends Component {
     if (this._status === status) return;
 
     this._status = status;
+
     this.setAttribute(Attributes.STATUS, status);
 
     const event = { detail: { status } };
