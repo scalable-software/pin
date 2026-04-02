@@ -140,10 +140,10 @@ export class Pin extends Component {
     visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
     visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
 
-    visible === Visible.NO &&
-      this._dispatchEvent(Event.ON_HIDE, { detail: { visible } });
-    visible === Visible.YES &&
-      this._dispatchEvent(Event.ON_SHOW, { detail: { visible } });
+    const event = { detail: { visible } };
+
+    visible === Visible.NO && this._dispatchEvent(Event.ON_HIDE, event);
+    visible === Visible.YES && this._dispatchEvent(Event.ON_SHOW, event);
   }
 
   /**
@@ -163,10 +163,10 @@ export class Pin extends Component {
     this._status = status;
     this.setAttribute(Attributes.STATUS, status);
 
-    status === Status.PINNED &&
-      this._dispatchEvent(Event.ON_PIN, { detail: { status } });
-    status === Status.UNPINNED &&
-      this._dispatchEvent(Event.ON_UNPIN, { detail: { status } });
+    const event = { detail: { status } };
+
+    status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, event);
+    status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, event);
   }
 
   /**
