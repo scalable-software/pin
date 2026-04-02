@@ -74,7 +74,7 @@ composition("Template", () => {
       let template: HTMLTemplateElement;
       beforeEach(async () => {
         template = (await Pin.Template.load(
-          "pin.template.html"
+          "pin.template.html",
         )) as HTMLTemplateElement;
       });
       afterEach(() => {
@@ -205,6 +205,31 @@ state(State.VISIBLE, () => {
 
           then("pin.visible is Visible.NO", () => {
             expect(pin.visible).toBe(Visible.NO);
+          });
+        });
+
+        when("pin.visible is set to invalid value", () => {
+          let value: any;
+          let error;
+          beforeEach(() => {
+            value = "invalid";
+            try {
+              pin.visible = value;
+            } catch (err) {
+              error = err;
+            }
+          });
+
+          then("pin.visible setter throws", () => {
+            expect(error).not.toBeUndefined();
+          });
+
+          and("pin.visible setter throws", () => {
+            then("error message contains 'Invalid visible value'", () => {
+              expect((error as Error).message).toEqual(
+                "Invalid visible value: invalid",
+              );
+            });
           });
         });
       });
@@ -553,7 +578,7 @@ events(Event.ON, () => {
 
             then("on is called with `visible: Visible.NO`", () => {
               expect(on).toHaveBeenCalledWith(
-                jasmine.objectContaining({ detail: { visible: Visible.NO } })
+                jasmine.objectContaining({ detail: { visible: Visible.NO } }),
               );
             });
           });
@@ -692,7 +717,9 @@ events(Event.ON_SHOW, () => {
               });
               then("onshow is called with `visible: Visible.YES`", () => {
                 expect(onshow).toHaveBeenCalledWith(
-                  jasmine.objectContaining({ detail: { visible: Visible.YES } })
+                  jasmine.objectContaining({
+                    detail: { visible: Visible.YES },
+                  }),
                 );
               });
             });
@@ -764,7 +791,7 @@ events(Event.ON_PIN, () => {
 
             then("onpin is called with `status: Status.PINNED`", () => {
               expect(onpin).toHaveBeenCalledWith(
-                jasmine.objectContaining({ detail: { status: Status.PINNED } })
+                jasmine.objectContaining({ detail: { status: Status.PINNED } }),
               );
             });
           });
@@ -842,7 +869,7 @@ events(Event.ON_UNPIN, () => {
                 expect(onunpin).toHaveBeenCalledWith(
                   jasmine.objectContaining({
                     detail: { status: Status.UNPINNED },
-                  })
+                  }),
                 );
               });
             });
