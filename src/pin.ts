@@ -156,6 +156,8 @@ export class Pin extends Component {
       : this._status;
   }
   public set status(status: Status) {
+    status = Validate.status(status);
+
     if (this._status === status) return;
 
     this._status = status;
