@@ -13,6 +13,8 @@ import {
   Gesture,
 } from "./pin.meta.js";
 
+import { Validate } from "./pin.validation.js";
+
 /**
  * Configuration required for components with custom layout and style
  * @category Configuration
@@ -129,6 +131,8 @@ export class Pin extends Component {
   }
   public set visible(visible: Visible) {
     visible = visible ?? Visible.YES;
+
+    visible = Validate.visible(visible);
 
     if (this._visible === visible) return;
 
