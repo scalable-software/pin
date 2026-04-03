@@ -86,35 +86,35 @@ export class Pin extends Component {
    * @category Events
    * @hidden
    */
-  private _on: Handler = null;
+  private _on: Handler | null = null;
 
   /**
    * onhide triggered when pin visibility changes to hidden
    * @category Events
    * @hidden
    */
-  private _onhide: Handler = null;
+  private _onhide: Handler | null = null;
 
   /**
    * onshow triggered when pin visibility changes to visible
    * @category Events
    * @hidden
    */
-  private _onshow: Handler = null;
+  private _onshow: Handler | null = null;
 
   /**
    * onpin triggered when pin status changes to pinned
    * @category Events
    * @hidden
    */
-  private _onpin: Handler = null;
+  private _onpin: Handler | null = null;
 
   /**
    * onunpin triggered when pin state changes to unpinned
    * @category Events
    * @hidden
    */
-  private _onunpin: Handler = null;
+  private _onunpin: Handler | null = null;
 
   constructor() {
     super(configuration);
@@ -125,9 +125,7 @@ export class Pin extends Component {
    * @category State
    */
   public get visible() {
-    return this.hasAttribute(Attributes.VISIBLE)
-      ? (this.getAttribute(Attributes.VISIBLE) as Visible)
-      : this._visible;
+    return this._visible;
   }
   public set visible(visible: Visible) {
     visible = visible ?? Visible.YES;
@@ -152,9 +150,7 @@ export class Pin extends Component {
    * @category State
    */
   public get status(): Status {
-    return this.hasAttribute(Attributes.STATUS)
-      ? (this.getAttribute(Attributes.STATUS) as Status)
-      : this._status;
+    return this._status;
   }
   public set status(status: Status) {
     status = Validate.status(status);
@@ -274,8 +270,8 @@ export class Pin extends Component {
    * @hidden
    */
   protected _attributeHandlers = {
-    [Attributes.VISIBLE]: (value) => (this.visible = value),
-    [Attributes.STATUS]: (value) => (this.status = value),
+    [Attributes.VISIBLE]: (value: Visible) => (this.visible = value),
+    [Attributes.STATUS]: (value: Status) => (this.status = value),
   };
 
   /**
@@ -303,7 +299,7 @@ export class Pin extends Component {
    * @hidden
    */
   protected _addEventListeners = () =>
-    this.elements.icon.addEventListener(Gesture.CLICK, this._handleClick);
+    this.elements?.icon?.addEventListener(Gesture.CLICK, this._handleClick);
 
   /**
    * Called by the disconnectedCallback prototypical method
@@ -311,7 +307,7 @@ export class Pin extends Component {
    * @hidden
    */
   protected _removeEventListeners = () =>
-    this.elements.icon.removeEventListener(Gesture.CLICK, this._handleClick);
+    this.elements?.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
 
   /**
    * Handles the click event
