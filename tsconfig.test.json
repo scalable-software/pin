@@ -2,10 +2,9 @@
   "compilerOptions": {
     "module": "es2022",
     "target": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "inlineSources": true,
-    "baseUrl": "./",
     "paths": {
       "@scalable.software/pin": ["./src/index.js"]
     },
