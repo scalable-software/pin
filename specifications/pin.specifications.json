@@ -31,25 +31,23 @@
   },
   "States": {
     "visible": {
-      "type": "Visibility",
-      "description": "Indicates whether the pin is visible. Visibility is assumed by default; absence of the attribute is equivalent to 'yes'.",
+      "type": "Visible",
+      "description": "Indicates whether the component is shown or hidden.",
       "values": ["yes", "no"],
       "default": "yes",
+      "readonly": false,
       "attribute": {
-        "optional": true,
-        "readonly": false,
-        "initialize": false
+        "optional": true
       }
     },
     "status": {
       "type": "Status",
-      "description": "Indicates the current status of the pin.",
+      "description": "Indicates the component's status.",
       "values": ["pinned", "unpinned"],
       "default": "unpinned",
+      "readonly": false,
       "attribute": {
-        "optional": false,
-        "readonly": false,
-        "initialize": true
+        "optional": false
       }
     }
   },

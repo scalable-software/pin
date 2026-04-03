@@ -1,3 +1,83 @@
+# Product Development
+
+Level 1 - The Application Hierarchy
+
+```
+ Initiative:  Web Application
+└─ Epic:     Workspace Layout Management
+   └─ Feature:   Pinnable Panels
+      └─ User Story: "As a user, I want to pin a panel so it
+                      stays visible while I navigate the workspace"
+         ├─ Acceptance Criteria:
+         │     ├─ Panel remains in position when pinned
+         │     ├─ Panel can be unpinned and dismissed
+         │     └─ Pin state persists across navigation
+         └─ Tasks:
+               ├─ Implement <content-panel> component
+               ├─ Integrate <pin-button> into panel
+               └─ Wire onpin event to layout manager
+```
+
+Level 2 - The Component Library Hierarchy
+
+```
+Initiative:  Component Library
+└─ Epic:     Interactive Controls
+   └─ Feature:   Pin Button
+      └─ User Story: "As a developer, I want a pin-button component
+                      with a reliable state/event contract so I can
+                      integrate it predictably into any panel"
+         ├─ Acceptance Criteria:
+         │     ├─ Component renders as a styled toggleable button
+         │     ├─ Supports visible and status states
+         │     ├─ Exposes hide, show, pin, unpin and toggle operations
+         │     ├─ Emits onhide, onshow, onpin, onunpin and on events
+         │     └─ Click gesture toggles status
+         └─ Tasks:
+               ├─ Define specification (pin.specifications.json)
+               ├─ Implement Pin.ts
+               ├─ Author Pin.template.html
+               ├─ Author Pin.style.css
+               ├─ Write unit tests
+               └─ Generate API documentation
+```
+
+Level 3 - The Component Capability Hierarchy
+
+```
+Initiative:  Component Library
+└─ Epic:     Pin Button
+   ├─ Feature:   Visibility
+   │  └─ User Story: "As a developer, I want to control pin visibility
+   │                  so I can show or hide it programmatically"
+   │     ├─ Acceptance Criteria:
+   │     │     ├─ visible state accepts 'yes' | 'no'
+   │     │     ├─ absence of attribute defaults to 'yes'
+   │     │     └─ DOM stays clean (attribute removed when visible=yes)
+   │     └─ Tasks:
+   │           ├─ Implement visible state with attribute reflection
+   │           ├─ Implement hide() operation
+   │           ├─ Implement show() operation
+   │           ├─ Emit onhide event with { visible: 'no' }
+   │           └─ Emit onshow event with { visible: 'yes' }
+   │
+   └─ Feature:   Pin Status
+      └─ User Story: "As a developer, I want to control pin status
+                      so I can pin or unpin it programmatically"
+         ├─ Acceptance Criteria:
+         │     ├─ status state accepts 'pinned' | 'unpinned'
+         │     ├─ attribute is always present (initialized)
+         │     └─ click gesture toggles status
+         └─ Tasks:
+               ├─ Implement status state with attribute reflection
+               ├─ Implement pin() operation
+               ├─ Implement unpin() operation
+               ├─ Implement toggle() operation
+               ├─ Wire click gesture to toggle()
+               ├─ Emit onpin event with { status: 'pinned' }
+               └─ Emit onunpin event with { status: 'unpinned' }
+```
+
 # Pin Component — Development Journey
 
 This document captures the agile development journey of the `pin-button` Web Component, organized as Epics, User Stories, Features, and Tasks. Epics 1–5 are a direct translation of the [pin.specifications.json](pin.specifications.json). Epic 6 is the only emergent backlog addition, and Epic 7 covers developer experience.
@@ -285,3 +365,5 @@ No runtime event. No unit test. Intentional per spec: _"visual-only gesture impl
 | Configure automated publish workflow             | `.github/workflows/publish.yaml` |
 | Configure `.npmignore` to exclude non-dist files | `.npmignore`                     |
 | Bump to `0.1.0`                                  | `package.json`                   |
+
+---
