@@ -124,7 +124,7 @@ export class Pin extends Component {
    * Get and Sets the visibility of the pin button
    * @category State
    */
-  public get visible() {
+  public get visible(): Visible {
     return this._visible;
   }
   public set visible(visible: Visible) {
@@ -135,7 +135,6 @@ export class Pin extends Component {
     if (this._visible === visible) return;
 
     this._visible = visible;
-
     visible === Visible.YES && this.removeAttribute(Attributes.VISIBLE);
     visible === Visible.NO && this.setAttribute(Attributes.VISIBLE, visible);
 
@@ -158,7 +157,6 @@ export class Pin extends Component {
     if (this._status === status) return;
 
     this._status = status;
-
     this.setAttribute(Attributes.STATUS, status);
 
     const event = { detail: { status } };
