@@ -85,7 +85,7 @@
         {
           "name": "detail",
           "type": "object",
-          "description": "Contains the new visibility state.",
+          "description": "Contains the new visible state.",
           "properties": {
             "visible": {
               "type": "Visible",
@@ -101,10 +101,10 @@
         {
           "name": "detail",
           "type": "object",
-          "description": "Contains the new visibility state.",
+          "description": "Contains the new visible state.",
           "properties": {
             "visible": {
-              "type": "Visibile",
+              "type": "Visible",
               "values": ["yes"]
             }
           }
