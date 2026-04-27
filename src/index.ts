@@ -6,6 +6,6 @@ export {
   Operation,
   Event,
   Gesture
-} from "./component.meta.js";
+} from "./pin.meta.js";
 
-export { component } from "./component.js";
+export { Pin } from "./pin.js";
