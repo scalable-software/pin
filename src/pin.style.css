@@ -11,6 +11,10 @@
 
   --icon-size: 40px;
   --icon-margin: 4px;
+
+  --svg-fill-color: #5a5a5a;
+  --svg-size: 24px;
+  --svg-margin: 8px;
 }
 
 /* =======================
@@ -33,4 +37,17 @@
     background-color 0.2s,
     border-color 0.2s,
     box-shadow 0.2s;
+}
+
+/* =======================
+  SVG Icon Styles
+======================= */
+svg {
+  margin: var(--svg-margin);
+  width: var(--svg-size);
+  height: var(--svg-size);
+  fill: var(--svg-fill-color);
+  transition:
+    fill 0.2s,
+    opacity 0.2s;
 }
