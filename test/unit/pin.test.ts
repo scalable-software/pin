@@ -1,6 +1,6 @@
 import { Template } from "@scalable.software/component";
 
-import { Pin, Tag, CSS, Attributes } from "@scalable.software/pin";
+import { Pin, Tag, CSS, Attributes, State } from "@scalable.software/pin";
 
 // Configuration
 configuration(Configuration.TAG, () => {
@@ -151,6 +151,36 @@ composition(Composition.CSS, () => {
 });
 
 // State
+state(State.VISIBILITY, () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("a HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      when("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.visibility` getter exists", () => {
+          expect(pin.visibility).toBeDefined();
+        });
+      });
+    });
+  });
+});
 
 // Operation
 
