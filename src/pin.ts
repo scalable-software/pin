@@ -95,7 +95,10 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _attributeHandlers = {};
+  protected _attributeHandlers = {
+    [Attributes.VISIBILITY]: (value: Visibility | null) =>
+      (this.visibility = value)
+  };
 
   /**
    * Cache element references to improve performance
