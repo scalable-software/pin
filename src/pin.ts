@@ -7,7 +7,7 @@ import { Component, Template } from "@scalable.software/component";
 import { type Configuration } from "@scalable.software/component";
 
 // Pin Metadata
-import { Tag, CSS, Attributes } from "./pin.meta.js";
+import { Tag, CSS, Attributes, Visibility } from "./pin.meta.js";
 
 /**
  * Optional Configuration: required for pins with custom layout and style
@@ -50,6 +50,14 @@ export class Pin extends Component {
   public static Template = new Template(import.meta.url);
 
   /**
+   * Internal Visibility state of the component
+   * @category State
+   * @default Visibility.VISIBLE
+   * @hidden
+   */
+  private _visibility: Visibility = Visibility.VISIBLE;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
@@ -67,8 +75,8 @@ export class Pin extends Component {
    * Get the visibility of the pin button
    * @category State
    */
-  public get visibility() {
-    return "";
+  public get visibility(): Visibility {
+    return this._visibility;
   }
 
   /**
