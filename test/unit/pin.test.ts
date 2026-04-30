@@ -1,6 +1,13 @@
 import { Template } from "@scalable.software/component";
 
-import { Pin, Tag, CSS, Attributes, State } from "@scalable.software/pin";
+import {
+  Pin,
+  Tag,
+  CSS,
+  Attributes,
+  State,
+  Visibility
+} from "@scalable.software/pin";
 
 // Configuration
 configuration(Configuration.TAG, () => {
@@ -165,7 +172,7 @@ state(State.VISIBILITY, () => {
         remove(Pin.Tag);
       });
 
-      when("a new pin is added to DOM", () => {
+      and("a new pin is added to DOM", () => {
         let pin: Pin;
         beforeEach(() => {
           pin = add<Pin>(Pin.Tag);
@@ -176,6 +183,12 @@ state(State.VISIBILITY, () => {
 
         then("`pin.visibility` getter exists", () => {
           expect(pin.visibility).toBeDefined();
+        });
+
+        when("`pin.visibility` getter exists", () => {
+          then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+            expect(pin.visibility).toBe(Visibility.VISIBLE);
+          });
         });
       });
     });
