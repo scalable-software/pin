@@ -23,9 +23,15 @@ metadata(Metadata.ATTRIBUTES, () => {
       expect(Attributes).toBeDefined();
     });
 
-    when("Attributes is defined", () => {
+    and("Attributes is defined", () => {
       then("Attributes is an object", () => {
         expect(typeof Attributes).toBe("object");
+      });
+
+      when("Attributes is an object", () => {
+        then("`Attributes.VISIBILITY` exists", () => {
+          expect(Attributes.VISIBILITY).toBeDefined();
+        });
       });
     });
   });
@@ -38,9 +44,15 @@ metadata(Metadata.STATE, () => {
       expect(State).toBeDefined();
     });
 
-    when("State is defined", () => {
+    and("State is defined", () => {
       then("State is an object", () => {
         expect(typeof State).toBe("object");
+      });
+
+      when("State is an object", () => {
+        then("`State.VISIBILITY` exists", () => {
+          expect(State.VISIBILITY).toBeDefined();
+        });
       });
     });
   });
