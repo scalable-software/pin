@@ -72,12 +72,13 @@ export class Pin extends Component {
   }
 
   /**
-   * Get the visibility of the pin button
+   * Get and set the visibility of the pin button
    * @category State
    */
   public get visibility(): Visibility {
     return this._visibility;
   }
+  public set visibility(value: Visibility) {}
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
