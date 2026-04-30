@@ -42,6 +42,18 @@ export const State = {
 export type State = (typeof State)[keyof typeof State];
 
 /**
+ * Indicates whether the component is visible or hidden
+ * @category Metadata
+ * @enum
+ */
+export const Visibility = {} as const;
+/**
+ * Indicates whether the component is visible or hidden
+ * @category Metadata
+ */
+export type Visibility = (typeof Visibility)[keyof typeof Visibility];
+
+/**
  * @category Metadata
  * @enum
  */
