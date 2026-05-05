@@ -9,6 +9,9 @@ import { type Configuration } from "@scalable.software/component";
 // Pin Metadata
 import { Tag, CSS, Attributes, Visibility } from "./pin.meta.js";
 
+// Validation
+import { Validate } from "./pin.validation.js";
+
 /**
  * Optional Configuration: required for pins with custom layout and style
  * @category Configuration
@@ -80,6 +83,8 @@ export class Pin extends Component {
   }
   public set visibility(value: Visibility | null) {
     value = value ?? Visibility.VISIBLE;
+
+    value = Validate.visibility(value);
 
     if (this._visibility === value) return;
 
