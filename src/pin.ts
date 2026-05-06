@@ -111,7 +111,7 @@ export class Pin extends Component {
     const message = { detail: { visibility: value } };
 
     value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, message);
-    value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW);
+    value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, message);
   }
 
   /**
