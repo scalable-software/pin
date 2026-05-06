@@ -115,9 +115,15 @@ metadata(Metadata.EVENT, () => {
       expect(Event).toBeDefined();
     });
 
-    when("Event is defined", () => {
+    and("Event is defined", () => {
       then("Event is an object", () => {
         expect(typeof Event).toBe("object");
+      });
+
+      when("Event is an object", () => {
+        then("`Event.ON_HIDE` exists", () => {
+          expect(Event.ON_HIDE).toBeDefined();
+        });
       });
     });
   });
