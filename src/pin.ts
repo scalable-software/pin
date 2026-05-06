@@ -7,7 +7,7 @@ import { Component, Template } from "@scalable.software/component";
 import { type Configuration } from "@scalable.software/component";
 
 // Pin Metadata
-import { Tag, CSS, Attributes, Visibility } from "./pin.meta.js";
+import { Tag, CSS, Attributes, Visibility, Event } from "./pin.meta.js";
 
 // Validation
 import { Validate } from "./pin.validation.js";
@@ -61,6 +61,13 @@ export class Pin extends Component {
   private _visibility: Visibility = Visibility.VISIBLE;
 
   /**
+   * onhide triggered when pin visibility changes to hidden
+   * @category Events
+   * @hidden
+   */
+  private _onhide: EventListener | null = null;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
@@ -93,9 +100,20 @@ export class Pin extends Component {
     value === Visibility.HIDDEN &&
       this.setAttribute(Attributes.VISIBILITY, value);
     value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
+
+    value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE);
   }
 
-  public set onhide(handler: EventListener) {}
+  /**
+   * Triggered via `.hide()`
+   * @event
+   * @category Events
+   */
+  public set onhide(handler: EventListener | null) {
+    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = handler;
+    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+  }
 
   /**
    * Hide the pin button when it is visible
