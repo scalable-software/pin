@@ -433,6 +433,18 @@ events(Event.ON_HIDE, () => {
                 then("new `pin.onhide` is called", () => {
                   expect(onhide2).toHaveBeenCalled();
                 });
+
+                then(
+                  "new `pin.onhide` is called with `{ detail: { visibility: Visibility.HIDDEN } }`",
+                  () => {
+                    const message = {
+                      detail: { visibility: Visibility.HIDDEN }
+                    };
+                    expect(onhide2).toHaveBeenCalledWith(
+                      jasmine.objectContaining(message)
+                    );
+                  }
+                );
               });
             });
           });
