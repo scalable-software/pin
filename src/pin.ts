@@ -101,7 +101,11 @@ export class Pin extends Component {
    */
   public hide = () => (this.visibility = Visibility.HIDDEN);
 
-  public show = () => {};
+  /**
+   * Show the pin button when it is hidden
+   * @category Operations
+   */
+  public show = () => (this.visibility = Visibility.VISIBLE);
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
