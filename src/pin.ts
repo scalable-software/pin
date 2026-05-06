@@ -95,6 +95,8 @@ export class Pin extends Component {
     value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
   }
 
+  public set onhide(handler: EventListener) {}
+
   /**
    * Hide the pin button when it is visible
    * @category Operations
