@@ -95,6 +95,8 @@ export class Pin extends Component {
     value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
   }
 
+  public hide = () => {};
+
   /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
