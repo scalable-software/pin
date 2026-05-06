@@ -525,6 +525,18 @@ events(Event.ON_SHOW, () => {
                   then("new `pin.onshow` is called", () => {
                     expect(onshow2).toHaveBeenCalled();
                   });
+
+                  then(
+                    "new `pin.onshow` is called with `{ detail: { visibility: Visibility.VISIBLE } }`",
+                    () => {
+                      const message = {
+                        detail: { visibility: Visibility.VISIBLE }
+                      };
+                      expect(onshow2).toHaveBeenCalledWith(
+                        jasmine.objectContaining(message)
+                      );
+                    }
+                  );
                 });
               });
             });
