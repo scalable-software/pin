@@ -99,6 +99,10 @@ metadata(Metadata.OPERATION, () => {
         then("`Operation.HIDE` exists", () => {
           expect(Operation.HIDE).toBeDefined();
         });
+
+        then("`Operation.SHOW` exists", () => {
+          expect(Operation.SHOW).toBeDefined();
+        });
       });
     });
   });
