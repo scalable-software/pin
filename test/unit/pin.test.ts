@@ -1,6 +1,15 @@
 import { Template } from "@scalable.software/component";
 
-import { Pin, Tag, CSS, Attributes } from "@scalable.software/pin";
+import {
+  Pin,
+  Tag,
+  CSS,
+  Attributes,
+  State,
+  Visibility,
+  Operation,
+  Event
+} from "@scalable.software/pin";
 
 // Configuration
 configuration(Configuration.TAG, () => {
@@ -90,6 +99,25 @@ composition(Composition.TEMPLATE, () => {
         then("pin.root contents contains template contents", () => {
           expect(pin.root.innerHTML).toContain(template.innerHTML);
         });
+
+        and("`pin.root` contents contains template contents", () => {
+          then("`pin.root` contains `div.icon`", () => {
+            const div = pin.root.querySelector("div.icon");
+            expect(div).not.toBeNull();
+          });
+
+          when("`pin.root` contains `div.icon`", () => {
+            let div: HTMLDivElement;
+            beforeEach(() => {
+              div = pin.root.querySelector("div.icon") as HTMLDivElement;
+            });
+
+            then("`div.icon` contains `svg.unpinned`", () => {
+              const svg = div.querySelector("svg.unpinned");
+              expect(svg).not.toBeNull();
+            });
+          });
+        });
       });
     });
   });
@@ -132,9 +160,391 @@ composition(Composition.CSS, () => {
 });
 
 // State
+state(State.VISIBILITY, () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("a HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.visibility` getter exists", () => {
+          expect(pin.visibility).toBeDefined();
+        });
+
+        when("`pin.visibility` getter exists", () => {
+          then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+            expect(pin.visibility).toBe(Visibility.VISIBLE);
+          });
+        });
+
+        then("`pin.visibility` setter exists", () => {
+          expect(hasSetter(pin, "visibility")).toBeTrue();
+        });
+
+        and("`pin.visibility` setter exists", () => {
+          when("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+            afterEach(() => {
+              pin.visibility = Visibility.VISIBLE;
+            });
+
+            then("`pin.visibility` is `Visibility.HIDDEN`", () => {
+              expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+
+            then("pin `visibility` attribute is `Visibility.HIDDEN`", () => {
+              const value = pin.getAttribute(Attributes.VISIBILITY);
+              expect(value).toBe(Visibility.HIDDEN);
+            });
+          });
+
+          when("`pin.visibility` is set to `null`", () => {
+            beforeEach(() => {
+              pin.visibility = null;
+            });
+            afterEach(() => {
+              pin.visibility = Visibility.VISIBLE;
+            });
+
+            then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+              expect(pin.visibility).toBe(Visibility.VISIBLE);
+            });
+          });
+
+          when("`visibility` attribute is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.VISIBILITY, Visibility.HIDDEN);
+            });
+            afterEach(() => {
+              pin.removeAttribute(Attributes.VISIBILITY);
+            });
+
+            then("`pin.visibility` is `Visibility.HIDDEN`", () => {
+              expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+          });
+
+          when("`pin.visibility` is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(() => {
+              try {
+                // @ts-expect-error
+                pin.visibility = "invalid";
+              } catch (err) {
+                error = err as Error;
+              }
+            });
+            afterEach(() => {
+              pin.visibility = Visibility.VISIBLE;
+            });
+
+            then("an error is thrown", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid visibility value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid visibility value: invalid");
+              }
+            );
+          });
+        });
+      });
+    });
+  });
+});
 
 // Operation
+operation(Operation.HIDE, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.hide` method exists", () => {
+          expect(pin.hide).toBeDefined();
+        });
+
+        and("`pin.hide` method exists", () => {
+          when("invoking `pin.hide`", () => {
+            beforeEach(() => {
+              pin.hide();
+            });
+
+            then("`pin.visibility` is `Visibility.HIDDEN`", () => {
+              expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+operation(Operation.SHOW, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.show` method exists", () => {
+          expect(pin.show).toBeDefined();
+        });
+
+        and("`pin.show` method exists", () => {
+          and("pin.visibility is `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+            afterEach(() => {
+              pin.visibility = Visibility.VISIBLE;
+            });
+
+            when("invoking `pin.show`", () => {
+              beforeEach(() => {
+                pin.show();
+              });
+
+              then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+                expect(pin.visibility).toBe(Visibility.VISIBLE);
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
 
 // Event
+events(Event.ON_HIDE, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.onhide` setter exists", () => {
+          expect(hasSetter(pin, Event.ON_HIDE)).toBeTrue();
+        });
+
+        and("`pin.onhide` setter exists", () => {
+          and("`pin.onhide` is set to a listener ", () => {
+            let onhide: jasmine.Spy;
+            beforeEach(() => {
+              onhide = jasmine.createSpy("onhide");
+              pin.onhide = onhide;
+            });
+            afterEach(() => {
+              pin.onhide = null;
+            });
+
+            and("`pin.onhide` is set to a new listener", () => {
+              let onhide2: jasmine.Spy;
+              beforeEach(() => {
+                onhide2 = jasmine.createSpy("onhide2");
+                pin.onhide = onhide2;
+              });
+              afterEach(() => {
+                pin.onhide = null;
+              });
+
+              when("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.HIDDEN;
+                });
+                afterEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("old `pin.onhide` is not called", () => {
+                  expect(onhide).not.toHaveBeenCalled();
+                });
+
+                then("new `pin.onhide` is called", () => {
+                  expect(onhide2).toHaveBeenCalled();
+                });
+
+                then(
+                  "new `pin.onhide` is called with `{ detail: { visibility: Visibility.HIDDEN } }`",
+                  () => {
+                    const message = {
+                      detail: { visibility: Visibility.HIDDEN }
+                    };
+                    expect(onhide2).toHaveBeenCalledWith(
+                      jasmine.objectContaining(message)
+                    );
+                  }
+                );
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+events(Event.ON_SHOW, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.onshow` setter exists", () => {
+          expect(hasSetter(pin, Event.ON_SHOW)).toBeTrue();
+        });
+
+        and("`pin.onshow` setter exists", () => {
+          and("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+            afterEach(() => {
+              pin.visibility = Visibility.VISIBLE;
+            });
+
+            and("`pin.onshow` is set to a listener ", () => {
+              let onshow: jasmine.Spy;
+              beforeEach(() => {
+                onshow = jasmine.createSpy("onshow");
+                pin.onshow = onshow;
+              });
+              afterEach(() => {
+                pin.onshow = null;
+              });
+
+              and("`pin.onshow` is set to a new listener", () => {
+                let onshow2: jasmine.Spy;
+                beforeEach(() => {
+                  onshow2 = jasmine.createSpy("onshow2");
+                  pin.onshow = onshow2;
+                });
+                afterEach(() => {
+                  pin.onshow = null;
+                });
+
+                when("`pin.visibility` is set to `Visibility.VISIBLE`", () => {
+                  beforeEach(() => {
+                    pin.visibility = Visibility.VISIBLE;
+                  });
+                  afterEach(() => {
+                    pin.visibility = Visibility.HIDDEN;
+                  });
+
+                  then("old `pin.onshow` is not called", () => {
+                    expect(onshow).not.toHaveBeenCalled();
+                  });
+
+                  then("new `pin.onshow` is called", () => {
+                    expect(onshow2).toHaveBeenCalled();
+                  });
+
+                  then(
+                    "new `pin.onshow` is called with `{ detail: { visibility: Visibility.VISIBLE } }`",
+                    () => {
+                      const message = {
+                        detail: { visibility: Visibility.VISIBLE }
+                      };
+                      expect(onshow2).toHaveBeenCalledWith(
+                        jasmine.objectContaining(message)
+                      );
+                    }
+                  );
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
 
 // Gesture

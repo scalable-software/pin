@@ -3,4 +3,58 @@
 ======================= */
 :host {
   display: inline-block;
+
+  --button-background-color: #ffffff;
+  --button-border-color: #d1d1d1;
+  --button-radius: 8px;
+  --button-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+  --icon-size: 40px;
+  --icon-margin: 4px;
+
+  --svg-fill-color: #5a5a5a;
+  --svg-size: 24px;
+  --svg-margin: 8px;
+}
+
+/* =======================
+  Icon Styles
+======================= */
+.icon {
+  position: relative;
+  margin: var(--icon-margin);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  background-color: var(--button-background-color);
+  border: 1px solid var(--button-border-color);
+  border-radius: var(--button-radius);
+  box-shadow: var(--button-shadow);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+/* =======================
+  SVG Icon Styles
+======================= */
+svg {
+  margin: var(--svg-margin);
+  width: var(--svg-size);
+  height: var(--svg-size);
+  fill: var(--svg-fill-color);
+  transition:
+    fill 0.2s,
+    opacity 0.2s;
+}
+
+/* =======================
+  State Visibility
+======================= */
+:host([visibility="hidden"]) {
+  display: none;
 }

@@ -17,7 +17,9 @@ export const CSS = "pin.style.css" as const;
  * @category Metadata
  * @enum
  */
-export const Attributes = {} as const;
+export const Attributes = {
+  VISIBILITY: "visibility"
+} as const;
 /**
  * HTML Attributes available to set
  * @category Metadata
@@ -40,10 +42,28 @@ export const State = {
 export type State = (typeof State)[keyof typeof State];
 
 /**
+ * Indicates whether the component is visible or hidden
  * @category Metadata
  * @enum
  */
-export const Operation = {} as const;
+export const Visibility = {
+  VISIBLE: "visible",
+  HIDDEN: "hidden"
+} as const;
+/**
+ * Indicates whether the component is visible or hidden
+ * @category Metadata
+ */
+export type Visibility = (typeof Visibility)[keyof typeof Visibility];
+
+/**
+ * @category Metadata
+ * @enum
+ */
+export const Operation = {
+  HIDE: "hide",
+  SHOW: "show"
+} as const;
 
 /**
  * @category Metadata
@@ -54,7 +74,10 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
  * @category Metadata
  * @enum
  */
-export const Event = {} as const;
+export const Event = {
+  ON_HIDE: "onhide",
+  ON_SHOW: "onshow"
+} as const;
 /**
  * @category Metadata
  */

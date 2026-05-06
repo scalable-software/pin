@@ -7,7 +7,10 @@ import { Component, Template } from "@scalable.software/component";
 import { type Configuration } from "@scalable.software/component";
 
 // Pin Metadata
-import { Tag, CSS, Attributes } from "./pin.meta.js";
+import { Tag, CSS, Attributes, Visibility, Event } from "./pin.meta.js";
+
+// Validation
+import { Validate } from "./pin.validation.js";
 
 /**
  * Optional Configuration: required for pins with custom layout and style
@@ -50,6 +53,28 @@ export class Pin extends Component {
   public static Template = new Template(import.meta.url);
 
   /**
+   * Internal Visibility state of the component
+   * @category State
+   * @default Visibility.VISIBLE
+   * @hidden
+   */
+  private _visibility: Visibility = Visibility.VISIBLE;
+
+  /**
+   * onhide triggered when pin visibility changes to hidden
+   * @category Events
+   * @hidden
+   */
+  private _onhide: EventListener | null = null;
+
+  /**
+   * onshow triggered when pin visibility changes to visible
+   * @category Events
+   * @hidden
+   */
+  private _onshow: EventListener | null = null;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
@@ -64,11 +89,74 @@ export class Pin extends Component {
   }
 
   /**
+   * Get and set the visibility of the pin button
+   * @category State
+   */
+  public get visibility(): Visibility {
+    return this._visibility;
+  }
+  public set visibility(value: Visibility | null) {
+    value = value ?? Visibility.VISIBLE;
+
+    value = Validate.visibility(value);
+
+    if (this._visibility === value) return;
+
+    this._visibility = value;
+
+    value === Visibility.HIDDEN &&
+      this.setAttribute(Attributes.VISIBILITY, value);
+    value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
+
+    const message = { detail: { visibility: value } };
+
+    value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, message);
+    value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, message);
+  }
+
+  /**
+   * Triggered via `.hide()`
+   * @event
+   * @category Events
+   */
+  public set onhide(handler: EventListener | null) {
+    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = handler;
+    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+  }
+
+  /**
+   * Triggered via `.show()`
+   * @event
+   * @category Events
+   */
+  public set onshow(handler: EventListener | null) {
+    this._onshow && this.removeEventListener(Event.ON_SHOW, this._onshow);
+    this._onshow = handler;
+    this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
+  }
+
+  /**
+   * Hide the pin button when it is visible
+   * @category Operations
+   */
+  public hide = () => (this.visibility = Visibility.HIDDEN);
+
+  /**
+   * Show the pin button when it is hidden
+   * @category Operations
+   */
+  public show = () => (this.visibility = Visibility.VISIBLE);
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
    */
-  protected _attributeHandlers = {};
+  protected _attributeHandlers = {
+    [Attributes.VISIBILITY]: (value: Visibility | null) =>
+      (this.visibility = value)
+  };
 
   /**
    * Cache element references to improve performance
