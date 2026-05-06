@@ -61,7 +61,8 @@ export type Visibility = (typeof Visibility)[keyof typeof Visibility];
  * @enum
  */
 export const Operation = {
-  HIDE: "hide"
+  HIDE: "hide",
+  SHOW: "show"
 } as const;
 
 /**
