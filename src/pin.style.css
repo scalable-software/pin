@@ -9,6 +9,9 @@
   --button-radius: 8px;
   --button-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 
+  --button-active-background-color: #e1e1e1;
+  --button-active-border-color: #a1a1a1;
+
   --icon-size: 40px;
   --icon-margin: 4px;
 
@@ -79,4 +82,12 @@ svg {
 
 :host([status="unpinned"]) .unpinned {
   display: inline-block;
+}
+
+/* =======================
+  State Status: Pinned
+======================= */
+:host([status="pinned"]) .icon {
+  background-color: var(--button-active-background-color);
+  border-color: var(--button-active-border-color);
 }
