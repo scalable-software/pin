@@ -101,7 +101,7 @@ export class Pin extends Component {
    * @category State
    * @hidden
    */
-  protected elements: {} = {};
+  protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
   /**
    * @hidden
@@ -250,7 +250,9 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _cache = () => {};
+  protected _cache = () => {
+    this.elements.icon = this.root.querySelector(".icon");
+  };
 
   /**
    * Initialize pin attributes with default values
