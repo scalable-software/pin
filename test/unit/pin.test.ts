@@ -316,6 +316,13 @@ state(State.STATUS, () => {
           const value = pin.getAttribute(Attributes.STATUS);
           expect(value).not.toBeNull();
         });
+
+        when("`status` attribute exists", () => {
+          then("`status` attribute is `Status.UNPINNED`", () => {
+            const value = pin.getAttribute(Attributes.STATUS);
+            expect(value).toBe(Status.UNPINNED);
+          });
+        });
       });
     });
   });
