@@ -58,3 +58,10 @@ svg {
 :host([visibility="hidden"]) {
   display: none;
 }
+
+/* =======================
+  State Status
+======================= */
+.unpinned {
+  display: inline-block;
+}
