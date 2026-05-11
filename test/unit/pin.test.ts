@@ -968,6 +968,18 @@ events(Event.ON_UNPIN, () => {
                   then("new `pin.onunpin` is called", () => {
                     expect(onunpin2).toHaveBeenCalled();
                   });
+
+                  then(
+                    "new `pin.onunpin` is called with `{ detail: { status: Status.UNPINNED } }`",
+                    () => {
+                      const message = {
+                        detail: { status: Status.UNPINNED }
+                      };
+                      expect(onunpin2).toHaveBeenCalledWith(
+                        jasmine.objectContaining(message)
+                      );
+                    }
+                  );
                 });
               });
             });
