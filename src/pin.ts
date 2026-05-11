@@ -145,7 +145,9 @@ export class Pin extends Component {
 
     this.setAttribute(Attributes.STATUS, value);
 
-    value === Status.PINNED && this._dispatchEvent(Event.ON_PIN);
+    const message = { detail: { status: value } };
+
+    value === Status.PINNED && this._dispatchEvent(Event.ON_PIN, message);
   }
 
   /**
