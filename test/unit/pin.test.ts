@@ -7,6 +7,7 @@ import {
   Attributes,
   State,
   Visibility,
+  Status,
   Operation,
   Event
 } from "@scalable.software/pin";
@@ -292,7 +293,7 @@ state(State.STATUS, () => {
         remove(Pin.Tag);
       });
 
-      when("a new pin is added to DOM", () => {
+      and("a new pin is added to DOM", () => {
         let pin: Pin;
         beforeEach(() => {
           pin = add<Pin>(Pin.Tag);
@@ -303,6 +304,12 @@ state(State.STATUS, () => {
 
         then("`pin.status` getter exists", () => {
           expect(pin.status).toBeDefined();
+        });
+
+        when("`pin.status` getter exists", () => {
+          then("`pin.status` is `Status.UNPINNED`", () => {
+            expect(pin.status).toBe(Status.UNPINNED);
+          });
         });
       });
     });
