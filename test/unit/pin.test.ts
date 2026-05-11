@@ -526,7 +526,7 @@ operation(Operation.UNPIN, () => {
         remove(Pin.Tag);
       });
 
-      when("a new pin is added to DOM", () => {
+      and("a new pin is added to DOM", () => {
         let pin: Pin;
         beforeEach(() => {
           pin = add<Pin>(Pin.Tag);
@@ -537,6 +537,27 @@ operation(Operation.UNPIN, () => {
 
         then("`pin.unpin` method exists", () => {
           expect(pin.unpin).toBeDefined();
+        });
+
+        and("`pin.unpin` method exists", () => {
+          and("pin.status is `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+            afterEach(() => {
+              pin.status = Status.UNPINNED;
+            });
+
+            when("invoking `pin.unpin`", () => {
+              beforeEach(() => {
+                pin.unpin();
+              });
+
+              then("`pin.status` is `Status.UNPINNED`", () => {
+                expect(pin.status).toBe(Status.UNPINNED);
+              });
+            });
+          });
         });
       });
     });
