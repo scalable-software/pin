@@ -63,7 +63,8 @@ export type Visibility = (typeof Visibility)[keyof typeof Visibility];
  * @enum
  */
 export const Status = {
-  PINNED: "pinned"
+  PINNED: "pinned",
+  UNPINNED: "unpinned"
 } as const;
 /**
  * Indicates whether the component is pinned or unpinned
