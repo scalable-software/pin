@@ -317,10 +317,23 @@ state(State.STATUS, () => {
           expect(value).not.toBeNull();
         });
 
-        when("`status` attribute exists", () => {
+        and("`status` attribute exists", () => {
           then("`status` attribute is `Status.UNPINNED`", () => {
             const value = pin.getAttribute(Attributes.STATUS);
             expect(value).toBe(Status.UNPINNED);
+          });
+
+          when("`status` attribute is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.STATUS, Status.PINNED);
+            });
+            afterEach(() => {
+              pin.setAttribute(Attributes.STATUS, Status.UNPINNED);
+            });
+
+            then("`pin.status` is `Status.PINNED`", () => {
+              expect(pin.status).toBe(Status.PINNED);
+            });
           });
         });
 
