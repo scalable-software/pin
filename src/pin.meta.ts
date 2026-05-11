@@ -58,6 +58,18 @@ export const Visibility = {
 export type Visibility = (typeof Visibility)[keyof typeof Visibility];
 
 /**
+ * Indicates whether the component is pinned or unpinned
+ * @category Metadata
+ * @enum
+ */
+export const Status = {} as const;
+/**
+ * Indicates whether the component is pinned or unpinned
+ * @category Metadata
+ */
+export type Status = (typeof Status)[keyof typeof Status];
+
+/**
  * @category Metadata
  * @enum
  */
