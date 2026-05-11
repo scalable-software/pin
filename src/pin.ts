@@ -173,6 +173,8 @@ export class Pin extends Component {
    */
   public show = () => (this.visibility = Visibility.VISIBLE);
 
+  public pin = () => {};
+
   /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
