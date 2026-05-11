@@ -7,7 +7,15 @@ import { Component, Template } from "@scalable.software/component";
 import { type Configuration } from "@scalable.software/component";
 
 // Pin Metadata
-import { Tag, CSS, Attributes, Visibility, Status, Event } from "./pin.meta.js";
+import {
+  Tag,
+  CSS,
+  Attributes,
+  Visibility,
+  Status,
+  Event,
+  Gesture
+} from "./pin.meta.js";
 
 // Validation
 import { Validate } from "./pin.validation.js";
@@ -269,12 +277,23 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _addEventListeners = () => {};
+  protected _addEventListeners = () => {
+    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+  };
 
   /**
    * Called by the disconnectedCallback prototypical method
    * @category Configuration
    * @hidden
    */
-  protected _removeEventListeners = () => {};
+  protected _removeEventListeners = () => {
+    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+  };
+
+  /**
+   * Handles the click event
+   * @category Gesture
+   * @hidden
+   */
+  private _handleClick = (event: MouseEvent | TouchEvent) => this.toggle();
 }
