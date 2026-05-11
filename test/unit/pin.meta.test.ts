@@ -33,6 +33,10 @@ metadata(Metadata.ATTRIBUTES, () => {
         then("`Attributes.VISIBILITY` exists", () => {
           expect(Attributes.VISIBILITY).toBeDefined();
         });
+
+        then("`Attributes.STATUS` exists", () => {
+          expect(Attributes.STATUS).toBeDefined();
+        });
       });
     });
   });
@@ -53,6 +57,10 @@ metadata(Metadata.STATE, () => {
       when("State is an object", () => {
         then("`State.VISIBILITY` exists", () => {
           expect(State.VISIBILITY).toBeDefined();
+        });
+
+        then("`State.STATUS` exists", () => {
+          expect(State.STATUS).toBeDefined();
         });
       });
     });
