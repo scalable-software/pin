@@ -340,6 +340,11 @@ state(State.STATUS, () => {
             then("`pin.status` is `Status.PINNED`", () => {
               expect(pin.status).toBe(Status.PINNED);
             });
+
+            then("pin `status` attribute is `Status.PINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.PINNED);
+            });
           });
         });
       });
