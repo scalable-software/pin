@@ -65,3 +65,10 @@ svg {
 .unpinned {
   display: inline-block;
 }
+
+/* =======================
+  State Status: Unpinned
+======================= */
+:host([status="unpinned"]) .pinned {
+  display: none;
+}
