@@ -342,22 +342,30 @@ state(State.STATUS, () => {
         });
 
         and("`pin.status` setter exists", () => {
-          when("`pin.status` is set to `Status.PINNED`", () => {
+          when("`pin.status` is set to `invalid`", () => {
+            let error: Error;
             beforeEach(() => {
-              pin.status = Status.PINNED;
+              try {
+                // @ts-expect-error
+                pin.status = "invalid";
+              } catch (err) {
+                error = err as Error;
+              }
             });
             afterEach(() => {
               pin.status = Status.UNPINNED;
             });
 
-            then("`pin.status` is `Status.PINNED`", () => {
-              expect(pin.status).toBe(Status.PINNED);
+            then("an error is thrown", () => {
+              expect(error).toBeDefined();
             });
 
-            then("pin `status` attribute is `Status.PINNED`", () => {
-              const value = pin.getAttribute(Attributes.STATUS);
-              expect(value).toBe(Status.PINNED);
-            });
+            then(
+              "error message contains 'Invalid status value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid status value: invalid");
+              }
+            );
           });
         });
       });
