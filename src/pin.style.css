@@ -91,3 +91,6 @@ svg {
   background-color: var(--button-active-background-color);
   border-color: var(--button-active-border-color);
 }
+:host([status="pinned"]) .pinned {
+  display: inline-block;
+}
