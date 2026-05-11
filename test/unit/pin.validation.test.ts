@@ -100,3 +100,17 @@ validation(State.VISIBILITY, () => {
     });
   });
 });
+
+validation(State.STATUS, () => {
+  given("Validate imported", () => {
+    then("Validate is defined", () => {
+      expect(Validate).toBeDefined();
+    });
+
+    and("Validate is defined", () => {
+      then("`Validate.status` static method exists", () => {
+        expect(Validate.status).toBeDefined();
+      });
+    });
+  });
+});
