@@ -178,7 +178,8 @@ export class Pin extends Component {
    */
   protected _attributeHandlers = {
     [Attributes.VISIBILITY]: (value: Visibility | null) =>
-      (this.visibility = value)
+      (this.visibility = value),
+    [Attributes.STATUS]: (value: Status) => (this.status = value)
   };
 
   /**
