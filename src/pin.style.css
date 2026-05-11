@@ -66,6 +66,10 @@ svg {
   display: inline-block;
 }
 
+.pinned {
+  display: none;
+}
+
 /* =======================
   State Status: Unpinned
 ======================= */
