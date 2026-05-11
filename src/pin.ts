@@ -83,6 +83,13 @@ export class Pin extends Component {
   private _onshow: EventListener | null = null;
 
   /**
+   * onpin triggered when pin status changes to pinned
+   * @category Events
+   * @hidden
+   */
+  private _onpin: EventListener | null = null;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
@@ -137,6 +144,8 @@ export class Pin extends Component {
     this._status = value;
 
     this.setAttribute(Attributes.STATUS, value);
+
+    value === Status.PINNED && this._dispatchEvent(Event.ON_PIN);
   }
 
   /**
@@ -161,7 +170,16 @@ export class Pin extends Component {
     this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
   }
 
-  public set onpin(handler: EventListener | null) {}
+  /**
+   * Trigger via `.pin()`
+   * @event
+   * @category Events
+   */
+  public set onpin(handler: EventListener | null) {
+    this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
+    this._onpin = handler;
+    this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+  }
 
   /**
    * Hide the pin button when it is visible
