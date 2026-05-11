@@ -20,4 +20,6 @@ export class Validate {
     }
     return value as Visibility;
   };
+
+  public static status = () => {};
 }
