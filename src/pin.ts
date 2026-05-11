@@ -130,6 +130,8 @@ export class Pin extends Component {
     return this._status;
   }
   public set status(value: Status) {
+    value = Validate.status(value);
+
     if (this._status === value) return;
 
     this._status = value;
