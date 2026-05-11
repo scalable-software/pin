@@ -129,7 +129,11 @@ export class Pin extends Component {
   public get status() {
     return this._status;
   }
-  public set status(value: Status) {}
+  public set status(value: Status) {
+    if (this._status === value) return;
+
+    this._status = value;
+  }
 
   /**
    * Triggered via `.hide()`
