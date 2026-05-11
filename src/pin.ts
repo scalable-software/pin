@@ -90,6 +90,13 @@ export class Pin extends Component {
   private _onpin: EventListener | null = null;
 
   /**
+   * onunpin triggered when pin status changes to unpinned
+   * @category Events
+   * @hidden
+   */
+  private _onunpin: EventListener | null = null;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
@@ -148,6 +155,7 @@ export class Pin extends Component {
     const message = { detail: { status: value } };
 
     value === Status.PINNED && this._dispatchEvent(Event.ON_PIN, message);
+    value === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN);
   }
 
   /**
@@ -183,7 +191,16 @@ export class Pin extends Component {
     this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
   }
 
-  public set onunpin(handler: EventListener | null) {}
+  /**
+   * Trigger via `.unpin()`
+   * @event
+   * @category Events
+   */
+  public set onunpin(handler: EventListener | null) {
+    this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
+    this._onunpin = handler;
+    this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+  }
 
   /**
    * Hide the pin button when it is visible
