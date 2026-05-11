@@ -133,6 +133,8 @@ export class Pin extends Component {
     if (this._status === value) return;
 
     this._status = value;
+
+    this.setAttribute(Attributes.STATUS, value);
   }
 
   /**
