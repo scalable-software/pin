@@ -161,6 +161,8 @@ export class Pin extends Component {
     this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
   }
 
+  public set onpin(handler: EventListener | null) {}
+
   /**
    * Hide the pin button when it is visible
    * @category Operations
