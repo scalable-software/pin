@@ -2,7 +2,7 @@
  * @module Pin
  */
 
-import { Visibility } from "./pin.meta.js";
+import { Visibility, Status } from "./pin.meta.js";
 
 /**
  * @category Validation
@@ -21,5 +21,16 @@ export class Validate {
     return value as Visibility;
   };
 
-  public static status = () => {};
+  /**
+   * Validate that the value is a member of the `Status` enum.
+   * Throws if the value is not a recognized status state.
+   * @category Validation
+   */
+  public static status = (value: string) => {
+    const valid = Object.values(Status).includes(value as Status);
+    if (!valid) {
+      throw new Error(`Invalid status value: ${value}`);
+    }
+    return value as Status;
+  };
 }
