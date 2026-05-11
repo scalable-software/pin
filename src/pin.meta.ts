@@ -18,7 +18,8 @@ export const CSS = "pin.style.css" as const;
  * @enum
  */
 export const Attributes = {
-  VISIBILITY: "visibility"
+  VISIBILITY: "visibility",
+  STATUS: "status"
 } as const;
 /**
  * HTML Attributes available to set
@@ -57,12 +58,30 @@ export const Visibility = {
 export type Visibility = (typeof Visibility)[keyof typeof Visibility];
 
 /**
+ * Indicates whether the component is pinned or unpinned
+ * @category Metadata
+ * @enum
+ */
+export const Status = {
+  PINNED: "pinned",
+  UNPINNED: "unpinned"
+} as const;
+/**
+ * Indicates whether the component is pinned or unpinned
+ * @category Metadata
+ */
+export type Status = (typeof Status)[keyof typeof Status];
+
+/**
  * @category Metadata
  * @enum
  */
 export const Operation = {
   HIDE: "hide",
-  SHOW: "show"
+  SHOW: "show",
+  PIN: "pin",
+  UNPIN: "unpin",
+  TOGGLE: "toggle"
 } as const;
 
 /**
@@ -76,7 +95,9 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
  */
 export const Event = {
   ON_HIDE: "onhide",
-  ON_SHOW: "onshow"
+  ON_SHOW: "onshow",
+  ON_PIN: "onpin",
+  ON_UNPIN: "onunpin"
 } as const;
 /**
  * @category Metadata
@@ -87,7 +108,9 @@ export type Event = (typeof Event)[keyof typeof Event];
  * @category Metadata
  * @enum
  */
-export const Gesture = {} as const;
+export const Gesture = {
+  CLICK: "click"
+} as const;
 /**
  * @category Metadata
  */

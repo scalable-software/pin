@@ -7,7 +7,15 @@ import { Component, Template } from "@scalable.software/component";
 import { type Configuration } from "@scalable.software/component";
 
 // Pin Metadata
-import { Tag, CSS, Attributes, Visibility, Event } from "./pin.meta.js";
+import {
+  Tag,
+  CSS,
+  Attributes,
+  Visibility,
+  Status,
+  Event,
+  Gesture
+} from "./pin.meta.js";
 
 // Validation
 import { Validate } from "./pin.validation.js";
@@ -61,6 +69,14 @@ export class Pin extends Component {
   private _visibility: Visibility = Visibility.VISIBLE;
 
   /**
+   * Internal Status state of the component
+   * @category State
+   * @default Status.UNPINNED
+   * @hidden
+   */
+  private _status: Status = Status.UNPINNED;
+
+  /**
    * onhide triggered when pin visibility changes to hidden
    * @category Events
    * @hidden
@@ -75,11 +91,25 @@ export class Pin extends Component {
   private _onshow: EventListener | null = null;
 
   /**
+   * onpin triggered when pin status changes to pinned
+   * @category Events
+   * @hidden
+   */
+  private _onpin: EventListener | null = null;
+
+  /**
+   * onunpin triggered when pin status changes to unpinned
+   * @category Events
+   * @hidden
+   */
+  private _onunpin: EventListener | null = null;
+
+  /**
    * Cache element references to improve performance
    * @category State
    * @hidden
    */
-  protected elements: {} = {};
+  protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
   /**
    * @hidden
@@ -115,6 +145,28 @@ export class Pin extends Component {
   }
 
   /**
+   * Get and set the status of the pin button
+   * @category State
+   */
+  public get status() {
+    return this._status;
+  }
+  public set status(value: Status) {
+    value = Validate.status(value);
+
+    if (this._status === value) return;
+
+    this._status = value;
+
+    this.setAttribute(Attributes.STATUS, value);
+
+    const message = { detail: { status: value } };
+
+    value === Status.PINNED && this._dispatchEvent(Event.ON_PIN, message);
+    value === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, message);
+  }
+
+  /**
    * Triggered via `.hide()`
    * @event
    * @category Events
@@ -137,6 +189,28 @@ export class Pin extends Component {
   }
 
   /**
+   * Trigger via `.pin()`
+   * @event
+   * @category Events
+   */
+  public set onpin(handler: EventListener | null) {
+    this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
+    this._onpin = handler;
+    this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+  }
+
+  /**
+   * Trigger via `.unpin()`
+   * @event
+   * @category Events
+   */
+  public set onunpin(handler: EventListener | null) {
+    this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
+    this._onunpin = handler;
+    this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+  }
+
+  /**
    * Hide the pin button when it is visible
    * @category Operations
    */
@@ -149,13 +223,34 @@ export class Pin extends Component {
   public show = () => (this.visibility = Visibility.VISIBLE);
 
   /**
+   * Pin the pin button when it is unpinned
+   * @category Operations
+   */
+  public pin = () => (this.status = Status.PINNED);
+
+  /**
+   * Unpin the pin button when it is pinned
+   * @category Operations
+   */
+  public unpin = () => (this.status = Status.UNPINNED);
+
+  /**
+   * Pin the pin button when it is unpinned, and unpin it when it is pinned
+   * @category Operations
+   */
+  public toggle = () =>
+    (this.status =
+      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+
+  /**
    * List operations to perform for selected attributes being observed in the DOM.
    * @category Configuration
    * @hidden
    */
   protected _attributeHandlers = {
     [Attributes.VISIBILITY]: (value: Visibility | null) =>
-      (this.visibility = value)
+      (this.visibility = value),
+    [Attributes.STATUS]: (value: Status) => (this.status = value)
   };
 
   /**
@@ -163,26 +258,42 @@ export class Pin extends Component {
    * @category Configuration
    * @hidden
    */
-  protected _cache = () => {};
+  protected _cache = () => {
+    this.elements.icon = this.root.querySelector(".icon");
+  };
 
   /**
    * Initialize pin attributes with default values
    * @category Configuration
    * @hidden
    */
-  protected _initialize = () => {};
+  protected _initialize = () => {
+    !this.hasAttribute(Attributes.STATUS) &&
+      this.setAttribute(Attributes.STATUS, this._status);
+  };
 
   /**
    * Called by the connectedCallback prototypical method
    * @category Configuration
    * @hidden
    */
-  protected _addEventListeners = () => {};
+  protected _addEventListeners = () => {
+    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+  };
 
   /**
    * Called by the disconnectedCallback prototypical method
    * @category Configuration
    * @hidden
    */
-  protected _removeEventListeners = () => {};
+  protected _removeEventListeners = () => {
+    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+  };
+
+  /**
+   * Handles the click event
+   * @category Gesture
+   * @hidden
+   */
+  private _handleClick = (event: MouseEvent | TouchEvent) => this.toggle();
 }
