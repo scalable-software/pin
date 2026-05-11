@@ -123,12 +123,13 @@ export class Pin extends Component {
   }
 
   /**
-   * Get the status of the pin button
+   * Get and set the status of the pin button
    * @category State
    */
   public get status() {
     return this._status;
   }
+  public set status(value: Status) {}
 
   /**
    * Triggered via `.hide()`
