@@ -179,7 +179,11 @@ export class Pin extends Component {
    */
   public pin = () => (this.status = Status.PINNED);
 
-  public unpin = () => {};
+  /**
+   * Unpin the pin button when it is pinned
+   * @category Operations
+   */
+  public unpin = () => (this.status = Status.UNPINNED);
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
