@@ -1,11 +1,242 @@
 <!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Pin</title><meta name="description" content="Documentation for Pin"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">Pin</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h2>Pin</h2></div><div class="tsd-panel tsd-typography"><p><img src="https://flat.badgen.net/static/license/CC-BY-NC-SA-4.0/green" alt="License: CC BY-NC-SA 4.0"></p>
 <a id="md:pin" class="tsd-anchor"></a><h1><a href="#md:pin">Pin</a></h1><p>A lightweight, self-contained web component for fixing UI elements — panels, toolbars, cards, or widgets — in place or releasing them to float. It can be shown or hidden on demand, toggles between pinned and unpinned states, responds visually to user interaction, and adapts automatically to light and dark themes, emitting discrete events for each transition to give product teams a single drop-in control to manage the persistence of any on-screen element.</p>
-<a id="md:testing-the-component" class="tsd-anchor"></a><h3><a href="#md:testing-the-component">Testing the Component</a></h3><p>To test the component, you can use the <code>test</code> script. This script will run the component&#39;s test suite and generate both a test and coverage report.</p>
+<hr>
+<a id="md:1-introduction" class="tsd-anchor"></a><h2><a href="#md:1-introduction">1. Introduction</a></h2><p>The <strong>Pin</strong> component provides a toggleable element that can be pinned/unpinned and hidden/shown via both <strong>imperative</strong> and <strong>declarative</strong> APIs. It leverages custom Web Component features, including Shadow DOM, custom events, and attribute reflection for a clean, modular design.</p>
+<a id="md:11-installation-amp-setup" class="tsd-anchor"></a><h3><a href="#md:11-installation-amp-setup">1.1 Installation &amp; Setup</a></h3><ol>
+<li><p><strong>Clone the Repository</strong></p>
+<pre><code class="language-bash"><span class="hl-0">git</span><span class="hl-1"> </span><span class="hl-2">clone</span><span class="hl-1"> </span><span class="hl-2">https://github.com/scalable-software/pin.git</span><br/><span class="hl-0">cd</span><span class="hl-1"> </span><span class="hl-2">pin</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Install Dependencies</strong></p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">install</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Run Tests (Optional)</strong></p>
 <pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">test</span>
 </code><button>Copy</button></pre>
-<a id="md:document-the-component-api" class="tsd-anchor"></a><h3><a href="#md:document-the-component-api">Document the Component API</a></h3><p>To document the component API, you can use the <code>docs</code> script. This script will generate a set of documentation files for the component.</p>
-<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">document</span>
+<ul>
+<li>Ensures everything is working as expected before you start.</li>
+</ul>
+</li>
+<li><p><strong>Start Local Server</strong></p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">serve</span>
 </code><button>Copy</button></pre>
+<ul>
+<li>This runs a local development server, making <code>&lt;pin-button&gt;</code> available in your browser.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<a id="md:2-quick-start-usage-walkthrough" class="tsd-anchor"></a><h2><a href="#md:2-quick-start-usage-walkthrough">2. Quick Start Usage Walkthrough</a></h2><p>This walkthrough demonstrates how to interact with <code>&lt;pin-button&gt;</code> right after installation, letting you see how the pin behaves before exploring its internal design.</p>
+<ol>
+<li><p><strong>Open</strong> the served page in your browser.</p>
+<ul>
+<li>You should see a <code>&lt;pin-button&gt;</code> component displayed.</li>
+</ul>
+</li>
+<li><p><strong>Open the Developer Tools</strong>, select the <strong>Console</strong>.</p>
+</li>
+<li><p><strong>Get a reference</strong> to the component:</p>
+<pre><code class="language-js"><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-4">pin</span><span class="hl-1"> = </span><span class="hl-5">document</span><span class="hl-1">.</span><span class="hl-0">querySelector</span><span class="hl-1">(</span><span class="hl-2">&quot;pin-button&quot;</span><span class="hl-1">);</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Create a handler</strong> for when the pin is pinned:</p>
+<pre><code class="language-js"><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-0">onpin</span><span class="hl-1"> = (</span><span class="hl-5">event</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-5">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-2">&quot;Pin was pinned:&quot;</span><span class="hl-1">, </span><span class="hl-5">event</span><span class="hl-1">.</span><span class="hl-5">detail</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1">);</span><br/><span class="hl-1">};</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Assign</strong> that handler to the <code>onpin</code> property:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-5">onpin</span><span class="hl-1"> = </span><span class="hl-5">onpin</span><span class="hl-1">;</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Pin</strong> the component imperatively:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-0">pin</span><span class="hl-1">();</span>
+</code><button>Copy</button></pre>
+<ul>
+<li>This changes <code>status</code> from <code>unpinned</code> to <code>pinned</code>.</li>
+<li>Observe the console output: <code>&quot;Pin was pinned: pinned&quot;</code>.</li>
+</ul>
+</li>
+<li><p><strong>Inspect</strong> the <code>&lt;pin-button&gt;</code> in the <strong>Elements</strong> tab:</p>
+<pre><code class="language-html"><span class="hl-6">&lt;</span><span class="hl-7">pin-button</span><span class="hl-1"> </span><span class="hl-8">status</span><span class="hl-1">=</span><span class="hl-9">&quot;pinned&quot;</span><span class="hl-6">&gt;&lt;/</span><span class="hl-7">pin-button</span><span class="hl-6">&gt;</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Manually change</strong> the <code>status</code> attribute to <code>&quot;unpinned&quot;</code>.</p>
+<ul>
+<li>Notice the pin&#39;s icon and internal state update.</li>
+</ul>
+</li>
+<li><p><strong>Check</strong> the current status in the console:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1">; </span><span class="hl-10">// &quot;unpinned&quot;</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Click</strong> the <code>&lt;pin-button&gt;</code> in the UI.</p>
+<ul>
+<li>Clicking toggles it between <code>pinned</code> and <code>unpinned</code>. Since the current state is <code>unpinned</code>, the <code>onpin</code> event fires and the handler logs the result.</li>
+</ul>
+</li>
+<li><p><strong>Check</strong> the status again:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1">; </span><span class="hl-10">// &quot;pinned&quot;</span>
+</code><button>Copy</button></pre>
+</li>
+</ol>
+<blockquote>
+<p><strong>Visibility</strong></p>
+<p>You can similarly call <code>pin.hide()</code> or <code>pin.show()</code> to toggle visibility. Watch for <code>onhide</code> or <code>onshow</code> events in the console.</p>
+</blockquote>
+<p>For more details on <strong>States</strong>, <strong>Operations</strong>, and <strong>Events</strong>, consult the sections below or check the generated <strong>API documentation</strong> (see <code>npm run document</code>).</p>
+<hr>
+<a id="md:3-architectural-overview" class="tsd-anchor"></a><h2><a href="#md:3-architectural-overview">3. Architectural Overview</a></h2><a id="md:31-composition" class="tsd-anchor"></a><h3><a href="#md:31-composition">3.1 Composition</a></h3><ul>
+<li><strong>Template</strong> (<code>pin.template.html</code>): Defines DOM structure — a <code>.icon</code> container holding the pinned and unpinned SVG icons.</li>
+<li><strong>Style</strong> (<code>pin.style.css</code>): Encapsulates appearance, including state-driven icon swapping, hover effects, and light/dark theme adaptation.</li>
+<li><strong>Class</strong> (<code>pin.ts</code>): Extends the base component class to handle lifecycle hooks, Shadow DOM creation, attribute reflection, and event dispatch.</li>
+</ul>
+<blockquote>
+<p><strong>Separation of Concerns</strong></p>
+<ul>
+<li><strong>HTML</strong> for structure</li>
+<li><strong>CSS</strong> for presentation</li>
+<li><strong>TypeScript</strong> for behavior</li>
+</ul>
+</blockquote>
+<a id="md:32-class-lifecycle" class="tsd-anchor"></a><h3><a href="#md:32-class-lifecycle">3.2 Class Lifecycle</a></h3><p>Lifecycle methods are implemented in the base class and extended by the <strong>Pin</strong> component:</p>
+<ul>
+<li><p><strong><code>connectedCallback()</code></strong></p>
+<ol>
+<li>Creates a Shadow DOM.</li>
+<li>Clones the HTML template into the Shadow Root.</li>
+<li>Inserts a <code>&lt;link&gt;</code> for scoped CSS.</li>
+<li>Initialises default state attributes.</li>
+<li>Sets up event listeners (e.g., click on the icon).</li>
+</ol>
+</li>
+<li><p><strong><code>disconnectedCallback()</code></strong></p>
+<ul>
+<li>Removes event listeners and cleans up cached element references.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<a id="md:4-core-concepts-state-operations-and-events" class="tsd-anchor"></a><h2><a href="#md:4-core-concepts-state-operations-and-events">4. Core Concepts: State, Operations, and Events</a></h2><p>The following sections explain how the pin works internally.</p>
+<a id="md:41-state" class="tsd-anchor"></a><h3><a href="#md:41-state">4.1 State</a></h3><p>The <strong>Pin</strong> component uses both <strong>internal properties</strong> and <strong>DOM attributes</strong> to manage its state. This ensures consistency whether you modify the pin via script or HTML attributes.</p>
+<a id="md:411-definition" class="tsd-anchor"></a><h4><a href="#md:411-definition">4.1.1 Definition</a></h4><ul>
+<li><p><strong><code>visibility</code></strong> (<code>visible</code> | <code>hidden</code>)</p>
+<ul>
+<li>Whether the pin is displayed.</li>
+<li><strong>Optional attribute</strong>: absent from the DOM when <code>visible</code> (the default); present as <code>[visibility=&quot;hidden&quot;]</code> on the host element when hidden.</li>
+</ul>
+</li>
+<li><p><strong><code>status</code></strong> (<code>pinned</code> | <code>unpinned</code>)</p>
+<ul>
+<li>Whether the pin is pinned or unpinned.</li>
+<li><strong>Compulsory attribute</strong>: always present in the DOM, reflecting the current state at all times.</li>
+</ul>
+</li>
+</ul>
+<a id="md:412-internal-vs-attribute-driven-state" class="tsd-anchor"></a><h4><a href="#md:412-internal-vs-attribute-driven-state">4.1.2 Internal vs. Attribute-Driven State</a></h4><ol>
+<li><p><strong>Internal State</strong></p>
+<pre><code class="language-typescript"><span class="hl-5">private</span><span class="hl-1"> </span><span class="hl-11">_visibility</span><span class="hl-1">: </span><span class="hl-5">Visibility</span><span class="hl-1"> = </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">VISIBLE</span><span class="hl-1">;</span><br/><span class="hl-5">private</span><span class="hl-1"> </span><span class="hl-11">_status</span><span class="hl-1">: </span><span class="hl-5">Status</span><span class="hl-1"> = </span><span class="hl-5">Status</span><span class="hl-1">.</span><span class="hl-4">UNPINNED</span><span class="hl-1">;</span>
+</code><button>Copy</button></pre>
+<ul>
+<li>Predictable defaults decoupled from external attributes.</li>
+</ul>
+</li>
+<li><p><strong>Attribute-Driven State</strong></p>
+<pre><code class="language-typescript"><span class="hl-5">public</span><span class="hl-1"> </span><span class="hl-5">get</span><span class="hl-1"> </span><span class="hl-0">visibility</span><span class="hl-1">() {</span><br/><span class="hl-1">  </span><span class="hl-12">return</span><span class="hl-1"> </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-5">_visibility</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><span class="hl-5">public</span><span class="hl-1"> </span><span class="hl-5">set</span><span class="hl-1"> </span><span class="hl-0">visibility</span><span class="hl-1">(</span><span class="hl-5">value</span><span class="hl-1">: </span><span class="hl-5">Visibility</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> = </span><span class="hl-5">value</span><span class="hl-1"> ?? </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">VISIBLE</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> = </span><span class="hl-5">Validate</span><span class="hl-1">.</span><span class="hl-0">visibility</span><span class="hl-1">(</span><span class="hl-5">value</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-12">if</span><span class="hl-1"> (</span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-5">_visibility</span><span class="hl-1"> === </span><span class="hl-5">value</span><span class="hl-1">) </span><span class="hl-12">return</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-5">_visibility</span><span class="hl-1"> = </span><span class="hl-5">value</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> === </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">VISIBLE</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-0">removeAttribute</span><span class="hl-1">(</span><span class="hl-5">Attributes</span><span class="hl-1">.</span><span class="hl-4">VISIBILITY</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> === </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">HIDDEN</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-0">setAttribute</span><span class="hl-1">(</span><span class="hl-5">Attributes</span><span class="hl-1">.</span><span class="hl-4">VISIBILITY</span><span class="hl-1">, </span><span class="hl-5">value</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-4">message</span><span class="hl-1"> = { </span><span class="hl-5">detail:</span><span class="hl-1"> { </span><span class="hl-5">visibility:</span><span class="hl-1"> </span><span class="hl-5">value</span><span class="hl-1"> } };</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> === </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">HIDDEN</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-0">_dispatchEvent</span><span class="hl-1">(</span><span class="hl-5">Event</span><span class="hl-1">.</span><span class="hl-4">ON_HIDE</span><span class="hl-1">, </span><span class="hl-5">message</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-5">value</span><span class="hl-1"> === </span><span class="hl-5">Visibility</span><span class="hl-1">.</span><span class="hl-4">VISIBLE</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-0">_dispatchEvent</span><span class="hl-1">(</span><span class="hl-5">Event</span><span class="hl-1">.</span><span class="hl-4">ON_SHOW</span><span class="hl-1">, </span><span class="hl-5">message</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+</code><button>Copy</button></pre>
+<ul>
+<li>Normalises <code>null</code> to the default before validation.</li>
+<li>Validates the incoming value and throws on invalid input.</li>
+<li>Guards against no-op mutations with an early return.</li>
+<li>Keeps <code>_visibility</code> in sync with <code>[visibility=&quot;hidden&quot;]</code> in the DOM and dispatches the corresponding event on every accepted transition.</li>
+</ul>
+</li>
+</ol>
+<a id="md:413-lifecycle-amp-attribute-handlers" class="tsd-anchor"></a><h4><a href="#md:413-lifecycle-amp-attribute-handlers">4.1.3 Lifecycle &amp; Attribute Handlers</a></h4><ul>
+<li><code>_initialize()</code> writes the <code>status</code> attribute to the DOM on connect if it is not already present, ensuring the compulsory attribute is always reflected from the first render.</li>
+<li><code>attributeChangedCallback()</code> invokes <code>_attributeHandlers</code>, routing attribute changes back through the setter so external attribute mutations and imperative setter calls follow the same mutation path.</li>
+</ul>
+<a id="md:414-usage-tips" class="tsd-anchor"></a><h4><a href="#md:414-usage-tips">4.1.4 Usage Tips</a></h4><ul>
+<li><strong>Fallback</strong>: Removing <code>[visibility=&quot;hidden&quot;]</code> reverts the component to its visible default.</li>
+<li><strong>Clean DOM</strong>: When <code>visibility</code> is <code>visible</code>, no attribute is present on the host element.</li>
+</ul>
+<hr>
+<a id="md:42-operations" class="tsd-anchor"></a><h3><a href="#md:42-operations">4.2 Operations</a></h3><p>The <strong>Pin</strong> component&#39;s imperative API manipulates state, which in turn updates the DOM and triggers events.</p>
+<a id="md:421-definition" class="tsd-anchor"></a><h4><a href="#md:421-definition">4.2.1 Definition</a></h4><ol>
+<li><code>hide()</code> → sets <code>[visibility=&quot;hidden&quot;]</code> on the host element</li>
+<li><code>show()</code> → removes the <code>[visibility]</code> attribute from the host element</li>
+<li><code>pin()</code> → <code>status=&quot;pinned&quot;</code></li>
+<li><code>unpin()</code> → <code>status=&quot;unpinned&quot;</code></li>
+<li><code>toggle()</code> → flips between <code>pinned</code> and <code>unpinned</code></li>
+</ol>
+<a id="md:422-example" class="tsd-anchor"></a><h4><a href="#md:422-example">4.2.2 Example</a></h4><pre><code class="language-typescript"><span class="hl-5">public</span><span class="hl-1"> </span><span class="hl-0">toggle</span><span class="hl-1"> = () </span><span class="hl-3">=&gt;</span><br/><span class="hl-1">  (</span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1"> =</span><br/><span class="hl-1">    </span><span class="hl-3">this</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1"> === </span><span class="hl-5">Status</span><span class="hl-1">.</span><span class="hl-4">PINNED</span><span class="hl-1"> ? </span><span class="hl-5">Status</span><span class="hl-1">.</span><span class="hl-4">UNPINNED</span><span class="hl-1"> : </span><span class="hl-5">Status</span><span class="hl-1">.</span><span class="hl-4">PINNED</span><span class="hl-1">);</span>
+</code><button>Copy</button></pre>
+<hr>
+<a id="md:43-events" class="tsd-anchor"></a><h3><a href="#md:43-events">4.3 Events</a></h3><p>The <strong>Pin</strong> component broadcasts custom events when its internal state changes.</p>
+<a id="md:431-definition" class="tsd-anchor"></a><h4><a href="#md:431-definition">4.3.1 Definition</a></h4><ul>
+<li><strong><code>onhide</code></strong>: Fired when transitioning from <code>visible</code> to <code>hidden</code>.</li>
+<li><strong><code>onshow</code></strong>: Fired when transitioning from <code>hidden</code> to <code>visible</code>.</li>
+<li><strong><code>onpin</code></strong>: Fired when transitioning from <code>unpinned</code> to <code>pinned</code>.</li>
+<li><strong><code>onunpin</code></strong>: Fired when transitioning from <code>pinned</code> to <code>unpinned</code>.</li>
+</ul>
+<a id="md:432-usage-tips" class="tsd-anchor"></a><h4><a href="#md:432-usage-tips">4.3.2 Usage Tips</a></h4><ul>
+<li><p>Assign a handler directly to the setter:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-0">onpin</span><span class="hl-1"> = (</span><span class="hl-5">event</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> </span><span class="hl-5">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-5">event</span><span class="hl-1">.</span><span class="hl-5">detail</span><span class="hl-1">.</span><span class="hl-5">status</span><span class="hl-1">);</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p>Or use standard DOM event listening:</p>
+<pre><code class="language-js"><span class="hl-5">pin</span><span class="hl-1">.</span><span class="hl-0">addEventListener</span><span class="hl-1">(</span><span class="hl-2">&quot;onpin&quot;</span><span class="hl-1">, (</span><span class="hl-5">e</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-10">// ...</span><br/><span class="hl-1">});</span>
+</code><button>Copy</button></pre>
+</li>
+</ul>
+<hr>
+<a id="md:5-development-workflow" class="tsd-anchor"></a><h2><a href="#md:5-development-workflow">5. Development Workflow</a></h2><p>Below is a recommended workflow for building, testing, documenting, and publishing the Pin component.</p>
+<a id="md:51-from-specifications-to-implementation" class="tsd-anchor"></a><h3><a href="#md:51-from-specifications-to-implementation">5.1 From Specifications to Implementation</a></h3><ol>
+<li><strong>Define Specs</strong> (states, operations, events).</li>
+<li><strong>Implement</strong> in TypeScript (reflect states as attributes, dispatch events on transitions).</li>
+<li><strong>Link</strong> the final compiled JS or leverage import maps.</li>
+</ol>
+<a id="md:52-testing" class="tsd-anchor"></a><h3><a href="#md:52-testing">5.2 Testing</a></h3><p>Unit tests run with Karma + Jasmine. The suite covers states, operations, events, and gestures.</p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">test</span>
+</code><button>Copy</button></pre>
+<a id="md:53-documentation-typedoc" class="tsd-anchor"></a><h3><a href="#md:53-documentation-typedoc">5.3 Documentation (Typedoc)</a></h3><pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">document</span>
+</code><button>Copy</button></pre>
+<p>Auto-generates API docs from TypeScript annotations.</p>
+<a id="md:54-publishing-amp-versioning" class="tsd-anchor"></a><h3><a href="#md:54-publishing-amp-versioning">5.4 Publishing &amp; Versioning</a></h3><ol>
+<li><p><strong>Build</strong>:</p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">build</span>
+</code><button>Copy</button></pre>
+<p>Outputs to <code>dist/</code>.</p>
+</li>
+<li><p><strong>Bump Version</strong>:</p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">version</span><span class="hl-1"> [major|</span><span class="hl-0">minor</span><span class="hl-1">|</span><span class="hl-0">patch]</span>
+</code><button>Copy</button></pre>
+</li>
+<li><p><strong>Publish</strong>:</p>
+<pre><code class="language-bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">publish</span>
+</code><button>Copy</button></pre>
+</li>
+</ol>
+<a id="md:55-import-maps" class="tsd-anchor"></a><h3><a href="#md:55-import-maps">5.5 Import Maps</a></h3><p>The path in the import map depends on how the package is consumed.</p>
+<p><strong>During local development</strong> (e.g. the project&#39;s own <code>demo/</code>), the path resolves relative to the served file and points directly into the local build output:</p>
+<pre><code class="language-html"><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;importmap&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  {</span><br/><span class="hl-13">    &quot;imports&quot;: {</span><br/><span class="hl-13">      &quot;@scalable.software/pin&quot;: &quot;./dist/index.js&quot;</span><br/><span class="hl-13">    }</span><br/><span class="hl-13">  }</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span><br/><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;module&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  </span><span class="hl-12">import</span><span class="hl-13"> </span><span class="hl-2">&quot;@scalable.software/pin&quot;</span><span class="hl-13">;</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span>
+</code><button>Copy</button></pre>
+<p><strong>After publishing to npm</strong>, the path must point to the package inside <code>node_modules</code>:</p>
+<pre><code class="language-html"><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;importmap&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  {</span><br/><span class="hl-13">    &quot;imports&quot;: {</span><br/><span class="hl-13">      &quot;@scalable.software/pin&quot;: &quot;/node_modules/@scalable.software/pin/dist/index.js&quot;</span><br/><span class="hl-13">    }</span><br/><span class="hl-13">  }</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span><br/><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;module&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  </span><span class="hl-12">import</span><span class="hl-13"> </span><span class="hl-2">&quot;@scalable.software/pin&quot;</span><span class="hl-13">;</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span>
+</code><button>Copy</button></pre>
+<p>Alternatively, reference the package from a CDN:</p>
+<pre><code class="language-html"><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;importmap&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  {</span><br/><span class="hl-13">    &quot;imports&quot;: {</span><br/><span class="hl-13">      &quot;@scalable.software/pin&quot;: &quot;https://unpkg.com/@scalable.software/pin/dist/index.js&quot;</span><br/><span class="hl-13">    }</span><br/><span class="hl-13">  }</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span><br/><span class="hl-6">&lt;</span><span class="hl-7">script</span><span class="hl-13"> </span><span class="hl-8">type</span><span class="hl-13">=</span><span class="hl-9">&quot;module&quot;</span><span class="hl-6">&gt;</span><br/><span class="hl-13">  </span><span class="hl-12">import</span><span class="hl-13"> </span><span class="hl-2">&quot;@scalable.software/pin&quot;</span><span class="hl-13">;</span><br/><span class="hl-6">&lt;/</span><span class="hl-7">script</span><span class="hl-6">&gt;</span>
+</code><button>Copy</button></pre>
+<hr>
+<a id="md:6-best-practices-amp-extensibility" class="tsd-anchor"></a><h2><a href="#md:6-best-practices-amp-extensibility">6. Best Practices &amp; Extensibility</a></h2><ol>
+<li><strong>Descriptive Naming</strong> — <code>pinned/unpinned</code> is domain-friendly for toggles.</li>
+<li><strong>Accessibility</strong> — Consider ARIA attributes and keyboard interactions to make <code>&lt;pin-button&gt;</code> fully accessible.</li>
+<li><strong>Testing</strong> — Simulate user clicks to confirm correct state transitions and event dispatch.</li>
+<li><strong>Documentation</strong> — Provide real usage snippets (like the Quick Start above) for developer onboarding.</li>
+<li><strong>Publishing</strong> — Use semantic versioning to manage features and breaking changes; employ CI/CD for automated build, test, and publish.</li>
+</ol>
+<hr>
+<a id="md:7-conclusion" class="tsd-anchor"></a><h2><a href="#md:7-conclusion">7. Conclusion</a></h2><p>By showing you how to <strong>pin</strong> or <strong>unpin</strong> the component immediately in the Usage Walkthrough, we have demonstrated its core features. Internally, the <strong>Pin</strong> component&#39;s <strong>State</strong>, <strong>Operations</strong>, and <strong>Events</strong> ensure predictable, event-driven functionality. Follow the <strong>development workflow</strong> for build, test, docs, and publishing to confidently integrate <code>&lt;pin-button&gt;</code> into your projects.</p>
+<hr>
 <a id="md:license" class="tsd-anchor"></a><h2><a href="#md:license">License</a></h2><blockquote>
 <p>This software and its documentation are released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License (CC BY-NC-SA 4.0). This means you are free to share, copy, distribute, and transmit the work, and to adapt it, but only under the following conditions:</p>
 <p>Attribution: You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).</p>
@@ -13,4 +244,4 @@
 <p>ShareAlike: If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.</p>
 <p>For more details, please visit the full <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">license agreement</a>.</p>
 </blockquote>
-</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-index-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><h4 class="uppercase">Member Visibility</h4><form><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div><div class="tsd-theme-toggle"><h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-index-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#md:pin"><span>Pin</span></a><ul><li><ul><li><a href="#md:testing-the-component"><span>Testing the <wbr/>Component</span></a></li><li><a href="#md:document-the-component-api"><span>Document the <wbr/>Component API</span></a></li></ul></li><li><a href="#md:license"><span>License</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="assets/icons.svg#icon-1"></use></svg><span>Pin</span></a><ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="."><li>Loading...</li></ul></nav></div></div></div><footer></footer><div class="overlay"></div></body></html>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-index-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><h4 class="uppercase">Member Visibility</h4><form><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div><div class="tsd-theme-toggle"><h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-index-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#md:pin"><span>Pin</span></a><ul><li><a href="#md:1-introduction"><span>1. <wbr/>Introduction</span></a></li><li><ul><li><a href="#md:11-installation-amp-setup"><span>1.1 <wbr/>Installation &amp; <wbr/>Setup</span></a></li></ul></li><li><a href="#md:2-quick-start-usage-walkthrough"><span>2. <wbr/>Quick <wbr/>Start <wbr/>Usage <wbr/>Walkthrough</span></a></li><li><a href="#md:3-architectural-overview"><span>3. <wbr/>Architectural <wbr/>Overview</span></a></li><li><ul><li><a href="#md:31-composition"><span>3.1 <wbr/>Composition</span></a></li><li><a href="#md:32-class-lifecycle"><span>3.2 <wbr/>Class <wbr/>Lifecycle</span></a></li></ul></li><li><a href="#md:4-core-concepts-state-operations-and-events"><span>4. <wbr/>Core <wbr/>Concepts: <wbr/>State, <wbr/>Operations, and <wbr/>Events</span></a></li><li><ul><li><a href="#md:41-state"><span>4.1 <wbr/>State</span></a></li><li><ul><li><a href="#md:411-definition"><span>4.1.1 <wbr/>Definition</span></a></li><li><a href="#md:412-internal-vs-attribute-driven-state"><span>4.1.2 <wbr/>Internal vs. <wbr/>Attribute-<wbr/>Driven <wbr/>State</span></a></li><li><a href="#md:413-lifecycle-amp-attribute-handlers"><span>4.1.3 <wbr/>Lifecycle &amp; <wbr/>Attribute <wbr/>Handlers</span></a></li><li><a href="#md:414-usage-tips"><span>4.1.4 <wbr/>Usage <wbr/>Tips</span></a></li></ul></li><li><a href="#md:42-operations"><span>4.2 <wbr/>Operations</span></a></li><li><ul><li><a href="#md:421-definition"><span>4.2.1 <wbr/>Definition</span></a></li><li><a href="#md:422-example"><span>4.2.2 <wbr/>Example</span></a></li></ul></li><li><a href="#md:43-events"><span>4.3 <wbr/>Events</span></a></li><li><ul><li><a href="#md:431-definition"><span>4.3.1 <wbr/>Definition</span></a></li><li><a href="#md:432-usage-tips"><span>4.3.2 <wbr/>Usage <wbr/>Tips</span></a></li></ul></li></ul></li><li><a href="#md:5-development-workflow"><span>5. <wbr/>Development <wbr/>Workflow</span></a></li><li><ul><li><a href="#md:51-from-specifications-to-implementation"><span>5.1 <wbr/>From <wbr/>Specifications to <wbr/>Implementation</span></a></li><li><a href="#md:52-testing"><span>5.2 <wbr/>Testing</span></a></li><li><a href="#md:53-documentation-typedoc"><span>5.3 <wbr/>Documentation (<wbr/>Typedoc)</span></a></li><li><a href="#md:54-publishing-amp-versioning"><span>5.4 <wbr/>Publishing &amp; <wbr/>Versioning</span></a></li><li><a href="#md:55-import-maps"><span>5.5 <wbr/>Import <wbr/>Maps</span></a></li></ul></li><li><a href="#md:6-best-practices-amp-extensibility"><span>6. <wbr/>Best <wbr/>Practices &amp; <wbr/>Extensibility</span></a></li><li><a href="#md:7-conclusion"><span>7. <wbr/>Conclusion</span></a></li><li><a href="#md:license"><span>License</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="assets/icons.svg#icon-1"></use></svg><span>Pin</span></a><ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="."><li>Loading...</li></ul></nav></div></div></div><footer></footer><div class="overlay"></div></body></html>
