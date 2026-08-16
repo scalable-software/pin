@@ -4,6 +4,8 @@
     "target": "es2022",
     "moduleResolution": "bundler",
     "declaration": true,
+    "types": [],
+    "skipLibCheck": true,
     "rootDir": "./src",
     "outDir": "./dist/",
     "paths": {
