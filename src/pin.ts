@@ -161,10 +161,10 @@ export class Pin extends Component {
 
     this.setAttribute(Attributes.STATUS, status);
 
-    const message = { detail: { status } };
+    const detail = { status };
 
-    status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, message);
-    status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, message);
+    status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+    status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
   }
 
   /**
