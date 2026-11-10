@@ -5,6 +5,10 @@
   "keywords": [
     "web component"
   ],
+  "files": [
+    "dist",
+    "!dist/.gitkeep"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js"
