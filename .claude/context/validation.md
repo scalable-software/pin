@@ -222,18 +222,18 @@ The mutation order is defined authoritatively in the state policy. The validatio
 Example showing the validator's position in the mutation path:
 
 ```typescript
-public set visibility(value: Visibility) {
+public set visibility(visibility: Visibility) {
   // Normalize
-  value = value ?? Visibility.VISIBLE;
+  visibility = visibility ?? Visibility.VISIBLE;
 
   // Validate — narrowed return value replaces the raw input
-  value = Validate.visibility(value);
+  visibility = Validate.visibility(visibility);
 
   // Guard
-  if (this._visibility === value) return;
+  if (this._visibility === visibility) return;
 
   // Mutate
-  this._visibility = value;
+  this._visibility = visibility;
   ...
 }
 ```
@@ -302,19 +302,19 @@ Invocation in `pin.ts`:
 
 ```typescript
 // visibility setter — optional attribute-backed, writable
-public set visibility(value: Visibility) {
-  value = value ?? Visibility.VISIBLE;     // Normalize
-  value = Validate.visibility(value);      // Validate
-  if (this._visibility === value) return;  // Guard
-  this._visibility = value;               // Mutate
+public set visibility(visibility: Visibility) {
+  visibility = visibility ?? Visibility.VISIBLE;  // Normalize
+  visibility = Validate.visibility(visibility);   // Validate
+  if (this._visibility === visibility) return;    // Guard
+  this._visibility = visibility;                  // Mutate
   ...
 }
 
 // status setter — compulsory attribute-backed, writable
-public set status(value: Status) {
-  value = Validate.status(value);          // Validate (no normalization step)
-  if (this._status === value) return;      // Guard
-  this._status = value;                   // Mutate
+public set status(status: Status) {
+  status = Validate.status(status);     // Validate (no normalization step)
+  if (this._status === status) return;  // Guard
+  this._status = status;                // Mutate
   ...
 }
 ```
