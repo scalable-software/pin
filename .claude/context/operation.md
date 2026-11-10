@@ -253,10 +253,10 @@ public set status(status: Status) {
   this._status = status;
   this.setAttribute(Attributes.STATUS, status);
 
-  const event = { detail: { status } };
+  const detail = { status };
 
-  status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, event);
-  status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, event);
+  status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+  status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 }
 ```
 

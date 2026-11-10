@@ -211,7 +211,7 @@ They must be emitted through the framework dispatch helper so the event is dispa
 
 Policy:
 
-- public events must be dispatched through `_dispatchEvent(...)`
+- public events must be dispatched through `_dispatch(...)`
 - the implementation must not manually invoke subscribed handlers as a substitute for event dispatch
 - the dispatch helper is the authoritative runtime path for public event emission
 - event name metadata from `Event` must be used as the dispatch vocabulary
@@ -219,10 +219,10 @@ Policy:
 Example:
 
 ```typescript
-const event = { detail: { status } };
+const detail = { status };
 
-status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, event);
-status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, event);
+status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 ```
 
 This ensures the implementation stays aligned with the DOM event model and keeps public event emission consistent across the component.
@@ -244,9 +244,9 @@ Policy:
 Example dispatch:
 
 ```typescript
-const event = { detail: { visibility } };
+const detail = { visibility };
 
-this._dispatchEvent(Event.ON_SHOW, event);
+this._dispatch(Event.ON_SHOW, detail);
 ```
 
 Consumer usage:
@@ -279,10 +279,10 @@ public set status(status: Status) {
   this._status = status;
   this.setAttribute(Attributes.STATUS, status);
 
-  const event = { detail: { status } };
+  const detail = { status };
 
-  status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, event);
-  status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, event);
+  status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+  status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 }
 ```
 
@@ -307,7 +307,7 @@ Transformation pattern:
 | Specification | `onpin` |
 | Metadata | `Event.ON_PIN = "onpin"` |
 | Component API | `set onpin(handler)` |
-| Dispatch | `_dispatchEvent(Event.ON_PIN, ...)` |
+| Dispatch | `_dispatch(Event.ON_PIN, ...)` |
 
 This predictable transformation keeps the implementation directly traceable back to the specification and consistent with the framework's metadata-driven design.
 
@@ -332,7 +332,7 @@ A compliant component must:
 13. Store each assigned subscription handler in a private handler slot typed `EventListener | null`.
 14. Replace the previous listener when a subscription property is reassigned.
 15. Remove the active listener when a subscription property is assigned `null`.
-16. Dispatch public events through `_dispatchEvent(...)`.
+16. Dispatch public events through `_dispatch(...)`.
 17. Never manually invoke subscribed handlers as a substitute for event dispatch.
 18. Emit runtime payload through `event.detail`.
 19. Ensure emitted payload matches the specification contract for the event.
@@ -486,10 +486,10 @@ public set visibility(visibility: Visibility) {
   visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
   visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
 
-  const event = { detail: { visibility } };
+  const detail = { visibility };
 
-  visibility === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, event);
-  visibility === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, event);
+  visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
+  visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
 }
 
 public set status(status: Status) {
@@ -500,10 +500,10 @@ public set status(status: Status) {
   this._status = status;
   this.setAttribute(Attributes.STATUS, status);
 
-  const event = { detail: { status } };
+  const detail = { status };
 
-  status === Status.PINNED && this._dispatchEvent(Event.ON_PIN, event);
-  status === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, event);
+  status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+  status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 }
 ```
 
@@ -514,10 +514,10 @@ How the implementation applies the policy:
 - the component class exposes each declared event as a public subscription property with the same canonical name
 - subscription properties are typed `EventListener | null` to formally support both handler assignment and handler removal
 - subscription properties manage a single handler slot — reassignment replaces, `null` removes
-- events are dispatched through `_dispatchEvent(...)`, not by manually invoking handlers
+- events are dispatched through `_dispatch(...)`, not by manually invoking handlers
 - payload is delivered through `detail` and matches the values declared in the specification
 - events are emitted only after the authoritative state setter has validated, guarded, mutated, and reflected the accepted transition
-- naming is predictably traceable: specification → `Event` metadata → subscription property → `_dispatchEvent` call
+- naming is predictably traceable: specification → `Event` metadata → subscription property → `_dispatch` call
 
 ---
 

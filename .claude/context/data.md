@@ -437,8 +437,8 @@ Examples:
 public load = (metadata: Metadata) => {
   this.metadata = metadata;
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_LOAD, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
 };
 
 public update = () => {
@@ -449,14 +449,14 @@ public update = () => {
     name: this.elements.name.value.trim(),
   };
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_UPDATE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_UPDATE, detail);
 };
 
 public reset = () => {
   this.metadata = null;
   this._syncName();
-  this._dispatchEvent(Event.ON_RESET);
+  this._dispatch(Event.ON_RESET);
 };
 ```
 
@@ -482,8 +482,8 @@ public create = () => {
     type: MapType.PATHWAY,
   };
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_CREATE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_CREATE, detail);
 };
 ```
 
@@ -497,8 +497,8 @@ Example:
 public load = (metadata: Metadata) => {
   this.metadata = metadata;
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_LOAD, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
 };
 ```
 
@@ -537,7 +537,7 @@ Some data events describe a direct accepted data outcome, such as load or update
 
 Policy:
 
-- public data-oriented events must be dispatched through `_dispatchEvent(...)`
+- public data-oriented events must be dispatched through `_dispatch(...)`
 - data-outcome events must not be emitted before the corresponding accepted outcome has occurred
 - when an event payload includes data, that payload must be emitted through `detail`
 - emitted data payload must match the declared event contract
@@ -549,8 +549,8 @@ Examples:
 public load = (metadata: Metadata) => {
   this.metadata = metadata;
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_LOAD, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
 };
 
 public save = () => {
@@ -558,8 +558,8 @@ public save = () => {
 
   this.update();
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_SAVE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_SAVE, detail);
 
   this.mode = Mode.VIEW;
 };
@@ -604,8 +604,8 @@ Example event contract:
 Example dispatch:
 
 ```typescript
-const event = { detail: { metadata: this.metadata } };
-this._dispatchEvent(Event.ON_LOAD, event);
+const detail = { metadata: this.metadata };
+this._dispatch(Event.ON_LOAD, detail);
 ```
 
 # 17) Data May Drive Temporary Editing Surfaces Without Those Surfaces Becoming Canonical
@@ -638,8 +638,8 @@ public save = () => {
 
   this.update();
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_SAVE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_SAVE, detail);
 
   this.mode = Mode.VIEW;
 };
@@ -647,7 +647,7 @@ public save = () => {
 public cancel = () => {
   this._syncName();
   this.content = !this.metadata?.name ? Content.EMPTY : Content.NAME;
-  this._dispatchEvent(Event.ON_CANCEL);
+  this._dispatch(Event.ON_CANCEL);
   this.mode = Mode.VIEW;
 };
 ```
@@ -840,15 +840,15 @@ public create = () => {
     type: MapType.PATHWAY,
   };
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_CREATE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_CREATE, detail);
 };
 
 public load = (metadata: Metadata) => {
   this.metadata = metadata;
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_LOAD, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
 };
 
 public update = () => {
@@ -859,14 +859,14 @@ public update = () => {
     name: this.elements.name.value.trim(),
   };
 
-  const event = { detail: { metadata: this.metadata } };
-  this._dispatchEvent(Event.ON_UPDATE, event);
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_UPDATE, detail);
 };
 
 public reset = () => {
   this.metadata = null;
   this._syncName();
-  this._dispatchEvent(Event.ON_RESET);
+  this._dispatch(Event.ON_RESET);
 };
 ```
 
@@ -911,7 +911,7 @@ A compliant component must:
 19. Preserve authoritative ownership of dependent state when data updates it.
 20. Keep data-oriented operations thin or orchestrational around the canonical data mutation path.
 21. Prefer whole-value reassignment over ad hoc nested mutation in public workflow paths.
-22. Dispatch public data-oriented events through `_dispatchEvent(...)`.
+22. Dispatch public data-oriented events through `_dispatch(...)`.
 23. Emit data events only after the accepted data outcome or declared workflow outcome has occurred.
 24. Emit data payload through `event.detail`.
 25. Ensure emitted data payload matches the declared contract.
