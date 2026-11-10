@@ -139,12 +139,10 @@ export class Pin extends Component {
     visibility === Visibility.VISIBLE &&
       this.removeAttribute(Attributes.VISIBILITY);
 
-    const message = { detail: { visibility } };
+    const detail = { visibility };
 
-    visibility === Visibility.HIDDEN &&
-      this._dispatchEvent(Event.ON_HIDE, message);
-    visibility === Visibility.VISIBLE &&
-      this._dispatchEvent(Event.ON_SHOW, message);
+    visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
+    visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
   }
 
   /**
