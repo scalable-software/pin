@@ -125,23 +125,26 @@ export class Pin extends Component {
   public get visibility(): Visibility {
     return this._visibility;
   }
-  public set visibility(value: Visibility | null) {
-    value = value ?? Visibility.VISIBLE;
+  public set visibility(visibility: Visibility | null) {
+    visibility = visibility ?? Visibility.VISIBLE;
 
-    value = Validate.visibility(value);
+    visibility = Validate.visibility(visibility);
 
-    if (this._visibility === value) return;
+    if (this._visibility === visibility) return;
 
-    this._visibility = value;
+    this._visibility = visibility;
 
-    value === Visibility.HIDDEN &&
-      this.setAttribute(Attributes.VISIBILITY, value);
-    value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
+    visibility === Visibility.HIDDEN &&
+      this.setAttribute(Attributes.VISIBILITY, visibility);
+    visibility === Visibility.VISIBLE &&
+      this.removeAttribute(Attributes.VISIBILITY);
 
-    const message = { detail: { visibility: value } };
+    const message = { detail: { visibility } };
 
-    value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, message);
-    value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, message);
+    visibility === Visibility.HIDDEN &&
+      this._dispatchEvent(Event.ON_HIDE, message);
+    visibility === Visibility.VISIBLE &&
+      this._dispatchEvent(Event.ON_SHOW, message);
   }
 
   /**
