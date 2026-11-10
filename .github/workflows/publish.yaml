@@ -3,13 +3,12 @@ on:
     types: [created]
 
 permissions:
-  id-token: write
+  id-token: write # Required for OIDC
   contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -17,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24 # npm 11.5.1 or later is required for OIDC
           registry-url: https://registry.npmjs.org
 
       - name: Install Dependencies
@@ -27,4 +26,4 @@ jobs:
         run: npm test
 
       - name: Publish
-        run: npm publish --access public
+        run: npm publish
