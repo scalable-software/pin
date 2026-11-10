@@ -1,6 +1,6 @@
 {
   "name": "@scalable.software/pin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A theme-aware web component that lets users show, hide, pin, or unpin UI elements while emitting events for each state change.",
   "keywords": [
     "web component"
