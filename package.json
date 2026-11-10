@@ -49,6 +49,6 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@scalable.software/component": "^0.3.0"
+    "@scalable.software/component": "^0.5.0"
   }
 }
