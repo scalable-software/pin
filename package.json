@@ -5,8 +5,13 @@
   "keywords": [
     "web component"
   ],
+  "files": [
+    "dist",
+    "!dist/.gitkeep"
+  ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
