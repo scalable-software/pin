@@ -125,23 +125,24 @@ export class Pin extends Component {
   public get visibility(): Visibility {
     return this._visibility;
   }
-  public set visibility(value: Visibility | null) {
-    value = value ?? Visibility.VISIBLE;
+  public set visibility(visibility: Visibility | null) {
+    visibility = visibility ?? Visibility.VISIBLE;
 
-    value = Validate.visibility(value);
+    visibility = Validate.visibility(visibility);
 
-    if (this._visibility === value) return;
+    if (this._visibility === visibility) return;
 
-    this._visibility = value;
+    this._visibility = visibility;
 
-    value === Visibility.HIDDEN &&
-      this.setAttribute(Attributes.VISIBILITY, value);
-    value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
+    visibility === Visibility.HIDDEN &&
+      this.setAttribute(Attributes.VISIBILITY, visibility);
+    visibility === Visibility.VISIBLE &&
+      this.removeAttribute(Attributes.VISIBILITY);
 
-    const message = { detail: { visibility: value } };
+    const detail = { visibility };
 
-    value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, message);
-    value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, message);
+    visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
+    visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
   }
 
   /**
@@ -151,19 +152,19 @@ export class Pin extends Component {
   public get status() {
     return this._status;
   }
-  public set status(value: Status) {
-    value = Validate.status(value);
+  public set status(status: Status) {
+    status = Validate.status(status);
 
-    if (this._status === value) return;
+    if (this._status === status) return;
 
-    this._status = value;
+    this._status = status;
 
-    this.setAttribute(Attributes.STATUS, value);
+    this.setAttribute(Attributes.STATUS, status);
 
-    const message = { detail: { status: value } };
+    const detail = { status };
 
-    value === Status.PINNED && this._dispatchEvent(Event.ON_PIN, message);
-    value === Status.UNPINNED && this._dispatchEvent(Event.ON_UNPIN, message);
+    status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+    status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
   }
 
   /**

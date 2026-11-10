@@ -178,16 +178,18 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    public get visibility() {
      return this._visibility;
    }
-   public set visibility(value: Visibility) {
-     value = value ?? Visibility.VISIBLE;
-     value = Validate.visibility(value);
-     if (this._visibility === value) return;
-     this._visibility = value;
-     value === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-     value === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, value);
-     const message = { detail: { visibility: value } };
-     value === Visibility.HIDDEN && this._dispatchEvent(Event.ON_HIDE, message);
-     value === Visibility.VISIBLE && this._dispatchEvent(Event.ON_SHOW, message);
+   public set visibility(visibility: Visibility) {
+     visibility = visibility ?? Visibility.VISIBLE;
+     visibility = Validate.visibility(visibility);
+     if (this._visibility === visibility) return;
+     this._visibility = visibility;
+     visibility === Visibility.VISIBLE &&
+       this.removeAttribute(Attributes.VISIBILITY);
+     visibility === Visibility.HIDDEN &&
+       this.setAttribute(Attributes.VISIBILITY, visibility);
+     const detail = { visibility };
+     visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
+     visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
    }
    ```
 
