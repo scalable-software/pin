@@ -66,6 +66,16 @@
       "attribute": {
         "optional": false
       }
+    },
+    "appearance": {
+      "type": "Appearance",
+      "description": "Indicates whether the component stands alone, with its own border and shadow, or lies flat inside another surface.",
+      "values": ["floating", "flat"],
+      "default": "floating",
+      "readonly": false,
+      "attribute": {
+        "optional": true
+      }
     }
   },
   "Operations": {
