@@ -1472,6 +1472,17 @@ gesture(Gesture.KEYDOWN, () => {
             });
           });
         });
+
+        when("user presses another key on `div` with class `icon`", () => {
+          beforeEach(() => {
+            const icon = pin.root.querySelector(".icon") as HTMLElement;
+            icon.dispatchEvent(new KeyboardEvent(Gesture.KEYDOWN, { key: "a" }));
+          });
+
+          then("`pin.status` is `Status.UNPINNED`", () => {
+            expect(pin.status).toEqual(Status.UNPINNED);
+          });
+        });
       });
     });
   });
