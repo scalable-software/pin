@@ -569,12 +569,17 @@ operation(Operation.HIDE, () => {
 
         and("`pin.hide` method exists", () => {
           when("invoking `pin.hide`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.hide();
+              result = pin.hide();
             });
 
             then("`pin.visibility` is `Visibility.HIDDEN`", () => {
               expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+
+            then("`pin.hide` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
