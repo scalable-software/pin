@@ -223,6 +223,10 @@ metadata(Metadata.GESTURE, () => {
         then("`Gesture.CLICK` exists", () => {
           expect(Gesture.CLICK).toBeDefined();
         });
+
+        then("`Gesture.KEYDOWN` exists", () => {
+          expect(Gesture.KEYDOWN).toBeDefined();
+        });
       });
     });
   });
