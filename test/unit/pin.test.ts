@@ -604,6 +604,16 @@ state(State.APPEARANCE, () => {
               const value = pin.getAttribute(Attributes.APPEARANCE);
               expect(value).toBe(Appearance.FLAT);
             });
+
+            when("`pin.appearance` is set to `Appearance.FLOATING`", () => {
+              beforeEach(() => {
+                pin.appearance = Appearance.FLOATING;
+              });
+
+              then("`appearance` attribute does not exist", () => {
+                expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+              });
+            });
           });
 
           when("`pin.appearance` is set to `null`", () => {
