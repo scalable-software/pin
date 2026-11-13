@@ -601,6 +601,16 @@ state(State.APPEARANCE, () => {
             });
           });
 
+          when("`pin.appearance` is set to `null`", () => {
+            beforeEach(() => {
+              pin.appearance = null;
+            });
+
+            then("`pin.appearance` is `Appearance.FLOATING`", () => {
+              expect(pin.appearance).toBe(Appearance.FLOATING);
+            });
+          });
+
           when("`pin.appearance` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
