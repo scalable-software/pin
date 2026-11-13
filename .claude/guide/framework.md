@@ -2,7 +2,7 @@
 
 This guide explains how components in this framework work and why they are built the way
 they are. It is written for a developer who is new to the framework. The policies in
-`.claude/context/` are the rules; this guide is the explanation behind them.
+`.claude/policies/` are the rules; this guide is the explanation behind them.
 
 The examples come from the `pin` component (`<pin-button>`), the reference implementation
 of the framework. Where the pin has no example of something, the guide says so and uses an
@@ -172,9 +172,9 @@ like the name of a state or an operation: other things depend on it.
 
 | Topic | Policy |
 |---|---|
-| The rules for composition | `.claude/context/composition.md` |
-| How a gesture names its target | `.claude/context/gesture.md` |
-| Which tests composition needs | `.claude/context/testing.md`, Section 8 |
+| The rules for composition | `.claude/policies/composition.md` |
+| How a gesture names its target | `.claude/policies/gesture.md` |
+| Which tests composition needs | `.claude/workflow/testing.md`, Section 8 |
 | The pin's composition | `specifications/pin.specifications.json`, `src/pin.template.html` |
 
 ---
@@ -555,10 +555,10 @@ same setter, and behave identically from there.
 
 | Topic | Policy |
 |---|---|
-| The rules for state, with every flavour | `.claude/context/state.md` |
-| How validators are written | `.claude/context/validation.md` |
-| Which tests a state needs | `.claude/context/testing.md` |
-| How events follow from state changes | `.claude/context/event.md` |
+| The rules for state, with every flavour | `.claude/policies/state.md` |
+| How validators are written | `.claude/policies/validation.md` |
+| Which tests a state needs | `.claude/workflow/testing.md` |
+| How events follow from state changes | `.claude/policies/event.md` |
 | The pin's own state | `specifications/pin.specifications.json`, `src/pin.ts` |
 
 ---
@@ -733,9 +733,9 @@ allowed", shows each case.
 
 | Topic | Policy |
 |---|---|
-| The rules for validators | `.claude/context/validation.md` |
-| Where validation sits in a setter | `.claude/context/state.md`, Section 7 |
-| Which tests a validator needs | `.claude/context/testing.md`, Section 6 |
+| The rules for validators | `.claude/policies/validation.md` |
+| Where validation sits in a setter | `.claude/policies/state.md`, Section 7 |
+| Which tests a validator needs | `.claude/workflow/testing.md`, Section 6 |
 | The pin's validators | `src/pin.validation.ts` |
 
 ---
@@ -946,9 +946,9 @@ for the tests to show.
 
 | Topic | Policy |
 |---|---|
-| The rules for operations | `.claude/context/operation.md` |
-| When an operation validates | `.claude/context/validation.md`, Section 10 |
-| Which tests an operation needs | `.claude/context/testing.md`, Section 10 |
+| The rules for operations | `.claude/policies/operation.md` |
+| When an operation validates | `.claude/policies/validation.md`, Section 10 |
+| Which tests an operation needs | `.claude/workflow/testing.md`, Section 10 |
 | The pin's operations | `src/pin.ts` |
 
 ---
@@ -1140,9 +1140,9 @@ how, under "How the component is held to its list".
 
 | Topic | Policy |
 |---|---|
-| The rules for events | `.claude/context/event.md` |
-| Where Dispatch sits in a setter | `.claude/context/state.md`, Section 7 |
-| Which tests an event needs | `.claude/context/testing.md`, Section 11 |
+| The rules for events | `.claude/policies/event.md` |
+| Where Dispatch sits in a setter | `.claude/policies/state.md`, Section 7 |
+| Which tests an event needs | `.claude/workflow/testing.md`, Section 11 |
 | The pin's events | `specifications/pin.specifications.json`, `src/pin.ts` |
 
 ---
@@ -1327,7 +1327,7 @@ Visual gestures are not tested, because a test cannot hover.
 
 | Topic | Policy |
 |---|---|
-| The rules for gestures | `.claude/context/gesture.md` |
-| Which operation a handler may call | `.claude/context/operation.md`, Section 12 |
-| Which tests a gesture needs | `.claude/context/testing.md`, Section 12 |
+| The rules for gestures | `.claude/policies/gesture.md` |
+| Which operation a handler may call | `.claude/policies/operation.md`, Section 12 |
+| Which tests a gesture needs | `.claude/workflow/testing.md`, Section 12 |
 | The pin's gestures | `specifications/pin.specifications.json`, `src/pin.ts`, `src/pin.style.css` |
