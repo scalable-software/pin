@@ -180,17 +180,23 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    }
    public set visibility(visibility: Visibility | null) {
      try {
+       // Normalize
        visibility = visibility ?? Visibility.VISIBLE;
+       // Validate
        visibility = Validate.visibility(visibility);
+       // Guard
        if (this._visibility === visibility) return;
+       // Mutate
        this._visibility = visibility;
      } finally {
+       // Reflect
        this._reflect(
          Attributes.VISIBILITY,
          this._visibility,
          Visibility.VISIBLE
        );
      }
+     // Dispatch
      const detail = { visibility };
      visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
      visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
