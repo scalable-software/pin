@@ -616,6 +616,16 @@ state(State.APPEARANCE, () => {
             });
           });
 
+          when("`appearance` attribute is set to `Appearance.FLAT`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.APPEARANCE, Appearance.FLAT);
+            });
+
+            then("`pin.appearance` is `Appearance.FLAT`", () => {
+              expect(pin.appearance).toBe(Appearance.FLAT);
+            });
+          });
+
           when("`pin.appearance` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
