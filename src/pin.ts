@@ -279,16 +279,6 @@ export class Pin extends Component {
   };
 
   /**
-   * Makes the attribute show the state: absent when the state is at `initial`
-   * @category Configuration
-   * @hidden
-   */
-  protected _reflect = (name: string, state: string, initial?: string) =>
-    state === initial
-      ? this.removeAttribute(name)
-      : this.getAttribute(name) !== state && this.setAttribute(name, state);
-
-  /**
    * Called by the connectedCallback prototypical method
    * @category Configuration
    * @hidden
