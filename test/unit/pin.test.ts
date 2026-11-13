@@ -518,6 +518,23 @@ state(State.STATUS, () => {
           });
         });
       });
+
+      and("a new pin with `status` attribute `invalid` is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(async () => {
+          await jasmine.spyOnGlobalErrorsAsync(async () => {
+            pin = add<Pin>(Pin.Tag, { [Attributes.STATUS]: "invalid" });
+          });
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`status` attribute is `Status.UNPINNED`", () => {
+          const value = pin.getAttribute(Attributes.STATUS);
+          expect(value).toBe(Status.UNPINNED);
+        });
+      });
     });
   });
 });
