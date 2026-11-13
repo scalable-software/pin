@@ -39,8 +39,6 @@ pin-button {
   left: 48px;
   top: 128px;
   display: inline-flex;
-  border: 1px solid #d1d1d1;
-  border-radius: 8px;
 }
 
 .toolbar pin-button {
