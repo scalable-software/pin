@@ -379,9 +379,11 @@ state(State.STATUS, () => {
           });
 
           when("`status` attribute is set to `invalid`", () => {
+            let error: Error;
             beforeEach(async () => {
-              await jasmine.spyOnGlobalErrorsAsync(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
                 pin.setAttribute(Attributes.STATUS, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
               });
             });
 
@@ -393,6 +395,17 @@ state(State.STATUS, () => {
             then("`pin.status` is `Status.UNPINNED`", () => {
               expect(pin.status).toBe(Status.UNPINNED);
             });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid status value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid status value: invalid");
+              }
+            );
           });
         });
 
