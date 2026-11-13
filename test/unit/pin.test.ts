@@ -329,6 +329,25 @@ state(State.VISIBILITY, () => {
             });
           });
 
+          and("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+
+            when("`visibility` attribute is set to `invalid`", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.setAttribute(Attributes.VISIBILITY, "invalid");
+                });
+              });
+
+              then("`visibility` attribute is `Visibility.HIDDEN`", () => {
+                const value = pin.getAttribute(Attributes.VISIBILITY);
+                expect(value).toBe(Visibility.HIDDEN);
+              });
+            });
+          });
+
           when("`pin.visibility` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
