@@ -109,7 +109,8 @@ export type Event = (typeof Event)[keyof typeof Event];
  * @enum
  */
 export const Gesture = {
-  CLICK: "click"
+  CLICK: "click",
+  KEYDOWN: "keydown"
 } as const;
 /**
  * @category Metadata
