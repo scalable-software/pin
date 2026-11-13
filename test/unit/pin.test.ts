@@ -865,6 +865,39 @@ events(Event.ON_HIDE, () => {
               pin.onhide = null;
             });
 
+            when("`pin.onhide` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onhide = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onhide value: invalid'", () => {
+                expect(error.message).toBe("Invalid onhide value: invalid");
+              });
+
+              when("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.HIDDEN;
+                });
+                afterEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("`pin.onhide` is still called", () => {
+                  expect(onhide).toHaveBeenCalled();
+                });
+              });
+            });
+
             when("`pin.visibility` is set to `Visibility.HIDDEN` twice", () => {
               beforeEach(() => {
                 pin.visibility = Visibility.HIDDEN;
