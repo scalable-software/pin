@@ -152,7 +152,7 @@ Policy:
 - the property signature must honor the declared `parameters` and `returns` contract
 - public operations form part of the component's imperative API
 
-Operations are implemented as arrow function class properties — not prototype methods — because this guarantees `this` binding at the point of definition. This makes operations safe to pass as callbacks without `.bind()`, which is important for gesture handlers and external consumers.
+Operations are implemented as arrow function class properties — not prototype methods — because this guarantees `this` binding at the point of definition. This makes operations safe to pass as callbacks without `.bind()`, which matters to external consumers. Inside the component, a gesture listener is given a dedicated handler, never the operation itself (see the gesture policy, Section 7).
 
 An operation has a block body. A one-line arrow function such as `() => (this.status = Status.PINNED)` would return the assigned value and publish it as the operation's return type.
 
@@ -208,7 +208,7 @@ pin.pin();
 Example runtime reuse:
 
 ```typescript
-private _handleClick = () => this.toggle();
+private _handleIconClick = () => this.toggle();
 ```
 
 # 6) Public Operation Methods Must Honor the Declared Return Contract
@@ -430,19 +430,20 @@ In this example, `toggle()` reads the current `status`, computes the opposite al
 
 When a runtime gesture triggers behavior that is declared as a public operation, the gesture handler must invoke that operation.
 
-If the behavior is not declared as a public operation, the gesture handler must delegate through the authoritative mutation path of the relevant construct.
+If the behavior is not offered to the outside, the gesture handler must invoke a private operation: a real operation, named with a leading underscore, that follows the same rules and is not declared in the specification, the metadata, or `Meta`.
 
 Policy:
 
 - if a behavior is declared in `Operations`, runtime gesture handlers must invoke that operation
 - gesture handlers must not reimplement declared public action logic inline
-- if no public operation exists for the behavior, the gesture handler must use the authoritative mutation path of the affected construct
+- if no public operation exists for the behavior, the gesture handler must invoke a private operation — a handler never changes state itself
+- an operation never receives the browser event: the handler passes plain values
 - operations remain the canonical public action surface for both imperative callers and runtime gesture handlers
 
 Example:
 
 ```typescript
-private _handleClick = () => this.toggle();
+private _handleIconClick = () => this.toggle();
 ```
 
 Preferred flow when the behavior is declared as an operation:
