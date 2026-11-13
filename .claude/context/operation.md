@@ -201,6 +201,7 @@ Policy:
 
 - operations express action intent
 - operations must not reimplement validation, guard logic, reflection, transition acceptance, or other mutation behavior that belongs to an authoritative construct mutation path
+- an operation validates a parameter only when it uses that parameter itself; a parameter it passes to a setter is validated there, so no value is validated twice (see the validation policy, Section 10)
 - when the operation maps to a writable public construct, it should normally delegate to that construct's public mutation path
 - when the operation requires a controlled internal transition or coordinated internal workflow, that path must remain authoritative
 - operations may act on state, data, or other internally owned constructs, provided they preserve the authoritative ownership of mutation behavior

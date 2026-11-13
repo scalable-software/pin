@@ -158,7 +158,7 @@ Note: For boolean value domains such as `Locked`, `Object.values(Locked).include
 
 ### 2.2) State Validation Must Be Implemented in `<component>.validation.ts`
 
-For every state declared in the specification, the implementation must define validation logic in `<component>.validation.ts`.
+For every state that accepts a value from outside the component, the implementation must define validation logic in `<component>.validation.ts`. A state that only the component sets has no validator (see the validation policy, Section 9).
 
 This validation serves as the runtime enforcement layer for the value domains declared in `<component>.meta.ts`.
 
@@ -176,7 +176,7 @@ Example:
 import { Visibility, Status } from "./pin.meta.js";
 
 export class Validate {
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     const valid = Object.values(Visibility).includes(value as Visibility);
     if (!valid) {
       throw new Error(`Invalid visibility value: ${value}`);
@@ -184,7 +184,7 @@ export class Validate {
     return value as Visibility;
   };
 
-  public static status = (value: string) => {
+  public static status = (value: unknown) => {
     const valid = Object.values(Status).includes(value as Status);
     if (!valid) {
       throw new Error(`Invalid status value: ${value}`);
@@ -657,19 +657,19 @@ Note: the examples below are intentionally state-only and exclude event-dispatch
 import { Visibility, Status, Locked } from "./pin.meta.js";
 
 export class Validate {
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     const valid = Object.values(Visibility).includes(value as Visibility);
     if (!valid) throw new Error(`Invalid visibility value: ${value}`);
     return value as Visibility;
   };
 
-  public static status = (value: string) => {
+  public static status = (value: unknown) => {
     const valid = Object.values(Status).includes(value as Status);
     if (!valid) throw new Error(`Invalid status value: ${value}`);
     return value as Status;
   };
 
-  public static locked = (value: boolean) => {
+  public static locked = (value: unknown) => {
     const valid = Object.values(Locked).includes(value as Locked);
     if (!valid) throw new Error(`Invalid locked value: ${value}`);
     return value as Locked;
