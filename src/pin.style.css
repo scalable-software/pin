@@ -130,6 +130,14 @@ svg {
 }
 
 /* =======================
+  State Appearance: Flat
+======================= */
+:host([appearance="flat"]) .icon {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* =======================
   Responsive Hover Styles
 ======================= */
 @media (hover: hover) {
