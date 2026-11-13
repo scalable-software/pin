@@ -787,12 +787,17 @@ operation(Operation.TOGGLE, () => {
             });
 
             when("invoking `pin.toggle`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.toggle();
+                result = pin.toggle();
               });
 
               then("`pin.status` is `Status.PINNED`", () => {
                 expect(pin.status).toBe(Status.PINNED);
+              });
+
+              then("`pin.toggle` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
