@@ -300,6 +300,10 @@ state(State.VISIBILITY, () => {
             then("`visibility` attribute does not exist", () => {
               expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
             });
+
+            then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+              expect(pin.visibility).toBe(Visibility.VISIBLE);
+            });
           });
 
           when("`pin.visibility` is set to `invalid`", () => {
