@@ -194,12 +194,13 @@ export class Pin extends Component implements Meta {
   }
 
   /**
-   * Get the appearance of the pin button
+   * Get and set the appearance of the pin button
    * @category State
    */
   public get appearance(): Appearance {
     return this._appearance;
   }
+  public set appearance(appearance: Appearance | null) {}
 
   /**
    * Triggered via `.hide()`
