@@ -136,7 +136,7 @@ Lifecycle methods are implemented in the base class and extended by the **Pin** 
   2. Clones the HTML template into the Shadow Root.
   3. Inserts a `<link>` for scoped CSS.
   4. Initialises default state attributes.
-  5. Sets up event listeners (e.g., click on the icon).
+  5. Sets up event listeners: a click and the Enter key on the icon.
 
 - **`disconnectedCallback()`**
   - Removes event listeners and cleans up cached element references.
@@ -375,8 +375,8 @@ Alternatively, reference the package from a CDN:
 ## 6. Best Practices & Extensibility
 
 1. **Descriptive Naming** — `pinned/unpinned` is domain-friendly for toggles.
-2. **Accessibility** — Consider ARIA attributes and keyboard interactions to make `<pin-button>` fully accessible.
-3. **Testing** — Simulate user clicks to confirm correct state transitions and event dispatch.
+2. **Accessibility** — The icon can be reached with the Tab key and toggled with Enter. It does not yet announce its pinned state to assistive technology; consider `aria-pressed` for that.
+3. **Testing** — Simulate user clicks and key presses to confirm correct state transitions and event dispatch.
 4. **Documentation** — Provide real usage snippets (like the Quick Start above) for developer onboarding.
 5. **Publishing** — Use semantic versioning to manage features and breaking changes; employ CI/CD for automated build, test, and publish.
 
