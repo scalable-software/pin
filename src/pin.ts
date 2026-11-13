@@ -200,7 +200,10 @@ export class Pin extends Component implements Meta {
   public get appearance(): Appearance {
     return this._appearance;
   }
-  public set appearance(appearance: Appearance | null) {}
+  public set appearance(appearance: Appearance | null) {
+    // Mutate
+    this._appearance = appearance;
+  }
 
   /**
    * Triggered via `.hide()`
