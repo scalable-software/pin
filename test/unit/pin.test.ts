@@ -614,6 +614,19 @@ state(State.APPEARANCE, () => {
                 expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
               });
             });
+
+            when("`appearance` attribute is set to `invalid`", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.setAttribute(Attributes.APPEARANCE, "invalid");
+                });
+              });
+
+              then("`appearance` attribute is `Appearance.FLAT`", () => {
+                const value = pin.getAttribute(Attributes.APPEARANCE);
+                expect(value).toBe(Appearance.FLAT);
+              });
+            });
           });
 
           when("`pin.appearance` is set to `null`", () => {
