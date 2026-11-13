@@ -189,9 +189,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onhide(handler: EventListener | null) {
-    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
-    this._onhide = handler;
-    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = this._subscribe(Event.ON_HIDE, this._onhide, handler);
   }
 
   /**
@@ -200,9 +198,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onshow(handler: EventListener | null) {
-    this._onshow && this.removeEventListener(Event.ON_SHOW, this._onshow);
-    this._onshow = handler;
-    this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
+    this._onshow = this._subscribe(Event.ON_SHOW, this._onshow, handler);
   }
 
   /**
@@ -211,9 +207,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onpin(handler: EventListener | null) {
-    this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
-    this._onpin = handler;
-    this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+    this._onpin = this._subscribe(Event.ON_PIN, this._onpin, handler);
   }
 
   /**
@@ -222,9 +216,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onunpin(handler: EventListener | null) {
-    this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
-    this._onunpin = handler;
-    this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+    this._onunpin = this._subscribe(Event.ON_UNPIN, this._onunpin, handler);
   }
 
   /**

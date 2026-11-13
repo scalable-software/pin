@@ -865,6 +865,53 @@ events(Event.ON_HIDE, () => {
               pin.onhide = null;
             });
 
+            when("`pin.onhide` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onhide = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onhide value: invalid'", () => {
+                expect(error.message).toBe("Invalid onhide value: invalid");
+              });
+
+              when("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.HIDDEN;
+                });
+                afterEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("`pin.onhide` is still called", () => {
+                  expect(onhide).toHaveBeenCalled();
+                });
+              });
+            });
+
+            when("`pin.visibility` is set to `Visibility.HIDDEN` twice", () => {
+              beforeEach(() => {
+                pin.visibility = Visibility.HIDDEN;
+                pin.visibility = Visibility.HIDDEN;
+              });
+              afterEach(() => {
+                pin.visibility = Visibility.VISIBLE;
+              });
+
+              then("`pin.onhide` is called once", () => {
+                expect(onhide).toHaveBeenCalledTimes(1);
+              });
+            });
+
             and("`pin.onhide` is set to a new listener", () => {
               let onhide2: jasmine.Spy;
               beforeEach(() => {
@@ -957,6 +1004,39 @@ events(Event.ON_SHOW, () => {
                 pin.onshow = null;
               });
 
+              when("`pin.onshow` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onshow = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onshow value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onshow value: invalid");
+                });
+
+                when("`pin.visibility` is set to `Visibility.VISIBLE`", () => {
+                  beforeEach(() => {
+                    pin.visibility = Visibility.VISIBLE;
+                  });
+                  afterEach(() => {
+                    pin.visibility = Visibility.HIDDEN;
+                  });
+
+                  then("`pin.onshow` is still called", () => {
+                    expect(onshow).toHaveBeenCalled();
+                  });
+                });
+              });
+
               and("`pin.onshow` is set to a new listener", () => {
                 let onshow2: jasmine.Spy;
                 beforeEach(() => {
@@ -1040,6 +1120,53 @@ events(Event.ON_PIN, () => {
             });
             afterEach(() => {
               pin.onpin = null;
+            });
+
+            when("`pin.onpin` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onpin = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onpin value: invalid'", () => {
+                expect(error.message).toBe("Invalid onpin value: invalid");
+              });
+
+              when("`pin.status` is set to `Status.PINNED`", () => {
+                beforeEach(() => {
+                  pin.status = Status.PINNED;
+                });
+                afterEach(() => {
+                  pin.status = Status.UNPINNED;
+                });
+
+                then("`pin.onpin` is still called", () => {
+                  expect(onpin).toHaveBeenCalled();
+                });
+              });
+            });
+
+            when("`pin.status` is set to `Status.PINNED` twice", () => {
+              beforeEach(() => {
+                pin.status = Status.PINNED;
+                pin.status = Status.PINNED;
+              });
+              afterEach(() => {
+                pin.status = Status.UNPINNED;
+              });
+
+              then("`pin.onpin` is called once", () => {
+                expect(onpin).toHaveBeenCalledTimes(1);
+              });
             });
 
             and("`pin.onpin` is set to a new listener", () => {
@@ -1132,6 +1259,39 @@ events(Event.ON_UNPIN, () => {
               });
               afterEach(() => {
                 pin.onunpin = null;
+              });
+
+              when("`pin.onunpin` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onunpin = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onunpin value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onunpin value: invalid");
+                });
+
+                when("`pin.status` is set to `Status.UNPINNED`", () => {
+                  beforeEach(() => {
+                    pin.status = Status.UNPINNED;
+                  });
+                  afterEach(() => {
+                    pin.status = Status.PINNED;
+                  });
+
+                  then("`pin.onunpin` is still called", () => {
+                    expect(onunpin).toHaveBeenCalled();
+                  });
+                });
               });
 
               and("`pin.onunpin` is set to a new listener", () => {
