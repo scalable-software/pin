@@ -1261,6 +1261,39 @@ events(Event.ON_UNPIN, () => {
                 pin.onunpin = null;
               });
 
+              when("`pin.onunpin` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onunpin = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onunpin value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onunpin value: invalid");
+                });
+
+                when("`pin.status` is set to `Status.UNPINNED`", () => {
+                  beforeEach(() => {
+                    pin.status = Status.UNPINNED;
+                  });
+                  afterEach(() => {
+                    pin.status = Status.PINNED;
+                  });
+
+                  then("`pin.onunpin` is still called", () => {
+                    expect(onunpin).toHaveBeenCalled();
+                  });
+                });
+              });
+
               and("`pin.onunpin` is set to a new listener", () => {
                 let onunpin2: jasmine.Spy;
                 beforeEach(() => {
