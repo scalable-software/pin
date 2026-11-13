@@ -407,6 +407,25 @@ state(State.STATUS, () => {
               }
             );
           });
+
+          and("`pin.status` is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            when("`status` attribute is removed", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.removeAttribute(Attributes.STATUS);
+                });
+              });
+
+              then("`status` attribute is `Status.PINNED`", () => {
+                const value = pin.getAttribute(Attributes.STATUS);
+                expect(value).toBe(Status.PINNED);
+              });
+            });
+          });
         });
 
         then("`pin.status` setter exists", () => {
