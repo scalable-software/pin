@@ -79,7 +79,8 @@ export type Status = (typeof Status)[keyof typeof Status];
  * @enum
  */
 export const Appearance = {
-  FLOATING: "floating"
+  FLOATING: "floating",
+  FLAT: "flat"
 } as const;
 /**
  * Indicates whether the component stands alone or lies flat inside another surface
