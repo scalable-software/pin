@@ -145,10 +145,13 @@ calls `toggle()`, so a gesture is an operation started by the user.
 The framework sends all of them through the same code. An operation assigns to the state:
 
 ```typescript
-public pin = () => (this.status = Status.PINNED);
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public pin = () => {
+  this.status = Status.PINNED;
+};
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 When an attribute changes, the browser calls the component, and the component hands the new
@@ -559,3 +562,216 @@ allowed", shows each case.
 | Where validation sits in a setter | `.claude/context/state.md`, Section 7 |
 | Which tests a validator needs | `.claude/context/testing.md`, Section 6 |
 | The pin's validators | `src/pin.validation.ts` |
+
+---
+
+## Operations
+
+### What an operation is
+
+An operation is **a named action the component offers to the outside**.
+
+The pin offers five:
+
+| Operation | What it does |
+|---|---|
+| `pin.hide()` | hides the pin |
+| `pin.show()` | shows the pin |
+| `pin.pin()` | pins it |
+| `pin.unpin()` | unpins it |
+| `pin.toggle()` | switches between pinned and unpinned |
+
+Like a state, an operation is declared in the specification, named in the metadata file,
+and written in the component.
+
+### Why operations exist when you can set a state
+
+`pin.pin()` and `pin.status = Status.PINNED` end in the same place. So why have both?
+
+- **An operation says what you want, not which value to set.** The caller does not need to
+  know that pinning is stored as a state called `status` with the value `pinned`.
+- **An operation can decide the value for you.** `toggle()` looks at the current status and
+  picks the other one. A property assignment cannot do that.
+- **An operation can do several things as one action.** Saving something may update data,
+  send an event and change a mode. The caller asks once.
+- **Gestures reuse them.** A click on the pin's icon calls `toggle()`, so a user and a
+  program go through the same code.
+
+### The two types of operation
+
+One question sorts every operation: **is its body a single assignment to a setter?**
+
+| | Pass-through | Rich |
+|---|---|---|
+| Body | one assignment to one setter | anything more |
+| Validates | never; the setter does | only a parameter it uses itself |
+| Sends events | none of its own; the setter sends them | may send its own |
+| Returns | nothing | what the specification declares |
+
+The type tells you what the operation is allowed to do, so decide it before you write the
+body.
+
+### Pass-through operations
+
+All five of the pin's operations are pass-throughs.
+
+```typescript
+public hide = () => {
+  this.visibility = Visibility.HIDDEN;
+};
+
+public pin = () => {
+  this.status = Status.PINNED;
+};
+
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
+```
+
+Notice what is *not* there. No validation, no check whether anything changed, no attribute
+update, no event. The setter does all of that, as the six steps in the State section
+describe. A pass-through only hands a value on.
+
+`toggle` first works out which value to assign, but it is still one assignment, so it is
+still a pass-through.
+
+Because the setter's guard stops a value that is already set, a pass-through is safe to
+call twice. The second `pin.pin()` changes nothing and sends no second event.
+
+### Rich operations
+
+A rich operation does more than one assignment. The pin has none, so these examples come
+from the `Title` component, a component that holds a name the user can edit.
+
+Several steps, and an event of its own:
+
+```typescript
+public save = () => {
+  if (!this.metadata) return;
+
+  this.update();
+
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_SAVE, detail);
+
+  this.mode = Mode.VIEW;
+};
+```
+
+A parameter that is passed on to a setter:
+
+```typescript
+public load = (metadata: Metadata) => {
+  this.metadata = metadata;
+
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
+};
+```
+
+`load` does not validate `metadata`. It assigns it to the setter, and the setter validates,
+so checking it here would check it twice. An operation validates a parameter only when it
+uses that parameter itself, with no setter in between. Neither component has such an
+operation yet.
+
+A rich operation may:
+
+- take several steps and call other operations (`save` calls `update`)
+- send an event of its own, when the event is about the action and not about one state
+- return a value, when the specification says so
+
+A rich operation may not go around a setter. It changes a state or data by assigning to
+it, never by writing the private field, so the setter's rules still apply.
+
+### What an operation returns
+
+An operation returns what its specification declares, and nothing else. For every
+pass-through that is nothing: the specification says `"returns": "void"`.
+
+This is why operations have a block body, with braces. A one-line version would look
+neater but would quietly return the value it assigns:
+
+```typescript
+public hide = () => (this.visibility = Visibility.HIDDEN);   // returns "hidden"
+```
+
+A returned value is part of the component's public face. Someone can start using it, and
+then it can never be taken away without breaking their code.
+
+### Why an operation is an arrow function
+
+Operations are written as `public hide = () => { ... }`, not as an ordinary method. An
+arrow function remembers which component it belongs to, so it still works when it is
+handed to someone else:
+
+```typescript
+button.addEventListener("click", pin.toggle);   // works; an ordinary method would not
+```
+
+### How the component is held to its list
+
+The metadata file names the operations:
+
+```typescript
+export const Operation = {
+  HIDE: "hide",
+  SHOW: "show",
+  PIN: "pin",
+  UNPIN: "unpin",
+  TOGGLE: "toggle"
+} as const;
+```
+
+Nothing would stop the class from forgetting one of them, or misspelling it. So the
+metadata file also exports a type that says "a component with these names", and the class
+promises to match it:
+
+```typescript
+// pin.meta.ts
+export type States = Record<State, unknown>;
+export type Operations = Record<Operation, (...parameters: any[]) => unknown>;
+export type Events = Record<Event, EventListener | null>;
+
+export type Meta = States & Operations & Events;
+
+// pin.ts
+import { type Meta } from "./pin.meta.js";
+
+export class Pin extends Component implements Meta {
+```
+
+If the class is missing a name from the metadata, the code does not build, and the message
+says which one:
+
+```text
+Property 'unpin' is missing in type 'Pin' but required in type 'Operations'.
+```
+
+`Meta` covers states and events the same way: every state must have its getter, and every
+event its `on…` property.
+
+The check runs in one direction. The class must have everything the metadata names; it may
+have more. And it only proves that a member exists. Whether `unpin` really unpins is still
+for the tests to show.
+
+### Mistakes to avoid
+
+- **Writing an operation on one line without braces.** It returns the assigned value.
+- **Checking or validating in a pass-through.** The setter does it.
+- **Sending a state's event from an operation.** The setter sends it, once, after a real
+  change.
+- **Writing the private field from an operation.** Assign to the state, so its rules run.
+- **Repeating an operation's logic in a gesture handler.** The handler calls the operation.
+- **Adding an operation to the class but not to the specification and the metadata.** It
+  builds, but it is undeclared.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for operations | `.claude/context/operation.md` |
+| When an operation validates | `.claude/context/validation.md`, Section 10 |
+| Which tests an operation needs | `.claude/context/testing.md`, Section 10 |
+| The pin's operations | `src/pin.ts` |
