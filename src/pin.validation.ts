@@ -40,6 +40,10 @@ export class Validate {
    * @category Validation
    */
   public static appearance = (value: unknown) => {
+    const valid = Object.values(Appearance).includes(value as Appearance);
+    if (!valid) {
+      throw new Error(`Invalid appearance value: ${value}`);
+    }
     return value as Appearance;
   };
 }
