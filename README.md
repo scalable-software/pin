@@ -230,9 +230,10 @@ The **Pin** component's imperative API manipulates state, which in turn updates 
 #### 4.2.2 Example
 
 ```typescript
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 ---
