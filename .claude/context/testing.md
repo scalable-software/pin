@@ -122,7 +122,7 @@ Configuration constants such as `CSS` are realized through composition (the styl
 
 Policy for `<component>.validation.test.ts`:
 
-- one `validation(...)` suite per attribute-backed state, in the order the keys appear in `Attributes`
+- one `validation(...)` suite per validator, in the order the validators are declared in `Validate`
 
 Policy for `<component>.test.ts`:
 
@@ -200,7 +200,7 @@ For every validator declared in `<component>.validation.ts`, the `<component>.va
 
 Policy:
 
-- every validator must have a `validation(...)` suite keyed to the corresponding state name (e.g. `State.VISIBILITY`)
+- every validator must have a `validation(...)` suite keyed to the name of what it validates (e.g. `State.VISIBILITY`)
 - the outermost block under the typed wrapper is `given("Validate imported", ...)`
 - each suite must verify the validator method is defined on the `Validate` class
 - each suite must test every valid domain value independently in its own `and(...)` block:
