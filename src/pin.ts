@@ -17,6 +17,8 @@ import {
   Gesture
 } from "./pin.meta.js";
 
+import { type Meta } from "./pin.meta.js";
+
 // Validation
 import { Validate } from "./pin.validation.js";
 
@@ -37,7 +39,7 @@ export const configuration: Configuration = {
 /**
  * @category Pin
  */
-export class Pin extends Component {
+export class Pin extends Component implements Meta {
   /**
    * The tag name of the pin
    * @category Configuration
