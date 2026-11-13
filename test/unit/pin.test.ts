@@ -389,6 +389,10 @@ state(State.STATUS, () => {
               const value = pin.getAttribute(Attributes.STATUS);
               expect(value).toBe(Status.UNPINNED);
             });
+
+            then("`pin.status` is `Status.UNPINNED`", () => {
+              expect(pin.status).toBe(Status.UNPINNED);
+            });
           });
         });
 
