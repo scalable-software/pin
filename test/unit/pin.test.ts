@@ -377,6 +377,19 @@ state(State.STATUS, () => {
               expect(pin.status).toBe(Status.PINNED);
             });
           });
+
+          when("`status` attribute is set to `invalid`", () => {
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async () => {
+                pin.setAttribute(Attributes.STATUS, "invalid");
+              });
+            });
+
+            then("`status` attribute is `Status.UNPINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.UNPINNED);
+            });
+          });
         });
 
         then("`pin.status` setter exists", () => {
