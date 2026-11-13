@@ -148,6 +148,10 @@ metadata(State.APPEARANCE, () => {
         then("`Appearance.FLOATING` exists", () => {
           expect(Appearance.FLOATING).toBeDefined();
         });
+
+        then("`Appearance.FLAT` exists", () => {
+          expect(Appearance.FLAT).toBeDefined();
+        });
       });
     });
   });
