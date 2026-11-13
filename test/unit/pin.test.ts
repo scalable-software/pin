@@ -730,12 +730,17 @@ operation(Operation.UNPIN, () => {
             });
 
             when("invoking `pin.unpin`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.unpin();
+                result = pin.unpin();
               });
 
               then("`pin.status` is `Status.UNPINNED`", () => {
                 expect(pin.status).toBe(Status.UNPINNED);
+              });
+
+              then("`pin.unpin` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
