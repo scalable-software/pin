@@ -648,6 +648,21 @@ state(State.APPEARANCE, () => {
             then("`appearance` attribute does not exist", () => {
               expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
             });
+
+            then("`pin.appearance` is `Appearance.FLOATING`", () => {
+              expect(pin.appearance).toBe(Appearance.FLOATING);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid appearance value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid appearance value: invalid");
+              }
+            );
           });
 
           when("`pin.appearance` is set to `invalid`", () => {
