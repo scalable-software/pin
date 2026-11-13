@@ -126,18 +126,21 @@ export class Pin extends Component {
     return this._visibility;
   }
   public set visibility(visibility: Visibility | null) {
-    visibility = visibility ?? Visibility.VISIBLE;
+    try {
+      visibility = visibility ?? Visibility.VISIBLE;
 
-    visibility = Validate.visibility(visibility);
+      visibility = Validate.visibility(visibility);
 
-    if (this._visibility === visibility) return;
+      if (this._visibility === visibility) return;
 
-    this._visibility = visibility;
-
-    visibility === Visibility.HIDDEN &&
-      this.setAttribute(Attributes.VISIBILITY, visibility);
-    visibility === Visibility.VISIBLE &&
-      this.removeAttribute(Attributes.VISIBILITY);
+      this._visibility = visibility;
+    } finally {
+      this._reflect(
+        Attributes.VISIBILITY,
+        this._visibility,
+        Visibility.VISIBLE
+      );
+    }
 
     const detail = { visibility };
 
@@ -276,12 +279,14 @@ export class Pin extends Component {
   };
 
   /**
-   * Makes the attribute show the state
+   * Makes the attribute show the state: absent when the state is at `initial`
    * @category Configuration
    * @hidden
    */
-  protected _reflect = (name: string, state: string) =>
-    this.getAttribute(name) !== state && this.setAttribute(name, state);
+  protected _reflect = (name: string, state: string, initial?: string) =>
+    state === initial
+      ? this.removeAttribute(name)
+      : this.getAttribute(name) !== state && this.setAttribute(name, state);
 
   /**
    * Called by the connectedCallback prototypical method
