@@ -844,12 +844,15 @@ For every behavioral gesture declared in the specification, the `<component>.tes
 
 Policy:
 
-- the DOM event is triggered directly on the realized element via `.click()` or the equivalent native method
+- the DOM event is triggered directly on the realized element via `.click()` or the equivalent native method; a keyboard gesture is triggered by dispatching a `KeyboardEvent` with the key from metadata
+- every trigger of a gesture must be verified: each target, and each condition
+- for a gesture with a condition, an input that does not meet the condition must be verified to change nothing
 - the element is located by selector (e.g., `pin.root.querySelector(".icon")`) — this verifies that the gesture wiring depends on the realized composition, not on a cached reference name
 - the state outcome of the triggered operation must be verified via the getter
 - the event dispatched as a consequence of the state change must be verified as having been called
 - for gestures that trigger a bidirectional toggle, both directions must be verified in sequence: a second interaction block nested inside the first restores the prior state and confirms the reverse outcome
 - visual gestures declared with `effects` are realized entirely in CSS — they do not require JavaScript assertions in the test suite
+- when a gesture needs an element to be focusable, the composition suite must verify the template attributes that make it so, such as `tabindex` and `role`
 
 Example:
 
