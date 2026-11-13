@@ -129,14 +129,19 @@ export class Pin extends Component implements Meta {
   }
   public set visibility(visibility: Visibility | null) {
     try {
+      // Normalize
       visibility = visibility ?? Visibility.VISIBLE;
 
+      // Validate
       visibility = Validate.visibility(visibility);
 
+      // Guard
       if (this._visibility === visibility) return;
 
+      // Mutate
       this._visibility = visibility;
     } finally {
+      // Reflect
       this._reflect(
         Attributes.VISIBILITY,
         this._visibility,
@@ -144,8 +149,8 @@ export class Pin extends Component implements Meta {
       );
     }
 
+    // Dispatch
     const detail = { visibility };
-
     visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
     visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
   }
@@ -159,17 +164,21 @@ export class Pin extends Component implements Meta {
   }
   public set status(status: Status) {
     try {
+      // Validate
       status = Validate.status(status);
 
+      // Guard
       if (this._status === status) return;
 
+      // Mutate
       this._status = status;
     } finally {
+      // Reflect
       this._reflect(Attributes.STATUS, this._status);
     }
 
+    // Dispatch
     const detail = { status };
-
     status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
     status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
   }
