@@ -1004,6 +1004,39 @@ events(Event.ON_SHOW, () => {
                 pin.onshow = null;
               });
 
+              when("`pin.onshow` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onshow = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onshow value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onshow value: invalid");
+                });
+
+                when("`pin.visibility` is set to `Visibility.VISIBLE`", () => {
+                  beforeEach(() => {
+                    pin.visibility = Visibility.VISIBLE;
+                  });
+                  afterEach(() => {
+                    pin.visibility = Visibility.HIDDEN;
+                  });
+
+                  then("`pin.onshow` is still called", () => {
+                    expect(onshow).toHaveBeenCalled();
+                  });
+                });
+              });
+
               and("`pin.onshow` is set to a new listener", () => {
                 let onshow2: jasmine.Spy;
                 beforeEach(() => {
