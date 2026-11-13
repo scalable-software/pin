@@ -303,7 +303,9 @@ export class Pin extends Component implements Meta {
   protected _attributeHandlers = {
     [Attributes.VISIBILITY]: (value: Visibility | null) =>
       (this.visibility = value),
-    [Attributes.STATUS]: (value: Status) => (this.status = value)
+    [Attributes.STATUS]: (value: Status) => (this.status = value),
+    [Attributes.APPEARANCE]: (value: Appearance | null) =>
+      (this.appearance = value)
   };
 
   /**
