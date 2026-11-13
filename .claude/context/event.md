@@ -67,10 +67,10 @@ This defines the public event contract that the implementation must honor.
 
 Events vary by payload presence:
 
-- **Payload-bearing events** — declared with `parameters` in the specification. Runtime payload is delivered through `event.detail` and must match the declared parameter contract (Section 7). Verification under the testing policy requires three behavioral commit pairs: setter existence, handler trigger, and payload contract.
-- **Payload-free events** — declared without `parameters`. They emit no runtime payload. Verification requires two behavioral commit pairs: setter existence and handler trigger.
+- **Payload-bearing events** — declared with `parameters` in the specification. Runtime payload is delivered through `event.detail` and must match the declared parameter contract (Section 7).
+- **Payload-free events** — declared without `parameters`. They emit no runtime payload.
 
-The framework dispatch path (Section 6), the listener-replacement semantics (Section 5), and the accepted-outcome dispatch rule (Section 8) are invariant across both variants.
+The subscription property (Sections 4–5), the framework dispatch path (Section 6), the accepted-outcome dispatch rule (Section 8), and the way an event behaves once dispatched (Section 10) are invariant across both variants.
 
 # 2) Events Must Represent Semantic Outcomes
 
@@ -117,6 +117,8 @@ Policy:
 - every declared public event must have a key in `Event`
 - `Event` contains only declared public event names
 - the implementation must use event metadata consistently as the canonical event vocabulary
+- the metadata must export an `Events` type, and the component class must implement it through `Meta`, so that the compiler fails the build when a declared event has no subscription property (see the operation policy, Section 3)
+- an event is named after the business outcome it reports; when that name is one every HTML element already has, such as `onchange` or `onload`, the override is allowed but must be deliberate
 
 Example pattern:
 
@@ -129,9 +131,26 @@ export const Event = {
 } as const;
 
 export type Event = (typeof Event)[keyof typeof Event];
+
+export type Events = Record<Event, EventListener | null>;
 ```
 
 This gives the implementation a stable, centralized event vocabulary that prevents string duplication and keeps naming consistent across metadata, subscription properties, and dispatch.
+
+A name the platform already uses replaces the element's own property of that name: on that component, `onchange` then means the component's event, not the browser's. The business name comes first, so this is allowed. The metadata tests record which names override, so that an override is a decision and never an accident:
+
+```typescript
+// no overrides
+then("no event name is taken by the platform", () => {
+  const taken = Object.values(Event).filter(
+    (name) => name in HTMLElement.prototype
+  );
+  expect(taken).toEqual([]);
+});
+
+// deliberate overrides, listed
+expect(taken).toEqual(["onchange", "onload"]);
+```
 
 # 4) Event Subscription Must Be Exposed Through Properties
 
@@ -142,6 +161,8 @@ Policy:
 - every declared public event must have a corresponding public subscription property on the component class
 - the public subscription property name must match the canonical event name
 - the subscription property must store its assigned handler in a private handler slot
+- the subscription property is write-only: it has a setter and no getter
+- the setter must go through the base component's `_subscribe` and store what it returns
 - assigning a subscription property must replace the previously assigned handler for that property
 - assigning `null` must remove the current handler
 
@@ -151,11 +172,7 @@ Example pattern:
 private _onpin: EventListener | null = null;
 
 public set onpin(handler: EventListener | null) {
-  this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
-
-  this._onpin = handler;
-
-  this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+  this._onpin = this._subscribe(Event.ON_PIN, this._onpin, handler);
 }
 ```
 
@@ -170,30 +187,26 @@ pin.onpin = null;
 
 Event subscription properties must behave as single-slot listener assignments.
 
-Assignment replaces the previous handler.
+Assignment replaces the previous handler. The base component's `_subscribe(event, current, next)` performs the replacement, in this sequence:
 
-Required sequence:
-
-1. remove the previous listener
-2. store the new handler
-3. attach the new listener if non-null
+1. check the new handler — it must be a function, `null`, or `undefined`
+2. remove the previous listener
+3. attach the new listener if there is one
+4. return the handler to store: the function, or `null`
 
 Policy:
 
 - a subscription property must manage at most one currently assigned handler
 - reassigning a subscription property must replace the previous handler rather than accumulate listeners
-- assigning `null` must leave no active listener for that subscription property
-- listener replacement behavior must be implemented through normal DOM listener registration and removal
+- assigning `null` or `undefined` must leave no active listener for that subscription property
+- a handler is a value that enters from outside, so it is validated before anything changes: a value that is not a function throws `Invalid {event} value: {value}`, and the previous handler stays in place
+- the component must not add or remove the listener itself; `_subscribe` owns that
 
 Example:
 
 ```typescript
 public set onunpin(handler: EventListener | null) {
-  this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
-
-  this._onunpin = handler;
-
-  this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+  this._onunpin = this._subscribe(Event.ON_UNPIN, this._onunpin, handler);
 }
 ```
 
@@ -273,17 +286,21 @@ Example pattern:
 ```typescript
 public set status(status: Status) {
   try {
+    // Validate
     status = Validate.status(status);
 
+    // Guard
     if (this._status === status) return;
 
+    // Mutate
     this._status = status;
   } finally {
+    // Reflect
     this._reflect(Attributes.STATUS, this._status);
   }
 
+  // Dispatch
   const detail = { status };
-
   status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
   status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 }
@@ -314,6 +331,44 @@ Transformation pattern:
 
 This predictable transformation keeps the implementation directly traceable back to the specification and consistent with the framework's metadata-driven design.
 
+# 10) How an Event Behaves Once Dispatched
+
+Policy:
+
+- the event type is the full canonical name: a listener is added with `addEventListener("onpin", …)`, not `"pin"`
+- an event stays on the component: it does not bubble and does not cross the shadow boundary, so a host subscribes on the element itself or through `onevent` (Section 11)
+- an event cannot be cancelled
+- the detail is the record of what happened: a handler must read `event.detail`, not the component, because an earlier handler may already have changed the state again
+- a handler that throws is contained: the browser reports the error, the remaining handlers still run, and the state change stands
+
+# 11) `onevent` Receives Every Event of a Component
+
+The base component gives every component one more subscription property, `onevent`. It is not declared in a component's specification or metadata.
+
+Policy:
+
+- `onevent` receives every event the component dispatches through `_dispatch`
+- it runs after the event's subscription property and after any listener added with `addEventListener`
+- assigning replaces the handler; `null` removes it
+- it is the entry point for an orchestrator that mirrors a component, such as a Machine:
+
+```typescript
+pin.onevent = (event) => machine.send(event);
+```
+
+# 12) Lifecycle Events Come From the Base Component
+
+The base component dispatches two events on every component:
+
+- `connected` — after the component is added to the DOM and initialized
+- `disconnected` — after the component is removed from the DOM
+
+Policy:
+
+- lifecycle events are not declared in a component's specification or metadata, and have no subscription property
+- they reach `onevent` like any other event
+- a component must not declare an event of its own with either name
+
 ---
 
 # Policy Checklist
@@ -327,14 +382,14 @@ A compliant component must:
 5. Express runtime payload through a `detail` object when payload is emitted.
 6. Ensure events represent semantic outcomes rather than low-level gestures.
 7. Avoid modeling gestures, state, or operations as events.
-8. Define all declared public event names in `<component>.meta.ts`.
-9. Use `Event` metadata as the canonical event vocabulary.
-10. Expose a public subscription property for every declared public event.
+8. Define all declared public event names in `<component>.meta.ts`, export the `Events` type, and implement `Meta` on the component class.
+9. Use `Event` metadata as the canonical event vocabulary, name events after the business outcome, and record any name that overrides one the platform already has.
+10. Expose a public, write-only subscription property for every declared public event.
 11. Keep each subscription property name aligned with the canonical event name from the specification.
 12. Type subscription property setters as `EventListener | null` to formally support handler removal.
 13. Store each assigned subscription handler in a private handler slot typed `EventListener | null`.
-14. Replace the previous listener when a subscription property is reassigned.
-15. Remove the active listener when a subscription property is assigned `null`.
+14. Replace the handler through `_subscribe` and store what it returns; do not add or remove the listener in the component.
+15. Reject a handler that is not a function, leaving the previous handler in place; remove the handler for `null`.
 16. Dispatch public events through `_dispatch(...)`.
 17. Never manually invoke subscribed handlers as a substitute for event dispatch.
 18. Emit runtime payload through `event.detail`.
@@ -452,27 +507,19 @@ private _onpin: EventListener | null = null;
 private _onunpin: EventListener | null = null;
 
 public set onhide(handler: EventListener | null) {
-  this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
-  this._onhide = handler;
-  this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+  this._onhide = this._subscribe(Event.ON_HIDE, this._onhide, handler);
 }
 
 public set onshow(handler: EventListener | null) {
-  this._onshow && this.removeEventListener(Event.ON_SHOW, this._onshow);
-  this._onshow = handler;
-  this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
+  this._onshow = this._subscribe(Event.ON_SHOW, this._onshow, handler);
 }
 
 public set onpin(handler: EventListener | null) {
-  this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
-  this._onpin = handler;
-  this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+  this._onpin = this._subscribe(Event.ON_PIN, this._onpin, handler);
 }
 
 public set onunpin(handler: EventListener | null) {
-  this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
-  this._onunpin = handler;
-  this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+  this._onunpin = this._subscribe(Event.ON_UNPIN, this._onunpin, handler);
 }
 ```
 
@@ -481,35 +528,44 @@ Dispatch from within the authoritative state setters:
 ```typescript
 public set visibility(visibility: Visibility | null) {
   try {
+    // Normalize
     visibility = visibility ?? Visibility.VISIBLE;
+    // Validate
     visibility = Validate.visibility(visibility);
 
+    // Guard
     if (this._visibility === visibility) return;
 
+    // Mutate
     this._visibility = visibility;
   } finally {
+    // Reflect
     this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
   }
 
+  // Dispatch
   const detail = { visibility };
-
   visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
   visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
 }
 
 public set status(status: Status) {
   try {
+    // Validate
     status = Validate.status(status);
 
+    // Guard
     if (this._status === status) return;
 
+    // Mutate
     this._status = status;
   } finally {
+    // Reflect
     this._reflect(Attributes.STATUS, this._status);
   }
 
+  // Dispatch
   const detail = { status };
-
   status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
   status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
 }
@@ -520,8 +576,8 @@ How the implementation applies the policy:
 - the specification defines the public event contract under `Events`
 - metadata defines the canonical event vocabulary
 - the component class exposes each declared event as a public subscription property with the same canonical name
-- subscription properties are typed `EventListener | null` to formally support both handler assignment and handler removal
-- subscription properties manage a single handler slot — reassignment replaces, `null` removes
+- subscription properties are write-only and typed `EventListener | null` to formally support both handler assignment and handler removal
+- subscription properties manage a single handler slot through `_subscribe` — reassignment replaces, `null` removes, and a value that is not a function is rejected
 - events are dispatched through `_dispatch(...)`, not by manually invoking handlers
 - payload is delivered through `detail` and matches the values declared in the specification
 - events are emitted only after the authoritative state setter has validated, guarded, mutated, and reflected the accepted transition

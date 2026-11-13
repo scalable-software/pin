@@ -270,14 +270,19 @@ Reflection makes the attribute show the state. It is done by the base component'
 ```typescript
 public set visibility(visibility: Visibility | null) {
   try {
+    // Normalize
     visibility = visibility ?? Visibility.VISIBLE;
 
+    // Validate
     visibility = Validate.visibility(visibility);
 
+    // Guard
     if (this._visibility === visibility) return;
 
+    // Mutate
     this._visibility = visibility;
   } finally {
+    // Reflect
     this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
   }
 }
@@ -289,12 +294,16 @@ public set visibility(visibility: Visibility | null) {
 ```typescript
 public set status(status: Status) {
   try {
+    // Validate
     status = Validate.status(status);
 
+    // Guard
     if (this._status === status) return;
 
+    // Mutate
     this._status = status;
   } finally {
+    // Reflect
     this._reflect(Attributes.STATUS, this._status);
   }
 }
@@ -340,6 +349,7 @@ For writable state, the public mutation path must follow this order:
 3. **Guard**
 4. **Mutate**
 5. **Reflect** — attribute-backed state only
+6. **Dispatch** — the sixth stage, after the mutation path: it announces an accepted change and is defined by the event policy
 
 Validation must be performed by logic defined in `<component>.validation.ts`, against the value-domain metadata defined in `<component>.meta.ts`. If the normalized value is invalid, validation must fail and the mutation must not proceed.
 
@@ -349,7 +359,7 @@ For attribute-backed state, Reflect is not optional and always runs. The first f
 
 - Reflect reads the backing field, not the setter's parameter: after a rejected value the parameter still holds the invalid input.
 - Reflect goes through `_reflect`, never a direct `setAttribute`: writing a value the attribute already has triggers `attributeChangedCallback` again, and a phase that always runs would loop.
-- Anything that follows an accepted change, such as event dispatch, comes after the `finally` block. The guard's `return` and the validator's error both leave through `finally` without reaching it.
+- Dispatch, and anything else that follows an accepted change, comes after the `finally` block. The guard's `return` and the validator's error both leave through `finally` without reaching it.
 
 Note: The normalization step for optional attribute-backed state handles a specific platform behavior: `attributeChangedCallback` passes `null` as the new value when an attribute is removed from the DOM. Without normalization, this `null` would reach validation and throw. Normalization ensures attribute removal is treated as equivalent to assigning the default value. Use `??` (nullish coalescing) rather than `||` (logical OR) so that only `null` and `undefined` are normalized — any other invalid value is left for validation to reject.
 
@@ -688,13 +698,18 @@ public get visibility(): Visibility {
 
 public set visibility(visibility: Visibility | null) {
   try {
+    // Normalize
     visibility = visibility ?? Visibility.VISIBLE;
+    // Validate
     visibility = Validate.visibility(visibility);
 
+    // Guard
     if (this._visibility === visibility) return;
 
+    // Mutate
     this._visibility = visibility;
   } finally {
+    // Reflect
     this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
   }
 }
@@ -712,12 +727,16 @@ public get status(): Status {
 
 public set status(status: Status) {
   try {
+    // Validate
     status = Validate.status(status);
 
+    // Guard
     if (this._status === status) return;
 
+    // Mutate
     this._status = status;
   } finally {
+    // Reflect
     this._reflect(Attributes.STATUS, this._status);
   }
 }
@@ -758,10 +777,13 @@ public get locked(): Locked {
 }
 
 public set locked(locked: Locked) {
+  // Validate
   locked = Validate.locked(locked);
 
+  // Guard
   if (this._locked === locked) return;
 
+  // Mutate
   this._locked = locked;
 }
 ```
