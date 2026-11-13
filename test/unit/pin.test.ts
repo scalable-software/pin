@@ -674,12 +674,17 @@ operation(Operation.PIN, () => {
 
         and("`pin.pin` method exists", () => {
           when("invoking `pin.pin`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.pin();
+              result = pin.pin();
             });
 
             then("`pin.status` is `Status.PINNED`", () => {
               expect(pin.status).toBe(Status.PINNED);
+            });
+
+            then("`pin.pin` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
