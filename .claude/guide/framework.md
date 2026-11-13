@@ -4,8 +4,9 @@ This guide explains how components in this framework work and why they are built
 they are. It is written for a developer who is new to the framework. The policies in
 `.claude/context/` are the rules; this guide is the explanation behind them.
 
-Every example comes from the `pin` component (`<pin-button>`), the reference
-implementation of the framework.
+The examples come from the `pin` component (`<pin-button>`), the reference implementation
+of the framework. Where the pin has no example of something, the guide says so and uses an
+illustration instead.
 
 ---
 
@@ -366,7 +367,8 @@ same setter, and behave identically from there.
 - **Passing the parameter to `_reflect`.** Pass the private field.
 - **Dispatching an event inside the `try` block.** Dispatch after `finally`.
 - **Putting logic in an attribute handler or an operation.** It belongs in the setter.
-- **Validating in an operation.** The setter already validates.
+- **Validating in an operation a value that goes on to a setter.** The setter already
+  validates it.
 - **Typing a value as a string.** Use the constant from `pin.meta.ts`.
 - **Leaving out the guard.** Without it, setting a state to the value it already has would
   send a second event.
@@ -380,3 +382,180 @@ same setter, and behave identically from there.
 | Which tests a state needs | `.claude/context/testing.md` |
 | How events follow from state changes | `.claude/context/event.md` |
 | The pin's own state | `specifications/pin.specifications.json`, `src/pin.ts` |
+
+---
+
+## Validation
+
+### What validation is
+
+Validation is **checking a value that comes in from outside before the component accepts
+it**.
+
+A component cannot trust what it is given. Markup can contain a typo
+(`status="pined"`), and other code can pass anything at all. Validation is the gate: a
+value that passes is safe to use everywhere inside the component, and a value that fails
+never gets in.
+
+### What is validated, and what is not
+
+One rule decides it:
+
+> **Check what comes in from outside. Trust what the component makes itself.**
+
+| Value | Comes from | Validated? |
+|---|---|---|
+| `pin.status = "pinned"` | outside, through the property | yes |
+| `<pin-button status="pinned">` | outside, through the attribute | yes |
+| A parameter passed to an operation | outside | yes, once (see below) |
+| A UUID the component generates | the component | no |
+| A state only the component sets | the component | no |
+
+The pin has two values that come in from outside, `visibility` and `status`, so it has two
+validators.
+
+### Where a validator lives
+
+All validators of a component sit in one file, as static functions of one class named
+`Validate`.
+
+| File | Job |
+|---|---|
+| `pin.meta.ts` | Says what is allowed: the list of values, the limits, the pattern |
+| `pin.validation.ts` | Checks a value against what is allowed |
+| `pin.ts` | Calls the validator at the right moment |
+
+A validator never contains its own list of allowed values. It reads them from the metadata
+file, so when a value is added there, validation follows without being touched.
+
+### What a validator looks like
+
+Every validator has the same three lines: a check, a throw, and a return.
+
+```typescript
+public static status = (value: unknown) => {
+  const valid = Object.values(Status).includes(value as Status);   // check
+  if (!valid) throw new Error(`Invalid status value: ${value}`);    // throw
+  return value as Status;                                           // return
+};
+```
+
+- **It accepts `unknown`.** The value could be a string, `null`, a number, anything. The
+  type says so honestly, which forces the validator to check before it believes.
+- **It throws on a bad value.** It never quietly replaces a bad value with a good one. A
+  silent replacement would hide the mistake from the person who made it.
+- **It returns the value with its proper type.** What goes in is `unknown`; what comes out
+  is a `Status`. The setter continues with the returned value, so everything after
+  validation works with a value that is known to be good.
+- **It is pure.** It looks only at the value it is given, never at the component. That
+  makes it trivial to test: call it with a value and see what comes back.
+
+### The kinds of check
+
+Only the check line differs from one validator to the next. There are four kinds.
+
+| Kind | The check asks | Example |
+|---|---|---|
+| Enum | Is the value on the list? | `status` is `pinned` or `unpinned` |
+| Format | Does the value have the right shape? | an id is a UUID |
+| Range | Does the value lie between the limits? | a zoom level from 0.5 to 4 |
+| Structure | Does every field pass its own check? | an object with an id and a name |
+
+The pin only has enums. The next two examples are illustrations of the other kinds, not
+code from the pin.
+
+A format check, with the pattern kept in the metadata file as `Uuid.PATTERN`:
+
+```typescript
+public static id = (value: unknown) => {
+  const valid = typeof value === "string" && Uuid.PATTERN.test(value);
+  if (!valid) throw new Error(`Invalid id value: ${value}`);
+  return value as Id;
+};
+```
+
+A range check, with the limits kept in the metadata file as `Zoom.MIN` and `Zoom.MAX`:
+
+```typescript
+public static zoom = (value: unknown) => {
+  const valid =
+    typeof value === "number" && value >= Zoom.MIN && value <= Zoom.MAX;
+  if (!valid) throw new Error(`Invalid zoom value: ${value}`);
+  return value as Zoom;
+};
+```
+
+Both first check the type of the value (`typeof`) and then its shape or its limits. The
+type check comes first because the second check only makes sense for the right type.
+
+### Where validation happens
+
+A value is validated **once, at the first place it lands**. There are two such places.
+
+**In a setter.** This is step 2 of the six steps in the State section. Every value that
+reaches a writable state passes through it, whether it came from the property, the
+attribute or an operation.
+
+**In an operation, when the operation uses a parameter itself.** If an operation takes a
+value and works with it directly, nothing else will check that value, so the operation
+does.
+
+An operation that passes its parameter to a setter does *not* validate. The setter will,
+and checking the same value twice is wasted work and two places to keep in step.
+
+| What an operation does with a parameter | Who validates |
+|---|---|
+| Passes it to a setter | the setter |
+| Uses it itself, with no setter in between | the operation, before first use |
+| Has no parameter | nobody; nothing came in |
+
+The pin's operations are all in the last row. `pin.pin()` takes nothing; it assigns
+`Status.PINNED` to the state, and the setter validates as it always does. So the pin has no
+example of an operation that validates.
+
+Attribute handlers and gesture handlers never validate. They only pass a value on.
+
+### What a rejected value looks like
+
+The error message always has the same form:
+
+```text
+Invalid {name} value: {value}
+```
+
+For example `Invalid status value: pined`. The name is the name of the state, and the value
+is exactly what was received, so the message tells you what to fix.
+
+An object cannot be printed as one value, so when one field of a structure fails, the
+message names the field and its problem instead: `Invalid metadata value: id is required`.
+
+How the error reaches you depends on how the value came in. A bad value assigned to a
+property is thrown to your code. A bad value written to an attribute is reported by the
+browser. The table in the State section, under "What happens with a value that is not
+allowed", shows each case.
+
+### Two things that surprise people
+
+- **Matching is exact.** `status="PINNED"` and `status=" pinned"` are rejected. The value
+  must be exactly one of the listed values.
+- **An attribute is always a string.** `zoom="2"` arrives as the string `"2"`, and the
+  range check above rejects a string. A state that is not a string must convert the value
+  in its Normalize step, before validation. Validation checks; it does not convert.
+
+### Mistakes to avoid
+
+- **Listing allowed values inside the validator.** They belong in the metadata file.
+- **Returning a fallback instead of throwing.** A bad value must be reported, not hidden.
+- **Ignoring the returned value.** Continue with what the validator returns.
+- **Validating the same value twice.** If it goes to a setter, the setter checks it.
+- **Reading the component inside a validator.** A validator sees only its arguments.
+- **Validating a value the component made itself.** There is nothing to distrust.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for validators | `.claude/context/validation.md` |
+| Where validation sits in a setter | `.claude/context/state.md`, Section 7 |
+| Which tests a validator needs | `.claude/context/testing.md`, Section 6 |
+| The pin's validators | `src/pin.validation.ts` |
