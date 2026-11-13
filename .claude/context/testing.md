@@ -146,6 +146,7 @@ Policy:
 - each suite must verify the constant is defined
 - for enum-shaped constants, each suite must additionally verify the constant is of runtime type `"object"`, and that every declared key is defined
 - key assertions use `expect(Constant.KEY).toBeDefined()` — not value equality
+- the `State`, `Operation`, and `Event` suites must each record the names that override one every HTML element already has: `Object.values(Constant).filter((name) => name in HTMLElement.prototype)` equals the list of deliberate overrides, which is empty when there are none
 - value equality belongs to the validation layer, not the metadata layer
 
 ## 5.1) Scalar Constants Use the Flat Pattern
@@ -744,6 +745,8 @@ Policy:
 - the event setter must be verified using `hasSetter(pin, Event.ON_{NAME})`
 - listener replacement must be verified: when a second listener replaces the first, only the second listener must be called when the event fires — the first must not be called
 - the event payload must match the structure declared in the specification's `parameters`
+- a rejected handler must be verified: assigning a value that is not a function must throw with the exact message `Invalid {event} value: {value}`, and the previous listener must still be called when the event fires
+- no event for a repeated value must be verified: assigning a state the value it already has must not call the listener again
 - spies must be created with `jasmine.createSpy`
 - the payload is asserted via `jasmine.objectContaining({ detail: { ... } })` passed to `toHaveBeenCalledWith`
 - for events that fire on a state transition requiring a prior state, the prior state must be established in `beforeEach` before listeners are assigned, so that assigning the listener does not capture the unrelated transition that established the prior state
