@@ -49,3 +49,8 @@ is interactive before I click.
 
 As an **end user**, I want the pin to match my device's light or dark colour scheme, so that
 it looks consistent with the rest of my interface.
+
+### STORY: Keyboard Operation
+
+As an **end user**, when I work with the keyboard, I want to reach the pin and pin or unpin
+with it, so that I do not need a pointing device.

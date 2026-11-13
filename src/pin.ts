@@ -14,8 +14,11 @@ import {
   Visibility,
   Status,
   Event,
-  Gesture
+  Gesture,
+  Key
 } from "./pin.meta.js";
+
+import { type Meta } from "./pin.meta.js";
 
 // Validation
 import { Validate } from "./pin.validation.js";
@@ -37,7 +40,7 @@ export const configuration: Configuration = {
 /**
  * @category Pin
  */
-export class Pin extends Component {
+export class Pin extends Component implements Meta {
   /**
    * The tag name of the pin
    * @category Configuration
@@ -126,21 +129,29 @@ export class Pin extends Component {
     return this._visibility;
   }
   public set visibility(visibility: Visibility | null) {
-    visibility = visibility ?? Visibility.VISIBLE;
+    try {
+      // Normalize
+      visibility = visibility ?? Visibility.VISIBLE;
 
-    visibility = Validate.visibility(visibility);
+      // Validate
+      visibility = Validate.visibility(visibility);
 
-    if (this._visibility === visibility) return;
+      // Guard
+      if (this._visibility === visibility) return;
 
-    this._visibility = visibility;
+      // Mutate
+      this._visibility = visibility;
+    } finally {
+      // Reflect
+      this._reflect(
+        Attributes.VISIBILITY,
+        this._visibility,
+        Visibility.VISIBLE
+      );
+    }
 
-    visibility === Visibility.HIDDEN &&
-      this.setAttribute(Attributes.VISIBILITY, visibility);
-    visibility === Visibility.VISIBLE &&
-      this.removeAttribute(Attributes.VISIBILITY);
-
+    // Dispatch
     const detail = { visibility };
-
     visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
     visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
   }
@@ -153,16 +164,22 @@ export class Pin extends Component {
     return this._status;
   }
   public set status(status: Status) {
-    status = Validate.status(status);
+    try {
+      // Validate
+      status = Validate.status(status);
 
-    if (this._status === status) return;
+      // Guard
+      if (this._status === status) return;
 
-    this._status = status;
+      // Mutate
+      this._status = status;
+    } finally {
+      // Reflect
+      this._reflect(Attributes.STATUS, this._status);
+    }
 
-    this.setAttribute(Attributes.STATUS, status);
-
+    // Dispatch
     const detail = { status };
-
     status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
     status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
   }
@@ -173,9 +190,7 @@ export class Pin extends Component {
    * @category Events
    */
   public set onhide(handler: EventListener | null) {
-    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
-    this._onhide = handler;
-    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = this._subscribe(Event.ON_HIDE, this._onhide, handler);
   }
 
   /**
@@ -184,9 +199,7 @@ export class Pin extends Component {
    * @category Events
    */
   public set onshow(handler: EventListener | null) {
-    this._onshow && this.removeEventListener(Event.ON_SHOW, this._onshow);
-    this._onshow = handler;
-    this._onshow && this.addEventListener(Event.ON_SHOW, this._onshow);
+    this._onshow = this._subscribe(Event.ON_SHOW, this._onshow, handler);
   }
 
   /**
@@ -195,9 +208,7 @@ export class Pin extends Component {
    * @category Events
    */
   public set onpin(handler: EventListener | null) {
-    this._onpin && this.removeEventListener(Event.ON_PIN, this._onpin);
-    this._onpin = handler;
-    this._onpin && this.addEventListener(Event.ON_PIN, this._onpin);
+    this._onpin = this._subscribe(Event.ON_PIN, this._onpin, handler);
   }
 
   /**
@@ -206,42 +217,49 @@ export class Pin extends Component {
    * @category Events
    */
   public set onunpin(handler: EventListener | null) {
-    this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
-    this._onunpin = handler;
-    this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+    this._onunpin = this._subscribe(Event.ON_UNPIN, this._onunpin, handler);
   }
 
   /**
    * Hide the pin button when it is visible
    * @category Operations
    */
-  public hide = () => (this.visibility = Visibility.HIDDEN);
+  public hide = () => {
+    this.visibility = Visibility.HIDDEN;
+  };
 
   /**
    * Show the pin button when it is hidden
    * @category Operations
    */
-  public show = () => (this.visibility = Visibility.VISIBLE);
+  public show = () => {
+    this.visibility = Visibility.VISIBLE;
+  };
 
   /**
    * Pin the pin button when it is unpinned
    * @category Operations
    */
-  public pin = () => (this.status = Status.PINNED);
+  public pin = () => {
+    this.status = Status.PINNED;
+  };
 
   /**
    * Unpin the pin button when it is pinned
    * @category Operations
    */
-  public unpin = () => (this.status = Status.UNPINNED);
+  public unpin = () => {
+    this.status = Status.UNPINNED;
+  };
 
   /**
    * Pin the pin button when it is unpinned, and unpin it when it is pinned
    * @category Operations
    */
-  public toggle = () =>
-    (this.status =
-      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+  public toggle = () => {
+    this.status =
+      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+  };
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.
@@ -269,8 +287,7 @@ export class Pin extends Component {
    * @hidden
    */
   protected _initialize = () => {
-    !this.hasAttribute(Attributes.STATUS) &&
-      this.setAttribute(Attributes.STATUS, this._status);
+    this._reflect(Attributes.STATUS, this._status);
   };
 
   /**
@@ -279,7 +296,11 @@ export class Pin extends Component {
    * @hidden
    */
   protected _addEventListeners = () => {
-    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+    this.elements.icon?.addEventListener(
+      Gesture.KEYDOWN,
+      this._handleIconKeydown
+    );
   };
 
   /**
@@ -288,13 +309,25 @@ export class Pin extends Component {
    * @hidden
    */
   protected _removeEventListeners = () => {
-    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleIconClick);
+    this.elements.icon?.removeEventListener(
+      Gesture.KEYDOWN,
+      this._handleIconKeydown
+    );
   };
 
   /**
-   * Handles the click event
+   * Handles a click on the icon: toggles the pin
    * @category Gesture
    * @hidden
    */
-  private _handleClick = (event: MouseEvent | TouchEvent) => this.toggle();
+  private _handleIconClick = () => this.toggle();
+
+  /**
+   * Handles a key pressed on the icon: Enter toggles the pin
+   * @category Gesture
+   * @hidden
+   */
+  private _handleIconKeydown = (event: KeyboardEvent) =>
+    event.key === Key.ENTER && this.toggle();
 }

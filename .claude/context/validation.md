@@ -36,14 +36,14 @@ This separation gives each file a single clear responsibility:
 
 # Template Variation Points
 
-Validators vary by the shape of the value domain they enforce:
+Validators vary only by the check they perform, which fits the kind of value (Section 6):
 
-- **String-enum value domains** — use the `Object.values(Domain).includes(value as Domain)` membership check (Section 6). The validator accepts `string` and returns the narrowed enum type. This is the most common case and is illustrated by the examples in this document.
-- **Structured-object value domains** — validate each declared field according to its declared type and constraints (see the data policy for the `Metadata` example). The validator accepts the structured input and returns the narrowed structured type.
-- **Scalar value domains** (numbers, booleans, UUIDs, timestamps) — use the shape check appropriate to the type. For booleans, the membership check is structurally consistent with enums but serves primarily as type narrowing rather than runtime guard.
-- **Context-dependent value domains** — the allowed values are not a fixed metadata constant but depend on component-owned data (e.g. a `branch` must be the id of a loaded item that has children). The validator takes that data as a second argument — `Validate.branch(value, items)` — and stays pure: it reads only its arguments, never the component instance. It still throws with the canonical message (Section 8) and is still invoked inside the state's authoritative write path (Section 10). For readonly state, that path is the internally writable setter (`protected set branch(value)`, see the state policy §9.1a): operations such as `navigate` assign through the setter and never call the validator themselves. Reference: Library 2.0.0 (2026-09-29).
+- **Enum** — the value is on a list. This is the most common case and is illustrated by the pin's validators.
+- **Format** — the value has the right shape, such as a UUID.
+- **Range** — the value lies between limits, such as a number between a minimum and a maximum.
+- **Structure** — each field of an object passes its own check (see the data policy for the `Metadata` example).
 
-The dedicated-file rule (Section 1), the `Validate`-class structure (Sections 2–4), the metadata-sourced domain rule (Section 4), the throw-on-invalid rule (Section 7), the canonical error format (Section 8), and the mutation-path placement (Section 10) are invariant across all value-domain shapes.
+The dedicated-file rule (Section 1), the `Validate`-class structure (Sections 2–3), the metadata-sourced domain rule (Section 4), the signature (Section 5), the throw-on-invalid rule (Section 7), the canonical error format (Section 8), the scope (Section 9), and the placement (Section 10) are the same for every kind.
 
 # 2) All Validators Belong to a Single Exported Class Named `Validate`
 
@@ -60,8 +60,8 @@ Example:
 
 ```typescript
 export class Validate {
-  public static visibility = (value: string) => { ... };
-  public static status = (value: string) => { ... };
+  public static visibility = (value: unknown) => { ... };
+  public static status = (value: unknown) => { ... };
 }
 ```
 
@@ -80,7 +80,7 @@ Example:
 
 ```typescript
 export class Validate {
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     ...
   };
 }
@@ -103,30 +103,31 @@ Example:
 import { Visibility, Status } from "./pin.meta.js";
 
 export class Validate {
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     const valid = Object.values(Visibility).includes(value as Visibility);
     ...
   };
 }
 ```
 
-# 5) Validator Signature Must Accept the Raw Input Type and Return the Narrowed Type
+# 5) Validator Signature Must Accept `unknown` and Return the Narrowed Type
 
-The input type of a validator must reflect the raw, unnarrowed value that arrives at the validation boundary.
+A value that arrives from outside can be anything: a string from an attribute, `null` from a removed attribute, or any value a caller passes. The input type of a validator is therefore `unknown`.
 
 The return type must be the narrowed TypeScript type defined by the corresponding value domain in metadata.
 
 Policy:
 
-- for string-based enum value domains, the input type is `string`
+- the input type is `unknown`
 - the return type is the TypeScript domain type (e.g., `Visibility`, `Status`)
 - on valid input, the validator returns the value cast to the narrowed type
 - on invalid input, the validator throws — it must not return a fallback or a default value
+- a validator is pure: it reads only its arguments, never the component
 
 Example:
 
 ```typescript
-public static visibility = (value: string) => {
+public static visibility = (value: unknown) => {
   const valid = Object.values(Visibility).includes(value as Visibility);
   if (!valid) throw new Error(`Invalid visibility value: ${value}`);
   return value as Visibility;
@@ -135,25 +136,53 @@ public static visibility = (value: string) => {
 
 The validator bridges from the unnarrowed boundary type to the narrowed domain type — or throws. There is no third path.
 
-# 6) Validation Logic Must Use the Enum Membership Pattern
+# 6) The Check Must Fit the Kind of Value
 
-For string-based enum value domains, validation must test membership using `Object.values`.
+Every validator has the same three lines: a check, a throw, and a return. Only the check differs, and every limit it tests against comes from `<component>.meta.ts`.
+
+| Kind | The check | Metadata |
+|---|---|---|
+| Enum | the value is on the list | `Status` |
+| Format | the value has the right shape | `Uuid.PATTERN` |
+| Range | the value lies between limits | `Zoom.MIN`, `Zoom.MAX` |
+| Structure | each field passes its own check | the field types |
 
 Policy:
 
-- use `Object.values(Domain).includes(value as Domain)` to test whether the input is a member of the declared value domain
-- this pattern derives valid values directly from the metadata object — it does not maintain a separate list
-- if the input is not a member, the validator must reject it
-- alternative checking strategies may be used only for non-string or non-enum domains
+- for an enum, use `Object.values(Domain).includes(value as Domain)` — it derives the valid values directly from the metadata object and does not maintain a separate list
+- for a format or a range, test the runtime type first, then the shape or the limits
+- a value of the wrong runtime type is rejected, not converted: an attribute always arrives as a string, so a non-string attribute-backed state converts in its Normalize step, before validation
+- matching is exact: a value that differs in case or carries whitespace is rejected
 
-Example:
+Enum:
 
 ```typescript
-const valid = Object.values(Visibility).includes(value as Visibility);
-if (!valid) {
-  throw new Error(`Invalid visibility value: ${value}`);
-}
-return value as Visibility;
+public static status = (value: unknown) => {
+  const valid = Object.values(Status).includes(value as Status);
+  if (!valid) throw new Error(`Invalid status value: ${value}`);
+  return value as Status;
+};
+```
+
+Format:
+
+```typescript
+public static id = (value: unknown) => {
+  const valid = typeof value === "string" && Uuid.PATTERN.test(value);
+  if (!valid) throw new Error(`Invalid id value: ${value}`);
+  return value as Id;
+};
+```
+
+Range:
+
+```typescript
+public static zoom = (value: unknown) => {
+  const valid =
+    typeof value === "number" && value >= Zoom.MIN && value <= Zoom.MAX;
+  if (!valid) throw new Error(`Invalid zoom value: ${value}`);
+  return value as Zoom;
+};
 ```
 
 # 7) Invalid Input Must Throw a Descriptive Error
@@ -193,29 +222,45 @@ throw new Error(`Invalid visibility value: ${value}`);
 throw new Error(`Invalid status value: ${value}`);
 ```
 
-# 9) Validation Scope Covers Publicly Writable Constructs
+A structure cannot be printed as one value. When a field of a structure fails, the message names the field and its problem instead:
 
-The `Validate` class must define validators for every publicly writable state or data property that accepts external input and has a finite value domain.
+```
+Invalid {name} value: {field} is {problem}
+```
 
-Policy:
+```typescript
+throw new Error("Invalid metadata value: id is required");
+```
 
-- every publicly writable state property with a finite value domain must have a corresponding validator in `Validate`
-- every publicly writable data property with a finite value domain must have a corresponding validator in `Validate`
-- readonly state that is only mutated internally does not require a validator in `Validate`
-- internally generated values (e.g., UUIDs, timestamps) do not require validation in `Validate`
-- the count of validators in `Validate` must equal the count of publicly writable constructs that require boundary enforcement
+# 9) Validation Scope Covers Every Value That Enters From Outside
 
-# 10) Validators Are Invoked Inside the Authoritative Mutation Path
-
-Validators are called by `<component>.ts` inside the public setter of each validated construct. They are not called at the gesture or operation layer.
+A validator exists for every value that enters the component from outside. A value the component produces itself is trusted and has no validator.
 
 Policy:
 
-- validation must be invoked inside the setter — the authoritative mutation path
-- validation is the second step of the mutation order, after normalization and before the guard: **Normalize → Validate → Guard → Mutate**
-- the return value of the validator — the narrowed typed value — must replace the raw input for the remainder of the mutation path
-- if validation throws, the mutation path must not proceed past that point
-- gesture handlers and operations must not invoke validators directly — they route through the setter which owns validation
+- a writable state or data item has a validator, because its setter accepts outside values
+- an operation parameter that the operation uses itself has a validator
+- a readonly value that only the component sets has no validator
+- a generated value, such as a new UUID or a timestamp, has no validator
+
+# 10) A Value Is Validated Once, Where It First Lands
+
+Validators are called by `<component>.ts` at the first place an outside value lands: a setter, or an operation that uses a parameter itself.
+
+Policy:
+
+- a setter validates its value, as the second step of the mutation order, after normalization and before the guard: **Normalize → Validate → Guard → Mutate → Reflect**
+- an operation validates a parameter it uses itself, before first use
+- an operation does not validate a parameter it passes to a setter — the setter does
+- attribute handlers and gesture handlers never validate — they pass the value on
+- the return value of the validator — the narrowed typed value — must replace the raw input for the remainder of the path
+- if validation throws, the state must not change; for attribute-backed state the setter's `finally` block still reflects, so the attribute returns to the state
+
+| What an operation does with a parameter | Who validates |
+|---|---|
+| passes it to a setter | the setter |
+| uses it itself, with no setter in between | the operation, before first use |
+| has no parameter | nobody |
 
 The mutation order is defined authoritatively in the state policy. The validation policy governs the implementation of the validator itself, not the order it is called in.
 
@@ -223,17 +268,22 @@ Example showing the validator's position in the mutation path:
 
 ```typescript
 public set visibility(visibility: Visibility | null) {
-  // Normalize
-  visibility = visibility ?? Visibility.VISIBLE;
+  try {
+    // Normalize
+    visibility = visibility ?? Visibility.VISIBLE;
 
-  // Validate — narrowed return value replaces the raw input
-  visibility = Validate.visibility(visibility);
+    // Validate — narrowed return value replaces the raw input
+    visibility = Validate.visibility(visibility);
 
-  // Guard
-  if (this._visibility === visibility) return;
+    // Guard
+    if (this._visibility === visibility) return;
 
-  // Mutate
-  this._visibility = visibility;
+    // Mutate
+    this._visibility = visibility;
+  } finally {
+    // Reflect
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
   ...
 }
 ```
@@ -242,7 +292,7 @@ public set visibility(visibility: Visibility | null) {
 
 # Policy Applied to Specification
 
-The Pin component declares two publicly writable state properties — `visibility` and `status` — both with string-based enum value domains declared in `pin.meta.ts`. Both require boundary enforcement at the public mutation path.
+The Pin component declares two writable state properties — `visibility` and `status` — both enums declared in `pin.meta.ts`. Both accept outside values through their setter, so both have a validator. None of the pin's operations takes a parameter, so no operation validates.
 
 `pin.meta.ts` — value domain declarations:
 
@@ -268,7 +318,7 @@ export type Status = (typeof Status)[keyof typeof Status];
 import { Visibility, Status } from "./pin.meta.js";
 
 export class Validate {
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     const valid = Object.values(Visibility).includes(value as Visibility);
     if (!valid) {
       throw new Error(`Invalid visibility value: ${value}`);
@@ -276,7 +326,7 @@ export class Validate {
     return value as Visibility;
   };
 
-  public static status = (value: string) => {
+  public static status = (value: unknown) => {
     const valid = Object.values(Status).includes(value as Status);
     if (!valid) {
       throw new Error(`Invalid status value: ${value}`);
@@ -292,29 +342,37 @@ How the policy is applied:
 - a single exported `Validate` class contains both validators
 - both validators are `public static` arrow function class properties
 - both import their value domains from `pin.meta.ts` — no allowed values are hardcoded in `pin.validation.ts`
-- both accept `string` as the raw input type and return the narrowed metadata type on success
+- both accept `unknown` and return the narrowed metadata type on success
 - both use `Object.values(Domain).includes(value as Domain)` for membership checking
 - both throw `new Error(...)` on invalid input — no fallback is returned
 - both use the canonical error format: `` `Invalid {name} value: ${value}` ``
-- `Validate` has exactly two methods because there are exactly two publicly writable state properties; readonly or internally-generated values are not covered
+- `Validate` has exactly two methods because exactly two values enter the pin from outside
 
 Invocation in `pin.ts`:
 
 ```typescript
 // visibility setter — optional attribute-backed, writable
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;  // Normalize
-  visibility = Validate.visibility(visibility);   // Validate
-  if (this._visibility === visibility) return;    // Guard
-  this._visibility = visibility;                  // Mutate
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;  // Normalize
+    visibility = Validate.visibility(visibility);   // Validate
+    if (this._visibility === visibility) return;    // Guard
+    this._visibility = visibility;                  // Mutate
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE); // Reflect
+  }
   ...
 }
 
 // status setter — compulsory attribute-backed, writable
 public set status(status: Status) {
-  status = Validate.status(status);     // Validate (no normalization step)
-  if (this._status === status) return;  // Guard
-  this._status = status;                // Mutate
+  try {
+    status = Validate.status(status);     // Validate (no normalization step)
+    if (this._status === status) return;  // Guard
+    this._status = status;                // Mutate
+  } finally {
+    this._reflect(Attributes.STATUS, this._status); // Reflect
+  }
   ...
 }
 ```
@@ -335,17 +393,17 @@ A compliant component must:
 4. Define all validators as members of the `Validate` class with no non-validation logic in the class.
 5. Define each validator as a `public static` arrow function class property.
 6. Import value domain objects from `<component>.meta.ts` — do not hardcode allowed values in validators.
-7. Use `Object.values(Domain).includes(value as Domain)` for string-based enum membership checking.
-8. Accept the raw unnarrowed input type (typically `string` for string-based enum domains).
+7. Use the check that fits the kind of value: `Object.values(Domain).includes(value as Domain)` for an enum, the runtime type and then the shape or limits for a format or a range.
+8. Accept `unknown` and keep the validator pure.
 9. Return the narrowed TypeScript domain type on valid input.
 10. Throw `new Error(...)` on invalid input — do not return a fallback or a default value.
-11. Use the canonical error message format: `` `Invalid {name} value: ${value}` ``.
+11. Use the canonical error message format: `` `Invalid {name} value: ${value}` ``; for a failing field of a structure, `Invalid {name} value: {field} is {problem}`.
 12. Use the camelCase canonical property name in the error message.
 13. Include the actual received value in the error message.
-14. Define a validator for every publicly writable state or data property with a finite value domain.
-15. Do not define validators in `Validate` for readonly state that is only internally mutated.
+14. Define a validator for every value that enters the component from outside: a writable state or data item, and an operation parameter the operation uses itself.
+15. Do not define validators in `Validate` for readonly values that only the component sets.
 16. Do not define validators in `Validate` for internally generated values.
-17. Invoke validators inside the public setter — the authoritative mutation path — not in gesture handlers or operations.
-18. Call the validator as the second step of the mutation path: after normalization, before the guard.
+17. Validate a value once, where it first lands: in the setter, or in an operation that uses the parameter itself — never in an attribute handler or a gesture handler.
+18. In a setter, call the validator as the second step of the mutation path: after normalization, before the guard.
 19. Replace the raw input with the narrowed return value of the validator for the remainder of the mutation path.
 20. Ensure that if validation throws, mutation does not proceed.

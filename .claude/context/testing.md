@@ -122,7 +122,7 @@ Configuration constants such as `CSS` are realized through composition (the styl
 
 Policy for `<component>.validation.test.ts`:
 
-- one `validation(...)` suite per attribute-backed state, in the order the keys appear in `Attributes`
+- one `validation(...)` suite per validator, in the order the validators are declared in `Validate`
 
 Policy for `<component>.test.ts`:
 
@@ -146,6 +146,7 @@ Policy:
 - each suite must verify the constant is defined
 - for enum-shaped constants, each suite must additionally verify the constant is of runtime type `"object"`, and that every declared key is defined
 - key assertions use `expect(Constant.KEY).toBeDefined()` — not value equality
+- the `State`, `Operation`, and `Event` suites must each record the names that override one every HTML element already has: `Object.values(Constant).filter((name) => name in HTMLElement.prototype)` equals the list of deliberate overrides, which is empty when there are none
 - value equality belongs to the validation layer, not the metadata layer
 
 ## 5.1) Scalar Constants Use the Flat Pattern
@@ -200,7 +201,7 @@ For every validator declared in `<component>.validation.ts`, the `<component>.va
 
 Policy:
 
-- every validator must have a `validation(...)` suite keyed to the corresponding state name (e.g. `State.VISIBILITY`)
+- every validator must have a `validation(...)` suite keyed to the name of what it validates (e.g. `State.VISIBILITY`)
 - the outermost block under the typed wrapper is `given("Validate imported", ...)`
 - each suite must verify the validator method is defined on the `Validate` class
 - each suite must test every valid domain value independently in its own `and(...)` block:
@@ -488,9 +489,12 @@ Policy — required for all state:
 
 Policy — required for attribute-backed state:
 
-- setting a valid value via the setter must sync the DOM attribute via `setAttribute`
+- setting a valid value via the setter must be reflected in the DOM attribute
 - setting the DOM attribute via `setAttribute` must drive the getter (`attributeChangedCallback` path)
+- setting the DOM attribute to an invalid value must leave the getter unchanged, restore the attribute to the state, and report the error with the exact message
 - for compulsory attribute-backed state, the attribute default must be verified — both that the attribute exists and that it carries the default value
+- for compulsory attribute-backed state, removing the attribute must restore it to the state
+- for optional attribute-backed state, setting the attribute to the default must remove it
 
 Policy — required when the setter normalizes `null` to a default:
 
@@ -501,6 +505,12 @@ Policy for invalid value tests:
 - the invalid assignment must be wrapped in a `try/catch` inside `beforeEach`
 - the `Error` is captured and asserted in a `then` block
 - the assignment must be annotated with `// @ts-expect-error` to suppress the type error
+
+Policy for invalid attribute tests:
+
+- an invalid attribute value cannot throw to the test: the browser reports the error, and a reported error fails the spec unless it is spied on
+- the attribute change must run inside `jasmine.spyOnGlobalErrorsAsync` in an `async` `beforeEach`
+- the reported `Error` is taken from the spy's most recent call and asserted in a `then` block
 
 Example (optional attribute-backed):
 
@@ -615,6 +625,36 @@ and("`status` attribute exists", () => {
 });
 ```
 
+Example (invalid attribute value — attribute restored, error reported):
+
+```typescript
+when("`status` attribute is set to `invalid`", () => {
+  let error: Error;
+  beforeEach(async () => {
+    await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+      pin.setAttribute(Attributes.STATUS, "invalid");
+      error = reported.calls.mostRecent()?.args[0];
+    });
+  });
+
+  then("`status` attribute is `Status.UNPINNED`", () => {
+    expect(pin.getAttribute(Attributes.STATUS)).toBe(Status.UNPINNED);
+  });
+
+  then("`pin.status` is `Status.UNPINNED`", () => {
+    expect(pin.status).toBe(Status.UNPINNED);
+  });
+
+  then("an error is reported", () => {
+    expect(error).toBeDefined();
+  });
+
+  then("error message contains 'Invalid status value: invalid'", () => {
+    expect(error.message).toBe("Invalid status value: invalid");
+  });
+});
+```
+
 # 10) Operation Tests Must Verify Existence and Behavioral Outcome
 
 For every operation declared in the specification, the `<component>.test.ts` must verify the method exists and produces the state outcome declared in the specification.
@@ -622,7 +662,8 @@ For every operation declared in the specification, the `<component>.test.ts` mus
 Policy:
 
 - the operation must be verified as defined on the component instance using `expect(pin.{operation}).toBeDefined()`
-- calling the operation must produce the state outcome declared in the specification's `returns` contract
+- calling the operation must produce the outcome declared in the specification's `description`
+- the value the operation returns must match the specification's `returns` contract: for `void`, the result is `undefined`
 - the outcome is verified by reading the relevant state getter after calling the operation
 - when an operation is only semantically meaningful from a specific prior state (e.g., `show` requires the component to already be `hidden`), that precondition must be established in `beforeEach` before the operation is called
 - when an operation produces a bidirectional outcome (e.g., `toggle`), both directions must be verified — each direction in its own sibling `and(...)` block establishing the prior state, with the operation invoked in a nested `when("invoking ...")` block
@@ -704,6 +745,8 @@ Policy:
 - the event setter must be verified using `hasSetter(pin, Event.ON_{NAME})`
 - listener replacement must be verified: when a second listener replaces the first, only the second listener must be called when the event fires — the first must not be called
 - the event payload must match the structure declared in the specification's `parameters`
+- a rejected handler must be verified: assigning a value that is not a function must throw with the exact message `Invalid {event} value: {value}`, and the previous listener must still be called when the event fires
+- no event for a repeated value must be verified: assigning a state the value it already has must not call the listener again
 - spies must be created with `jasmine.createSpy`
 - the payload is asserted via `jasmine.objectContaining({ detail: { ... } })` passed to `toHaveBeenCalledWith`
 - for events that fire on a state transition requiring a prior state, the prior state must be established in `beforeEach` before listeners are assigned, so that assigning the listener does not capture the unrelated transition that established the prior state
@@ -801,12 +844,15 @@ For every behavioral gesture declared in the specification, the `<component>.tes
 
 Policy:
 
-- the DOM event is triggered directly on the realized element via `.click()` or the equivalent native method
+- the DOM event is triggered directly on the realized element via `.click()` or the equivalent native method; a keyboard gesture is triggered by dispatching a `KeyboardEvent` with the key from metadata
+- every trigger of a gesture must be verified: each target, and each condition
+- for a gesture with a condition, an input that does not meet the condition must be verified to change nothing
 - the element is located by selector (e.g., `pin.root.querySelector(".icon")`) — this verifies that the gesture wiring depends on the realized composition, not on a cached reference name
 - the state outcome of the triggered operation must be verified via the getter
 - the event dispatched as a consequence of the state change must be verified as having been called
 - for gestures that trigger a bidirectional toggle, both directions must be verified in sequence: a second interaction block nested inside the first restores the prior state and confirms the reverse outcome
 - visual gestures declared with `effects` are realized entirely in CSS — they do not require JavaScript assertions in the test suite
+- when a gesture needs an element to be focusable, the composition suite must verify the template attributes that make it so, such as `tabindex` and `role`
 
 Example:
 

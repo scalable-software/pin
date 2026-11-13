@@ -22,7 +22,7 @@ When applying this policy to a new component, classify each rule before reconcil
 
 Each component specification must declare its gesture contract under `Gestures`.
 
-`Gestures` must be an object whose property names are the canonical gesture names.
+`Gestures` must be an object whose property names are the canonical gesture names. A behavioral gesture is named after the browser event it listens for, such as `click` or `keydown`.
 
 Each gesture definition must include:
 
@@ -44,17 +44,43 @@ Interpretation:
 - gestures declare interaction input, not semantic outcome
 - every gesture definition must include exactly one of `triggers` or `effects`
 
-The `effects` object declares the CSS properties affected by the visual gesture and the interaction condition. The CSS implementation is the authoritative source for per-element specifics — the spec declares the interaction intent and the set of affected properties.
+`triggers` is a list. Each trigger names one place the gesture is listened for and the operation it leads to:
+
+- `target` — the composition part the listener is attached to, by its composition name, such as `div.icon`
+- `operation` — the operation the handler calls
+- `condition` — optional; what must also hold for the gesture to count, such as `key is Enter`
+
+A gesture that is listened for in several places has one trigger for each.
+
+The `effects` object declares the composition part the visual gesture applies to and the CSS properties it affects. The CSS implementation is the authoritative source for per-element specifics — the spec declares the interaction intent and the set of affected properties.
 
 Example behavioral gesture specification:
 
 ```json
 "click": {
-  "description": "Toggle pin button when icon clicked.",
-  "triggers": {
-    "operation": "toggle",
-    "condition": "on element.icon"
-  }
+  "description": "User clicks the icon to toggle the pin status.",
+  "triggers": [
+    { "target": "div.icon", "operation": "toggle" }
+  ]
+},
+"keydown": {
+  "description": "User presses Enter on the focused icon to toggle the pin status.",
+  "triggers": [
+    { "target": "div.icon", "condition": "key is Enter", "operation": "toggle" }
+  ]
+}
+```
+
+Example with one gesture on several targets:
+
+```json
+"click": {
+  "description": "User clicks one of the title's buttons.",
+  "triggers": [
+    { "target": "button.edit", "operation": "edit" },
+    { "target": "button.save", "operation": "save" },
+    { "target": "button.cancel", "operation": "cancel" }
+  ]
 }
 ```
 
@@ -62,10 +88,10 @@ Example visual gesture specification:
 
 ```json
 "hover": {
-  "description": "Change button appearance when hovered over the icon.",
+  "description": "Changes the button appearance when hovered.",
   "effects": {
     "properties": ["background-color", "border-color", "box-shadow", "fill"],
-    "condition": "on element.icon"
+    "target": "div.icon"
   }
 }
 ```
@@ -106,7 +132,7 @@ Examples that must not be modeled as gestures:
 - `visibility`
 - `status`
 
-A component may support both behavioral and visual interaction responses, but each declared gesture remains a single interaction input with a single declared implementation role.
+A gesture may come from a pointer or from the keyboard. Two gestures may lead to the same operation: in `Pin`, `click` and `keydown` both call `toggle`.
 
 # 3) Gestures Must Be Classified by Implementation Role
 
@@ -121,12 +147,11 @@ This classification determines whether the gesture participates in runtime imple
 
 Behavioral gestures are interaction inputs that trigger runtime behavior.
 
-A behavioral gesture may:
+A behavioral gesture:
 
-- invoke a declared public operation
-- delegate through an authoritative mutation path when no public operation exists for the behavior
-- indirectly produce accepted state transitions
-- indirectly cause semantic event emission
+- calls an operation, through its handler
+- indirectly produces accepted state transitions
+- indirectly causes semantic event emission
 
 Examples:
 
@@ -172,9 +197,11 @@ For every behavioral gesture declared in the specification, the implementation m
 
 Policy:
 
-- every declared behavioral gesture must have a key in `Gesture`
+- every declared behavioral gesture must have a key in `Gesture`, once, however many triggers it has
+- the value is the name of the browser event the listener is registered for
 - `Gesture` contains only behavioral gestures that participate in runtime listener wiring
 - visual gestures must not be declared in `Gesture` when they are implemented purely through CSS
+- a value a condition tests against, such as a key, is declared in metadata too — never as a loose string in the handler
 - the implementation must use gesture metadata consistently as the canonical runtime gesture vocabulary
 
 Example pattern:
@@ -182,9 +209,16 @@ Example pattern:
 ```typescript
 export const Gesture = {
   CLICK: "click",
+  KEYDOWN: "keydown",
 } as const;
 
 export type Gesture = (typeof Gesture)[keyof typeof Gesture];
+
+export const Key = {
+  ENTER: "Enter",
+} as const;
+
+export type Key = (typeof Key)[keyof typeof Key];
 ```
 
 This gives the implementation a stable, centralized gesture vocabulary that prevents string duplication and keeps listener wiring consistent across metadata and component runtime implementation.
@@ -204,6 +238,7 @@ Policy:
 
 - behavioral gesture listeners must be attached in `_addEventListeners`
 - behavioral gesture listeners must be removed in `_removeEventListeners`
+- every trigger has one listener: one line in each of the two methods
 - listener lifecycle must be reversible
 - listener wiring must not be scattered across unrelated lifecycle or helper methods
 - visual gestures implemented only through CSS must not participate in this runtime listener lifecycle
@@ -211,11 +246,15 @@ Policy:
 Example:
 
 ```typescript
-protected _addEventListeners = () =>
-  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+protected _addEventListeners = () => {
+  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.addEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
 
-protected _removeEventListeners = () =>
-  this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+protected _removeEventListeners = () => {
+  this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.removeEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
 ```
 
 # 6) Runtime Gesture Listeners Must Target Explicit DOM References
@@ -230,7 +269,7 @@ Policy:
 - listener targets should be obtained during the component's caching phase
 - runtime listener wiring must use cached references rather than repeated selector queries
 - listener wiring must not depend on ad hoc selector lookup at the point of attachment
-- the specification target described by the gesture contract must be traceable to the implementation target reference
+- the `target` of a trigger is a composition part declared with `cached: true`, and the listener is attached to that part's cached reference
 
 Example:
 
@@ -241,22 +280,42 @@ protected _cache = () => {
   this.elements.icon = this.root.querySelector(".icon");
 };
 
-protected _addEventListeners = () =>
-  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+protected _addEventListeners = () => {
+  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+};
 ```
 
 This keeps gesture wiring stable, explicit, and resilient to template complexity while preserving a predictable mapping from specification target to implementation target.
 
-# 7) Runtime Gestures Must Route Through Dedicated Handlers
+## 6.1) The Target of a Keyboard Gesture Must Be Focusable
 
-Each behavioral gesture listener must delegate to a dedicated handler method on the component class.
-
-The handler defines the component's immediate response entry for that gesture.
+A key press goes to the element that has focus. A keyboard gesture on an element that cannot take focus can never fire.
 
 Policy:
 
-- every behavioral gesture listener must call a dedicated handler
-- the handler must be a component method with a name that predictably reflects the gesture, such as `_handleClick`
+- the target of a keyboard gesture must be focusable
+- an element that is not focusable by itself, such as a `div`, is made focusable in the template with `tabindex="0"`
+- such an element also declares its `role` in the template, so that assistive technology announces what it is
+- an element the user can click should also be operable by keyboard
+
+Example:
+
+```html
+<div class="icon" tabindex="0" role="button">
+```
+
+# 7) Runtime Gestures Must Route Through Dedicated Handlers
+
+Each trigger's listener must delegate to a dedicated handler on the component class.
+
+The handler defines the component's immediate response entry for that gesture on that target.
+
+Policy:
+
+- every trigger must have a dedicated handler
+- the handler is named `_handle{Target}{Gesture}`, such as `_handleIconClick` and `_handleIconKeydown`
+- a listener must be given the handler, never an operation: the browser passes its event to whatever is registered
+- the event stops at the handler: the handler takes what it needs from the event and applies the trigger's condition
 - handler methods must remain small and focused on gesture routing intent
 - listener wiring must not inline gesture behavior directly inside `_addEventListeners`
 - visual gestures implemented only through CSS do not require handler methods
@@ -264,34 +323,29 @@ Policy:
 Example:
 
 ```typescript
-protected _addEventListeners = () =>
-  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+private _handleIconClick = () => this.toggle();
 
-private _handleClick = () => this.toggle();
+private _handleIconKeydown = (event: KeyboardEvent) =>
+  event.key === Key.ENTER && this.toggle();
 ```
 
-This keeps listener wiring declarative, preserves readable separation between attachment and behavior routing, and gives each behavioral gesture a clear implementation entry point.
+The click handler has nothing to decide. The keydown handler reads the key, applies the condition, and only then calls the operation.
 
-# 8) Behavioral Gestures Must Route Through the Canonical Behavior Entry
+# 8) A Handler Must Call an Operation
 
-When a behavioral gesture triggers behavior that is declared as a public operation, the gesture handler must invoke that operation.
-
-If the behavior is not declared as a public operation, the gesture handler must delegate through the authoritative mutation path of the relevant construct.
+A handler contains no behavior of its own. It calls the operation its trigger names.
 
 Policy:
 
-- if a behavior is declared in `Operations`, behavioral gesture handlers must invoke that operation
-- gesture handlers must not reimplement declared public action logic inline
-- if no public operation exists for the behavior, the handler must use the authoritative mutation path of the affected construct
-- gesture handlers remain the interaction entry point, not the authoritative owner of mutation logic, transition acceptance, or semantic event emission
+- a handler must call an operation
+- when the behavior is offered to the outside, the handler calls that public operation
+- when the behavior is only ever reached through the gesture, the handler calls a private operation
+- a private operation is a real operation: it is pass-through or rich, and changes state only through setters (see the operation policy)
+- a private operation is named with a leading underscore, and is not declared under `Operations` in the specification, in `Operation` metadata, or in `Meta`
+- a handler must not change state itself and must not dispatch events
+- an operation never receives the browser's event: the handler passes plain values
 
-Example:
-
-```typescript
-private _handleClick = () => this.toggle();
-```
-
-Preferred flow when the behavior is declared as an operation:
+Preferred flow:
 
 ```text
 gesture
@@ -300,14 +354,14 @@ handler
   ↓
 operation
   ↓
-construct mutation
+setter
   ↓
 accepted outcome
   ↓
 event dispatch
 ```
 
-In this example, the click handler does not implement toggle behavior itself. It delegates to `toggle()`, keeping the operation layer as the single reusable action entry for both runtime interaction and imperative use.
+In `Pin`, the click handler does not implement toggle behavior itself. It delegates to `toggle()`, keeping the operation layer as the single reusable action entry for both runtime interaction and imperative use.
 
 # 9) Visual Gestures Should Prefer CSS
 
@@ -322,31 +376,37 @@ Policy:
 - CSS-implemented visual gestures must not require `_addEventListeners` or `_removeEventListeners`
 - CSS-implemented visual gestures must not require dedicated runtime handler methods
 - visual gesture implementation should remain traceable to the declared specification target and effect
+- a visual gesture is not covered by a test: a test cannot hover
 
 Example specification:
 
 ```json
 "hover": {
-  "description": "Change button appearance when hovered over the icon.",
+  "description": "Changes the button appearance when hovered.",
   "effects": {
     "properties": ["background-color", "border-color", "box-shadow", "fill"],
-    "condition": "on element.icon"
+    "target": "div.icon"
   }
 }
 ```
 
-Example implementation:
+Example implementation, from `pin.style.css`:
 
 ```css
 @media (hover: hover) {
-  .icon:hover {
-    background-color: var(--button-hover-background-color);
-    border-color: var(--button-border-hover-color);
-    box-shadow: var(--button-shadow-hover);
-  }
-
   .icon:hover svg {
     fill: var(--svg-hover-fill-color);
+  }
+
+  :host([status="unpinned"]) .icon:hover {
+    background-color: var(--button-unpinned-hover-background-color);
+    border-color: var(--button-hover-border-color);
+    box-shadow: var(--button-hover-shadow);
+  }
+  :host([status="pinned"]) .icon:hover {
+    background-color: var(--button-pinned-hover-background-color);
+    border-color: var(--button-hover-border-color);
+    box-shadow: var(--button-hover-shadow);
   }
 }
 ```
@@ -367,23 +427,7 @@ Policy:
 - if an interaction requires runtime behavior, that behavior must be declared and implemented as a behavioral gesture
 - visual feedback and behavioral response must remain separately modeled unless the specification explicitly declares both concerns
 
-Example:
-
-```css
-@media (hover: hover) {
-  .icon:hover {
-    background-color: var(--button-hover-background-color);
-    border-color: var(--button-border-hover-color);
-    box-shadow: var(--button-shadow-hover);
-  }
-
-  .icon:hover svg {
-    fill: var(--svg-hover-fill-color);
-  }
-}
-```
-
-In this example, `hover` changes appearance only. It does not call `toggle()`, change `status`, or emit `onpin`.
+In `Pin`, `hover` changes appearance only. It does not call `toggle()`, change `status`, or emit `onpin`. The hover rules read the `status` attribute to choose their colours, but they never change it.
 
 # Policy Applied to Specification
 
@@ -394,16 +438,19 @@ Specification fragment:
   "Gestures": {
     "click": {
       "description": "User clicks the icon to toggle the pin status.",
-      "triggers": {
-        "operation": "toggle",
-        "condition": "on element.icon"
-      }
+      "triggers": [{ "target": "div.icon", "operation": "toggle" }]
+    },
+    "keydown": {
+      "description": "User presses Enter on the focused icon to toggle the pin status.",
+      "triggers": [
+        { "target": "div.icon", "condition": "key is Enter", "operation": "toggle" }
+      ]
     },
     "hover": {
       "description": "Changes the button appearance when hovered.",
       "effects": {
         "properties": ["background-color", "border-color", "box-shadow", "fill"],
-        "condition": "on element.icon"
+        "target": "div.icon"
       }
     }
   }
@@ -413,12 +460,18 @@ Specification fragment:
 How this specification is implemented:
 
 - `click`
-    - behavioral gesture
+    - behavioral gesture with one trigger
     - declared in runtime gesture metadata as `Gesture.CLICK`
     - wired through the runtime listener lifecycle in `_addEventListeners` and `_removeEventListeners`
     - attached to the cached DOM reference `elements.icon`
-    - routed through the dedicated handler `_handleClick`
+    - routed through the dedicated handler `_handleIconClick`
     - delegated to the declared public operation `toggle()`
+- `keydown`
+    - behavioral gesture with one trigger and a condition
+    - declared in runtime gesture metadata as `Gesture.KEYDOWN`; the key is declared as `Key.ENTER`
+    - attached to the same cached DOM reference `elements.icon`, which the template makes focusable
+    - routed through the dedicated handler `_handleIconKeydown`, which applies the condition
+    - delegated to the same public operation `toggle()`
 - `hover`
     - visual gesture
     - not declared in runtime gesture metadata — implemented purely through CSS
@@ -428,43 +481,47 @@ How this specification is implemented:
 
 Implementation:
 
+```html
+<div class="icon" tabindex="0" role="button">
+```
+
 ```typescript
 export const Gesture = {
   CLICK: "click",
+  KEYDOWN: "keydown",
 } as const;
 
-protected _addEventListeners = () =>
-  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+export const Key = {
+  ENTER: "Enter",
+} as const;
 
-protected _removeEventListeners = () =>
-  this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+protected _addEventListeners = () => {
+  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.addEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
 
-private _handleClick = () => this.toggle();
-```
+protected _removeEventListeners = () => {
+  this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.removeEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
 
-```css
-@media (hover: hover) {
-  .icon:hover {
-    background-color: var(--button-hover-background-color);
-    border-color: var(--button-border-hover-color);
-    box-shadow: var(--button-shadow-hover);
-  }
+private _handleIconClick = () => this.toggle();
 
-  .icon:hover svg {
-    fill: var(--svg-hover-fill-color);
-  }
-}
+private _handleIconKeydown = (event: KeyboardEvent) =>
+  event.key === Key.ENTER && this.toggle();
 ```
 
 How the implementation applies the policy:
 
 - the specification declares the interaction contract under `Gestures`
 - behavioral and visual gestures are classified by specification shape (`triggers` vs `effects`)
+- every trigger names its target by its composition name and the operation it leads to
 - behavioral gestures become part of the canonical runtime `Gesture` vocabulary
 - behavioral gesture listeners are attached and removed through the centralized listener lifecycle
 - behavioral listeners target explicit cached DOM references
-- behavioral listeners route through dedicated handlers
-- handlers delegate to the canonical behavior entry — the declared public operation when one exists
+- the target of the keyboard gesture is focusable
+- every trigger routes through its own dedicated handler, and the event stops there
+- handlers call an operation and nothing else
 - visual gestures that affect presentation only are implemented in CSS
 - the `effects` spec declares the full set of affected CSS properties; per-element specifics are implementation detail owned by CSS
 - CSS-implemented visual gestures do not participate in runtime metadata, listener wiring, handler methods, state mutation, or event dispatch
@@ -477,19 +534,19 @@ A compliant component must:
 2. Define each gesture using the required specification contract.
 3. Classify every declared gesture as either behavioral (`triggers`) or visual (`effects`).
 4. Ensure every gesture definition includes exactly one of `triggers` or `effects`.
-5. Ensure the gesture classification matches the declared specification shape.
-6. Define every declared behavioral gesture in `<component>.meta.ts` as part of the canonical runtime `Gesture` vocabulary.
+5. Declare `triggers` as a list with one trigger for each target, each naming its `target` and `operation`, and its `condition` when there is one.
+6. Define every declared behavioral gesture in `<component>.meta.ts` as part of the canonical runtime `Gesture` vocabulary, and every value a condition tests against, such as a key.
 7. Avoid declaring CSS-only visual gestures in runtime gesture metadata.
 8. Attach behavioral gesture listeners in `_addEventListeners`.
 9. Remove behavioral gesture listeners in `_removeEventListeners`.
 10. Keep runtime gesture listener lifecycle centralized and reversible.
 11. Target explicit component-owned DOM references for behavioral gesture listeners.
 12. Obtain listener targets through the component caching path and reuse cached references during wiring.
-13. Route every behavioral gesture through a dedicated handler method.
-14. Keep dedicated handler methods small and focused on gesture routing intent.
-15. Invoke the declared public operation when the behavioral gesture maps to behavior declared in `Operations`.
-16. Avoid reimplementing declared public action logic inline in gesture handlers.
-17. When no public operation exists for the behavior, delegate through the authoritative mutation path of the affected construct.
+13. Make the target of a keyboard gesture focusable, in the template, and declare its role.
+14. Route every trigger through its own dedicated handler, named `_handle{Target}{Gesture}`.
+15. Keep the browser's event in the handler: apply the condition there and pass plain values on.
+16. Call an operation from every handler: the public one when the behavior is offered to the outside, a private one otherwise.
+17. Never change state or dispatch an event from a handler.
 18. Implement presentation-only visual gestures in CSS.
 19. Keep CSS-implemented visual gestures out of runtime listener wiring.
 20. Ensure CSS-implemented visual gestures do not invoke operations, mutate component state, or dispatch component events.
@@ -512,7 +569,7 @@ JSON Schema:
   "propertyNames": {
     "type": "string",
     "pattern": "^[a-z][a-zA-Z0-9]*$",
-    "description": "Canonical gesture name in lowerCamelCase, for example: click, hover, focus, keydown."
+    "description": "Canonical gesture name in lowerCamelCase, for example: click, hover, focus, keydown. A behavioral gesture is named after the browser event it listens for."
   },
   "additionalProperties": {
     "type": "object",
@@ -526,28 +583,36 @@ JSON Schema:
         "description": "Human-readable description of the interaction input represented by the gesture."
       },
       "triggers": {
-        "type": "object",
-        "description": "Behavioral gesture contract. Presence of this object means the gesture triggers runtime behavior.",
-        "required": ["condition"],
-        "minProperties": 1,
-        "additionalProperties": false,
-        "properties": {
-          "operation": {
-            "type": "string",
-            "pattern": "^[a-z][a-zA-Z0-9]*$",
-            "description": "Canonical operation name triggered by this gesture, for example: toggle, pin, hide."
-          },
-          "condition": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Human-readable interaction target and condition, for example: on element.icon."
+        "type": "array",
+        "description": "Behavioral gesture contract. Presence of this list means the gesture triggers runtime behavior. One trigger for each target the gesture is listened for on.",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["target", "operation"],
+          "additionalProperties": false,
+          "properties": {
+            "target": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Composition name of the part the listener is attached to, for example: div.icon, button.save."
+            },
+            "operation": {
+              "type": "string",
+              "pattern": "^_?[a-z][a-zA-Z0-9]*$",
+              "description": "Name of the operation the handler calls, for example: toggle, save. A leading underscore marks a private operation."
+            },
+            "condition": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What must also hold for the gesture to count, for example: key is Enter."
+            }
           }
         }
       },
       "effects": {
         "type": "object",
         "description": "Visual gesture contract. Presence of this object means the gesture affects presentation only. The properties array declares the full set of affected CSS properties across all targeted elements — per-element specifics are implementation detail owned by the CSS file.",
-        "required": ["properties", "condition"],
+        "required": ["properties", "target"],
         "additionalProperties": false,
         "properties": {
           "properties": {
@@ -559,10 +624,10 @@ JSON Schema:
               "minLength": 1
             }
           },
-          "condition": {
+          "target": {
             "type": "string",
             "minLength": 1,
-            "description": "Human-readable interaction target and condition, for example: on element.icon."
+            "description": "Composition name of the part the gesture applies to, for example: div.icon."
           }
         }
       }
@@ -592,10 +657,22 @@ Example JSON:
   "Gestures": {
     "click": {
       "description": "User clicks the icon to toggle the pin status.",
-      "triggers": {
-        "operation": "toggle",
-        "condition": "on element.icon"
-      }
+      "triggers": [
+        {
+          "target": "div.icon",
+          "operation": "toggle"
+        }
+      ]
+    },
+    "keydown": {
+      "description": "User presses Enter on the focused icon to toggle the pin status.",
+      "triggers": [
+        {
+          "target": "div.icon",
+          "condition": "key is Enter",
+          "operation": "toggle"
+        }
+      ]
     },
     "hover": {
       "description": "Changes the button appearance when hovered.",
@@ -606,7 +683,7 @@ Example JSON:
           "box-shadow",
           "fill"
         ],
-        "condition": "on element.icon"
+        "target": "div.icon"
       }
     }
   }

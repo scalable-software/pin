@@ -10,7 +10,8 @@ import {
   Status,
   Operation,
   Event,
-  Gesture
+  Gesture,
+  Key
 } from "@scalable.software/pin";
 
 // Configuration
@@ -122,6 +123,14 @@ composition(Composition.TEMPLATE, () => {
             then("`div.icon` contains `svg.pinned`", () => {
               const svg = div.querySelector("svg.pinned");
               expect(svg).not.toBeNull();
+            });
+
+            then("`div.icon` has `tabindex` `0`", () => {
+              expect(div.getAttribute("tabindex")).toBe("0");
+            });
+
+            then("`div.icon` has `role` `button`", () => {
+              expect(div.getAttribute("role")).toBe("button");
             });
           });
         });
@@ -290,6 +299,64 @@ state(State.VISIBILITY, () => {
             });
           });
 
+          when("`visibility` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.VISIBILITY, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`visibility` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+            });
+
+            then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+              expect(pin.visibility).toBe(Visibility.VISIBLE);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid visibility value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid visibility value: invalid");
+              }
+            );
+          });
+
+          when("`visibility` attribute is set to `Visibility.VISIBLE`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.VISIBILITY, Visibility.VISIBLE);
+            });
+
+            then("`visibility` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+            });
+          });
+
+          and("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+
+            when("`visibility` attribute is set to `invalid`", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.setAttribute(Attributes.VISIBILITY, "invalid");
+                });
+              });
+
+              then("`visibility` attribute is `Visibility.HIDDEN`", () => {
+                const value = pin.getAttribute(Attributes.VISIBILITY);
+                expect(value).toBe(Visibility.HIDDEN);
+              });
+            });
+          });
+
           when("`pin.visibility` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
@@ -377,6 +444,55 @@ state(State.STATUS, () => {
               expect(pin.status).toBe(Status.PINNED);
             });
           });
+
+          when("`status` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.STATUS, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`status` attribute is `Status.UNPINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.UNPINNED);
+            });
+
+            then("`pin.status` is `Status.UNPINNED`", () => {
+              expect(pin.status).toBe(Status.UNPINNED);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid status value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid status value: invalid");
+              }
+            );
+          });
+
+          and("`pin.status` is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            when("`status` attribute is removed", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.removeAttribute(Attributes.STATUS);
+                });
+              });
+
+              then("`status` attribute is `Status.PINNED`", () => {
+                const value = pin.getAttribute(Attributes.STATUS);
+                expect(value).toBe(Status.PINNED);
+              });
+            });
+          });
         });
 
         then("`pin.status` setter exists", () => {
@@ -409,6 +525,23 @@ state(State.STATUS, () => {
               }
             );
           });
+        });
+      });
+
+      and("a new pin with `status` attribute `invalid` is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(async () => {
+          await jasmine.spyOnGlobalErrorsAsync(async () => {
+            pin = add<Pin>(Pin.Tag, { [Attributes.STATUS]: "invalid" });
+          });
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`status` attribute is `Status.UNPINNED`", () => {
+          const value = pin.getAttribute(Attributes.STATUS);
+          expect(value).toBe(Status.UNPINNED);
         });
       });
     });
@@ -445,12 +578,17 @@ operation(Operation.HIDE, () => {
 
         and("`pin.hide` method exists", () => {
           when("invoking `pin.hide`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.hide();
+              result = pin.hide();
             });
 
             then("`pin.visibility` is `Visibility.HIDDEN`", () => {
               expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+
+            then("`pin.hide` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
@@ -496,12 +634,17 @@ operation(Operation.SHOW, () => {
             });
 
             when("invoking `pin.show`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.show();
+                result = pin.show();
               });
 
               then("`pin.visibility` is `Visibility.VISIBLE`", () => {
                 expect(pin.visibility).toBe(Visibility.VISIBLE);
+              });
+
+              then("`pin.show` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
@@ -540,12 +683,17 @@ operation(Operation.PIN, () => {
 
         and("`pin.pin` method exists", () => {
           when("invoking `pin.pin`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.pin();
+              result = pin.pin();
             });
 
             then("`pin.status` is `Status.PINNED`", () => {
               expect(pin.status).toBe(Status.PINNED);
+            });
+
+            then("`pin.pin` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
@@ -591,12 +739,17 @@ operation(Operation.UNPIN, () => {
             });
 
             when("invoking `pin.unpin`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.unpin();
+                result = pin.unpin();
               });
 
               then("`pin.status` is `Status.UNPINNED`", () => {
                 expect(pin.status).toBe(Status.UNPINNED);
+              });
+
+              then("`pin.unpin` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
@@ -643,12 +796,17 @@ operation(Operation.TOGGLE, () => {
             });
 
             when("invoking `pin.toggle`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.toggle();
+                result = pin.toggle();
               });
 
               then("`pin.status` is `Status.PINNED`", () => {
                 expect(pin.status).toBe(Status.PINNED);
+              });
+
+              then("`pin.toggle` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
@@ -714,6 +872,53 @@ events(Event.ON_HIDE, () => {
             });
             afterEach(() => {
               pin.onhide = null;
+            });
+
+            when("`pin.onhide` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onhide = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onhide value: invalid'", () => {
+                expect(error.message).toBe("Invalid onhide value: invalid");
+              });
+
+              when("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.HIDDEN;
+                });
+                afterEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("`pin.onhide` is still called", () => {
+                  expect(onhide).toHaveBeenCalled();
+                });
+              });
+            });
+
+            when("`pin.visibility` is set to `Visibility.HIDDEN` twice", () => {
+              beforeEach(() => {
+                pin.visibility = Visibility.HIDDEN;
+                pin.visibility = Visibility.HIDDEN;
+              });
+              afterEach(() => {
+                pin.visibility = Visibility.VISIBLE;
+              });
+
+              then("`pin.onhide` is called once", () => {
+                expect(onhide).toHaveBeenCalledTimes(1);
+              });
             });
 
             and("`pin.onhide` is set to a new listener", () => {
@@ -808,6 +1013,39 @@ events(Event.ON_SHOW, () => {
                 pin.onshow = null;
               });
 
+              when("`pin.onshow` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onshow = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onshow value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onshow value: invalid");
+                });
+
+                when("`pin.visibility` is set to `Visibility.VISIBLE`", () => {
+                  beforeEach(() => {
+                    pin.visibility = Visibility.VISIBLE;
+                  });
+                  afterEach(() => {
+                    pin.visibility = Visibility.HIDDEN;
+                  });
+
+                  then("`pin.onshow` is still called", () => {
+                    expect(onshow).toHaveBeenCalled();
+                  });
+                });
+              });
+
               and("`pin.onshow` is set to a new listener", () => {
                 let onshow2: jasmine.Spy;
                 beforeEach(() => {
@@ -891,6 +1129,53 @@ events(Event.ON_PIN, () => {
             });
             afterEach(() => {
               pin.onpin = null;
+            });
+
+            when("`pin.onpin` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onpin = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onpin value: invalid'", () => {
+                expect(error.message).toBe("Invalid onpin value: invalid");
+              });
+
+              when("`pin.status` is set to `Status.PINNED`", () => {
+                beforeEach(() => {
+                  pin.status = Status.PINNED;
+                });
+                afterEach(() => {
+                  pin.status = Status.UNPINNED;
+                });
+
+                then("`pin.onpin` is still called", () => {
+                  expect(onpin).toHaveBeenCalled();
+                });
+              });
+            });
+
+            when("`pin.status` is set to `Status.PINNED` twice", () => {
+              beforeEach(() => {
+                pin.status = Status.PINNED;
+                pin.status = Status.PINNED;
+              });
+              afterEach(() => {
+                pin.status = Status.UNPINNED;
+              });
+
+              then("`pin.onpin` is called once", () => {
+                expect(onpin).toHaveBeenCalledTimes(1);
+              });
             });
 
             and("`pin.onpin` is set to a new listener", () => {
@@ -983,6 +1268,39 @@ events(Event.ON_UNPIN, () => {
               });
               afterEach(() => {
                 pin.onunpin = null;
+              });
+
+              when("`pin.onunpin` is set to `invalid`", () => {
+                let error: Error;
+                beforeEach(() => {
+                  try {
+                    // @ts-expect-error
+                    pin.onunpin = "invalid";
+                  } catch (err) {
+                    error = err as Error;
+                  }
+                });
+
+                then("an error is thrown", () => {
+                  expect(error).toBeDefined();
+                });
+
+                then("error message contains 'Invalid onunpin value: invalid'", () => {
+                  expect(error.message).toBe("Invalid onunpin value: invalid");
+                });
+
+                when("`pin.status` is set to `Status.UNPINNED`", () => {
+                  beforeEach(() => {
+                    pin.status = Status.UNPINNED;
+                  });
+                  afterEach(() => {
+                    pin.status = Status.PINNED;
+                  });
+
+                  then("`pin.onunpin` is still called", () => {
+                    expect(onunpin).toHaveBeenCalled();
+                  });
+                });
               });
 
               and("`pin.onunpin` is set to a new listener", () => {
@@ -1087,6 +1405,82 @@ gesture(Gesture.CLICK, () => {
             then("`onunpin` is called", () => {
               expect(onunpin).toHaveBeenCalled();
             });
+          });
+        });
+      });
+    });
+  });
+});
+
+gesture(Gesture.KEYDOWN, () => {
+  and("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        when("user presses `Key.ENTER` on `div` with class `icon`", () => {
+          let onpin: jasmine.Spy;
+          beforeEach(() => {
+            onpin = jasmine.createSpy("onpin");
+            pin.onpin = onpin;
+            const icon = pin.root.querySelector(".icon") as HTMLElement;
+            icon.dispatchEvent(
+              new KeyboardEvent(Gesture.KEYDOWN, { key: Key.ENTER })
+            );
+          });
+
+          then("`pin.status` is `Status.PINNED`", () => {
+            expect(pin.status).toEqual(Status.PINNED);
+          });
+          then("`onpin` is called", () => {
+            expect(onpin).toHaveBeenCalled();
+          });
+
+          and("user presses `Key.ENTER` on `div` with class `icon`", () => {
+            let onunpin: jasmine.Spy;
+            beforeEach(() => {
+              onunpin = jasmine.createSpy("onunpin");
+              pin.onunpin = onunpin;
+              const icon = pin.root.querySelector(".icon") as HTMLElement;
+              icon.dispatchEvent(
+                new KeyboardEvent(Gesture.KEYDOWN, { key: Key.ENTER })
+              );
+            });
+
+            then("`pin.status` is `Status.UNPINNED`", () => {
+              expect(pin.status).toEqual(Status.UNPINNED);
+            });
+            then("`onunpin` is called", () => {
+              expect(onunpin).toHaveBeenCalled();
+            });
+          });
+        });
+
+        when("user presses another key on `div` with class `icon`", () => {
+          beforeEach(() => {
+            const icon = pin.root.querySelector(".icon") as HTMLElement;
+            icon.dispatchEvent(new KeyboardEvent(Gesture.KEYDOWN, { key: "a" }));
+          });
+
+          then("`pin.status` is `Status.UNPINNED`", () => {
+            expect(pin.status).toEqual(Status.UNPINNED);
           });
         });
       });

@@ -136,7 +136,7 @@ Lifecycle methods are implemented in the base class and extended by the **Pin** 
   2. Clones the HTML template into the Shadow Root.
   3. Inserts a `<link>` for scoped CSS.
   4. Initialises default state attributes.
-  5. Sets up event listeners (e.g., click on the icon).
+  5. Sets up event listeners: a click and the Enter key on the icon.
 
 - **`disconnectedCallback()`**
   - Removes event listeners and cleans up cached element references.
@@ -178,15 +178,25 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    public get visibility() {
      return this._visibility;
    }
-   public set visibility(visibility: Visibility) {
-     visibility = visibility ?? Visibility.VISIBLE;
-     visibility = Validate.visibility(visibility);
-     if (this._visibility === visibility) return;
-     this._visibility = visibility;
-     visibility === Visibility.VISIBLE &&
-       this.removeAttribute(Attributes.VISIBILITY);
-     visibility === Visibility.HIDDEN &&
-       this.setAttribute(Attributes.VISIBILITY, visibility);
+   public set visibility(visibility: Visibility | null) {
+     try {
+       // Normalize
+       visibility = visibility ?? Visibility.VISIBLE;
+       // Validate
+       visibility = Validate.visibility(visibility);
+       // Guard
+       if (this._visibility === visibility) return;
+       // Mutate
+       this._visibility = visibility;
+     } finally {
+       // Reflect
+       this._reflect(
+         Attributes.VISIBILITY,
+         this._visibility,
+         Visibility.VISIBLE
+       );
+     }
+     // Dispatch
      const detail = { visibility };
      visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
      visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
@@ -196,7 +206,8 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    - Normalises `null` to the default before validation.
    - Validates the incoming value and throws on invalid input.
    - Guards against no-op mutations with an early return.
-   - Keeps `_visibility` in sync with `[visibility="hidden"]` in the DOM and dispatches the corresponding event on every accepted transition.
+   - Always makes the `visibility` attribute show the state, also after a rejected or ignored value, so an invalid attribute never stays in the DOM.
+   - Dispatches the corresponding event on every accepted transition.
 
 #### 4.1.3 Lifecycle & Attribute Handlers
 
@@ -225,9 +236,10 @@ The **Pin** component's imperative API manipulates state, which in turn updates 
 #### 4.2.2 Example
 
 ```typescript
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 ---
@@ -363,8 +375,8 @@ Alternatively, reference the package from a CDN:
 ## 6. Best Practices & Extensibility
 
 1. **Descriptive Naming** — `pinned/unpinned` is domain-friendly for toggles.
-2. **Accessibility** — Consider ARIA attributes and keyboard interactions to make `<pin-button>` fully accessible.
-3. **Testing** — Simulate user clicks to confirm correct state transitions and event dispatch.
+2. **Accessibility** — The icon can be reached with the Tab key and toggled with Enter. It does not yet announce its pinned state to assistive technology; consider `aria-pressed` for that.
+3. **Testing** — Simulate user clicks and key presses to confirm correct state transitions and event dispatch.
 4. **Documentation** — Provide real usage snippets (like the Quick Start above) for developer onboarding.
 5. **Publishing** — Use semantic versioning to manage features and breaking changes; employ CI/CD for automated build, test, and publish.
 

@@ -164,10 +164,22 @@
   "Gestures": {
     "click": {
       "description": "User clicks the icon to toggle the pin status.",
-      "triggers": {
-        "operation": "toggle",
-        "condition": "on element.icon"
-      }
+      "triggers": [
+        {
+          "target": "div.icon",
+          "operation": "toggle"
+        }
+      ]
+    },
+    "keydown": {
+      "description": "User presses Enter on the focused icon to toggle the pin status.",
+      "triggers": [
+        {
+          "target": "div.icon",
+          "condition": "key is Enter",
+          "operation": "toggle"
+        }
+      ]
     },
     "hover": {
       "description": "Changes the button appearance when hovered.",
@@ -178,7 +190,7 @@
           "box-shadow",
           "fill"
         ],
-        "condition": "on element.icon"
+        "target": "div.icon"
       }
     }
   }

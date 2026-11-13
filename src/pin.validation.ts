@@ -13,7 +13,7 @@ export class Validate {
    * Throws if the value is not a recognized visibility state.
    * @category Validation
    */
-  public static visibility = (value: string) => {
+  public static visibility = (value: unknown) => {
     const valid = Object.values(Visibility).includes(value as Visibility);
     if (!valid) {
       throw new Error(`Invalid visibility value: ${value}`);
@@ -26,7 +26,7 @@ export class Validate {
    * Throws if the value is not a recognized status state.
    * @category Validation
    */
-  public static status = (value: string) => {
+  public static status = (value: unknown) => {
     const valid = Object.values(Status).includes(value as Status);
     if (!valid) {
       throw new Error(`Invalid status value: ${value}`);

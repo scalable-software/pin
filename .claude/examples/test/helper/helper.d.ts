@@ -23,6 +23,7 @@ declare const Metadata: {
   OPERATION: string;
   EVENT: string;
   GESTURE: string;
+  KEY: string;
 };
 
 declare const Configuration: {
