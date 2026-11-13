@@ -216,9 +216,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onunpin(handler: EventListener | null) {
-    this._onunpin && this.removeEventListener(Event.ON_UNPIN, this._onunpin);
-    this._onunpin = handler;
-    this._onunpin && this.addEventListener(Event.ON_UNPIN, this._onunpin);
+    this._onunpin = this._subscribe(Event.ON_UNPIN, this._onunpin, handler);
   }
 
   /**
