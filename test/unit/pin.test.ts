@@ -636,6 +636,20 @@ state(State.APPEARANCE, () => {
             });
           });
 
+          when("`appearance` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.APPEARANCE, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`appearance` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+            });
+          });
+
           when("`pin.appearance` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
