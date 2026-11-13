@@ -575,6 +575,16 @@ state(State.APPEARANCE, () => {
         then("`pin.appearance` getter exists", () => {
           expect(pin.appearance).toBeDefined();
         });
+
+        when("`pin.appearance` getter exists", () => {
+          then("`pin.appearance` is `Appearance.FLOATING`", () => {
+            expect(pin.appearance).toBe(Appearance.FLOATING);
+          });
+        });
+
+        then("`appearance` attribute does not exist", () => {
+          expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+        });
       });
     });
   });
