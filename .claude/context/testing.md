@@ -488,9 +488,12 @@ Policy — required for all state:
 
 Policy — required for attribute-backed state:
 
-- setting a valid value via the setter must sync the DOM attribute via `setAttribute`
+- setting a valid value via the setter must be reflected in the DOM attribute
 - setting the DOM attribute via `setAttribute` must drive the getter (`attributeChangedCallback` path)
+- setting the DOM attribute to an invalid value must leave the getter unchanged, restore the attribute to the state, and report the error with the exact message
 - for compulsory attribute-backed state, the attribute default must be verified — both that the attribute exists and that it carries the default value
+- for compulsory attribute-backed state, removing the attribute must restore it to the state
+- for optional attribute-backed state, setting the attribute to the default must remove it
 
 Policy — required when the setter normalizes `null` to a default:
 
@@ -501,6 +504,12 @@ Policy for invalid value tests:
 - the invalid assignment must be wrapped in a `try/catch` inside `beforeEach`
 - the `Error` is captured and asserted in a `then` block
 - the assignment must be annotated with `// @ts-expect-error` to suppress the type error
+
+Policy for invalid attribute tests:
+
+- an invalid attribute value cannot throw to the test: the browser reports the error, and a reported error fails the spec unless it is spied on
+- the attribute change must run inside `jasmine.spyOnGlobalErrorsAsync` in an `async` `beforeEach`
+- the reported `Error` is taken from the spy's most recent call and asserted in a `then` block
 
 Example (optional attribute-backed):
 
@@ -611,6 +620,36 @@ and("`status` attribute exists", () => {
     then("`pin.status` is `Status.PINNED`", () => {
       expect(pin.status).toBe(Status.PINNED);
     });
+  });
+});
+```
+
+Example (invalid attribute value — attribute restored, error reported):
+
+```typescript
+when("`status` attribute is set to `invalid`", () => {
+  let error: Error;
+  beforeEach(async () => {
+    await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+      pin.setAttribute(Attributes.STATUS, "invalid");
+      error = reported.calls.mostRecent()?.args[0];
+    });
+  });
+
+  then("`status` attribute is `Status.UNPINNED`", () => {
+    expect(pin.getAttribute(Attributes.STATUS)).toBe(Status.UNPINNED);
+  });
+
+  then("`pin.status` is `Status.UNPINNED`", () => {
+    expect(pin.status).toBe(Status.UNPINNED);
+  });
+
+  then("an error is reported", () => {
+    expect(error).toBeDefined();
+  });
+
+  then("error message contains 'Invalid status value: invalid'", () => {
+    expect(error.message).toBe("Invalid status value: invalid");
   });
 });
 ```
