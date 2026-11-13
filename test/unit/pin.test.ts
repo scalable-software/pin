@@ -865,6 +865,20 @@ events(Event.ON_HIDE, () => {
               pin.onhide = null;
             });
 
+            when("`pin.visibility` is set to `Visibility.HIDDEN` twice", () => {
+              beforeEach(() => {
+                pin.visibility = Visibility.HIDDEN;
+                pin.visibility = Visibility.HIDDEN;
+              });
+              afterEach(() => {
+                pin.visibility = Visibility.VISIBLE;
+              });
+
+              then("`pin.onhide` is called once", () => {
+                expect(onhide).toHaveBeenCalledTimes(1);
+              });
+            });
+
             and("`pin.onhide` is set to a new listener", () => {
               let onhide2: jasmine.Spy;
               beforeEach(() => {
