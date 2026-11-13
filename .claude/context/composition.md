@@ -211,14 +211,15 @@ Example metadata and configuration pattern:
 
 ```typescript
 export const Tag = "pin-button" as const;
+export const CSS = "pin.style.css" as const;
 
-export const configuration = {
+export const configuration: Configuration = {
   url: import.meta.url,
   template: {
     id: Tag,
   },
   css: {
-    name: "pin.style.css",
+    name: CSS,
   },
 } as const;
 ```
@@ -534,13 +535,13 @@ constructor() {
 Example configuration:
 
 ```typescript
-export const configuration = {
+export const configuration: Configuration = {
   url: import.meta.url,
   template: {
     id: Tag,
   },
   css: {
-    name: "pin.style.css",
+    name: CSS,
   },
 } as const;
 ```
@@ -669,14 +670,15 @@ Implementation:
 
 ```typescript
 export const Tag = "pin-button" as const;
+export const CSS = "pin.style.css" as const;
 
-export const configuration = {
+export const configuration: Configuration = {
   url: import.meta.url,
   template: {
     id: Tag,
   },
   css: {
-    name: "pin.style.css",
+    name: CSS,
   },
 } as const;
 
