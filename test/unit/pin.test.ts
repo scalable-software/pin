@@ -599,6 +599,11 @@ state(State.APPEARANCE, () => {
             then("`pin.appearance` is `Appearance.FLAT`", () => {
               expect(pin.appearance).toBe(Appearance.FLAT);
             });
+
+            then("pin `appearance` attribute is `Appearance.FLAT`", () => {
+              const value = pin.getAttribute(Attributes.APPEARANCE);
+              expect(value).toBe(Appearance.FLAT);
+            });
           });
 
           when("`pin.appearance` is set to `null`", () => {
