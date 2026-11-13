@@ -585,6 +585,10 @@ state(State.APPEARANCE, () => {
         then("`appearance` attribute does not exist", () => {
           expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
         });
+
+        then("`pin.appearance` setter exists", () => {
+          expect(hasSetter(pin, "appearance")).toBeTrue();
+        });
       });
     });
   });
