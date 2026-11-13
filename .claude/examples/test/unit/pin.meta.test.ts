@@ -6,7 +6,8 @@ import {
   Status,
   Operation,
   Event,
-  Gesture
+  Gesture,
+  Key
 } from "@scalable.software/pin";
 
 // Tag
@@ -222,6 +223,31 @@ metadata(Metadata.GESTURE, () => {
       when("Gesture is an object", () => {
         then("`Gesture.CLICK` exists", () => {
           expect(Gesture.CLICK).toBeDefined();
+        });
+
+        then("`Gesture.KEYDOWN` exists", () => {
+          expect(Gesture.KEYDOWN).toBeDefined();
+        });
+      });
+    });
+  });
+});
+
+// Key
+metadata(Metadata.KEY, () => {
+  and("Key imported", () => {
+    then("Key is defined", () => {
+      expect(Key).toBeDefined();
+    });
+
+    and("Key is defined", () => {
+      then("Key is an object", () => {
+        expect(typeof Key).toBe("object");
+      });
+
+      when("Key is an object", () => {
+        then("`Key.ENTER` exists", () => {
+          expect(Key.ENTER).toBeDefined();
         });
       });
     });

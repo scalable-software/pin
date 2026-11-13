@@ -14,7 +14,8 @@ import {
   Visibility,
   Status,
   Event,
-  Gesture
+  Gesture,
+  Key
 } from "./pin.meta.js";
 
 import { type Meta } from "./pin.meta.js";
@@ -295,7 +296,11 @@ export class Pin extends Component implements Meta {
    * @hidden
    */
   protected _addEventListeners = () => {
-    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleClick);
+    this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+    this.elements.icon?.addEventListener(
+      Gesture.KEYDOWN,
+      this._handleIconKeydown
+    );
   };
 
   /**
@@ -304,13 +309,25 @@ export class Pin extends Component implements Meta {
    * @hidden
    */
   protected _removeEventListeners = () => {
-    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleClick);
+    this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleIconClick);
+    this.elements.icon?.removeEventListener(
+      Gesture.KEYDOWN,
+      this._handleIconKeydown
+    );
   };
 
   /**
-   * Handles the click event
+   * Handles a click on the icon: toggles the pin
    * @category Gesture
    * @hidden
    */
-  private _handleClick = (event: MouseEvent | TouchEvent) => this.toggle();
+  private _handleIconClick = () => this.toggle();
+
+  /**
+   * Handles a key pressed on the icon: Enter toggles the pin
+   * @category Gesture
+   * @hidden
+   */
+  private _handleIconKeydown = (event: KeyboardEvent) =>
+    event.key === Key.ENTER && this.toggle();
 }

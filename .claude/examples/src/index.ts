@@ -7,7 +7,8 @@ export {
   Status,
   Operation,
   Event,
-  Gesture
+  Gesture,
+  Key
 } from "./pin.meta.js";
 
 export { Validate } from "./pin.validation.js";

@@ -109,12 +109,26 @@ export type Event = (typeof Event)[keyof typeof Event];
  * @enum
  */
 export const Gesture = {
-  CLICK: "click"
+  CLICK: "click",
+  KEYDOWN: "keydown"
 } as const;
 /**
  * @category Metadata
  */
 export type Gesture = (typeof Gesture)[keyof typeof Gesture];
+
+/**
+ * Keys a keyboard gesture responds to
+ * @category Metadata
+ * @enum
+ */
+export const Key = {
+  ENTER: "Enter"
+} as const;
+/**
+ * @category Metadata
+ */
+export type Key = (typeof Key)[keyof typeof Key];
 
 /**
  * Every state the component must have
