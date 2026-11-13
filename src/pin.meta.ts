@@ -118,6 +118,19 @@ export const Gesture = {
 export type Gesture = (typeof Gesture)[keyof typeof Gesture];
 
 /**
+ * Keys a keyboard gesture responds to
+ * @category Metadata
+ * @enum
+ */
+export const Key = {
+  ENTER: "Enter"
+} as const;
+/**
+ * @category Metadata
+ */
+export type Key = (typeof Key)[keyof typeof Key];
+
+/**
  * Every state the component must have
  * @category Metadata
  */
