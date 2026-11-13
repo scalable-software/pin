@@ -969,3 +969,190 @@ how, under "How the component is held to its list".
 | Where Dispatch sits in a setter | `.claude/context/state.md`, Section 7 |
 | Which tests an event needs | `.claude/context/testing.md`, Section 11 |
 | The pin's events | `specifications/pin.specifications.json`, `src/pin.ts` |
+
+---
+
+## Gestures
+
+### What a gesture is
+
+A gesture is **something a user does to the component**: a click, a key press, moving the
+pointer over it.
+
+The pin has three:
+
+| Gesture | What the user does | What happens |
+|---|---|---|
+| `click` | clicks the icon | the pin toggles |
+| `keydown` | presses Enter while the icon has focus | the pin toggles |
+| `hover` | moves the pointer over the icon | the icon changes colour |
+
+A gesture is an input. It is not the same as an event, which is an outcome: `click` is
+what the user did, `onpin` is what it led to.
+
+### Two kinds of gesture
+
+**Behavioural gestures** make the component do something. `click` and `keydown` are
+behavioural. They are written in the component, in TypeScript.
+
+**Visual gestures** only change how the component looks. `hover` is visual. It is written
+in the stylesheet, and the component's code knows nothing about it.
+
+The specification shows which is which. A behavioural gesture has `triggers`; a visual one
+has `effects`:
+
+```json
+"click": {
+  "description": "User clicks the icon to toggle the pin status.",
+  "triggers": [{ "target": "div.icon", "operation": "toggle" }]
+},
+"hover": {
+  "description": "Changes the button appearance when hovered.",
+  "effects": {
+    "properties": ["background-color", "border-color", "box-shadow", "fill"],
+    "target": "div.icon"
+  }
+}
+```
+
+### What a trigger says
+
+`triggers` is a list. Each trigger answers three questions:
+
+| Field | Question | In the pin |
+|---|---|---|
+| `target` | Which part of the component is listened on? | `div.icon` |
+| `operation` | Which operation does it lead to? | `toggle` |
+| `condition` | What else must be true? Optional. | `key is Enter` |
+
+It is a list because one gesture can be listened for in several places. A component with
+three buttons has one `click` gesture with three triggers, one for each button.
+
+### The chain from gesture to event
+
+Every behavioural gesture goes through the same four steps:
+
+```text
+gesture  →  handler  →  operation  →  setter
+```
+
+1. The browser notices the gesture and calls the component's **handler**.
+2. The handler calls an **operation**.
+3. The operation assigns to a state, which runs its **setter**.
+4. The setter changes the state, updates the attribute and sends the event.
+
+So a click is not special. It ends in exactly the same code as `pin.toggle()` called from a
+program. That is why a click and a method call always behave the same.
+
+### Listening: attach and detach
+
+The component starts listening when it is added to the page and stops when it is removed.
+There is one line in each method for every trigger:
+
+```typescript
+protected _addEventListeners = () => {
+  this.elements.icon?.addEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.addEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
+
+protected _removeEventListeners = () => {
+  this.elements.icon?.removeEventListener(Gesture.CLICK, this._handleIconClick);
+  this.elements.icon?.removeEventListener(Gesture.KEYDOWN, this._handleIconKeydown);
+};
+```
+
+Three things to notice:
+
+- **The names come from the metadata.** `Gesture.CLICK`, not `"click"`.
+- **The target is a cached element.** `this.elements.icon` is the part the composition
+  declares as `div.icon`.
+- **Whatever is added is removed.** The two methods mirror each other line for line.
+
+### The handler
+
+Each trigger has its own handler, named after its target and its gesture:
+
+```typescript
+private _handleIconClick = () => this.toggle();
+
+private _handleIconKeydown = (event: KeyboardEvent) =>
+  event.key === Key.ENTER && this.toggle();
+```
+
+A handler has one job: turn what the browser gives it into a call to an operation.
+
+- The click handler has nothing to decide, so it just calls `toggle()`.
+- The keydown handler has a condition. Every key press arrives here, so it looks at which
+  key it was and only calls `toggle()` for Enter.
+
+Two rules keep handlers small:
+
+- **The event stops at the handler.** The handler takes what it needs from the browser's
+  event. The operation never sees the event.
+- **A handler always calls an operation.** It never changes a state itself and never sends
+  an event. If the behaviour is not something the outside should be able to call, the
+  handler calls a private operation, named with an underscore, such as `_change`.
+
+### Why the listener gets a handler, not the operation
+
+It would be shorter to write `addEventListener(Gesture.CLICK, this.toggle)`. Do not. The
+browser passes its event to whatever you register, so the operation would receive an event
+as its first argument. For `toggle`, which takes nothing, that happens to be harmless. For
+an operation that takes a value, it would be a bug.
+
+### Keyboard gestures need focus
+
+A key press goes to the element that has focus. A user moves focus with the Tab key, and
+Tab only stops at elements that can take focus. A `div` cannot, unless the template says
+so:
+
+```html
+<div class="icon" tabindex="0" role="button">
+```
+
+- `tabindex="0"` puts the icon in the Tab order, so a keyboard user can reach it.
+- `role="button"` tells a screen reader that it is something to activate.
+
+Without `tabindex`, the `keydown` gesture would be declared, wired and tested, and no user
+could ever trigger it. Whenever something can be clicked, ask how a keyboard user gets to
+it.
+
+### Visual gestures
+
+`hover` needs no code in the component. The stylesheet does it:
+
+```css
+@media (hover: hover) {
+  :host([status="unpinned"]) .icon:hover {
+    background-color: var(--button-unpinned-hover-background-color);
+    border-color: var(--button-hover-border-color);
+    box-shadow: var(--button-hover-shadow);
+  }
+}
+```
+
+The rule reads the `status` attribute to pick its colours, which works because the setter
+keeps that attribute showing the state. But it only reads. A visual gesture never changes a
+state, calls an operation or sends an event.
+
+Visual gestures are not tested, because a test cannot hover.
+
+### Mistakes to avoid
+
+- **Registering an operation as the listener.** Register the handler.
+- **Doing the work in the handler.** The handler calls an operation.
+- **Changing a state or sending an event from a handler.** The setter does both.
+- **Writing `"click"` or `"Enter"` as a string.** Use `Gesture.CLICK` and `Key.ENTER`.
+- **Adding a listener without removing it.** Every trigger has a line in both methods.
+- **A keyboard gesture on something that cannot take focus.** Add `tabindex="0"`.
+- **Making a visual gesture do something.** If it needs behaviour, it is a behavioural
+  gesture and belongs in the specification as one.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for gestures | `.claude/context/gesture.md` |
+| Which operation a handler may call | `.claude/context/operation.md`, Section 12 |
+| Which tests a gesture needs | `.claude/context/testing.md`, Section 12 |
+| The pin's gestures | `specifications/pin.specifications.json`, `src/pin.ts`, `src/pin.style.css` |
