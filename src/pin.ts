@@ -153,13 +153,15 @@ export class Pin extends Component {
     return this._status;
   }
   public set status(status: Status) {
-    status = Validate.status(status);
+    try {
+      status = Validate.status(status);
 
-    if (this._status === status) return;
+      if (this._status === status) return;
 
-    this._status = status;
-
-    this.setAttribute(Attributes.STATUS, status);
+      this._status = status;
+    } finally {
+      this._reflect(Attributes.STATUS, this._status);
+    }
 
     const detail = { status };
 
@@ -272,6 +274,14 @@ export class Pin extends Component {
     !this.hasAttribute(Attributes.STATUS) &&
       this.setAttribute(Attributes.STATUS, this._status);
   };
+
+  /**
+   * Makes the attribute show the state
+   * @category Configuration
+   * @hidden
+   */
+  protected _reflect = (name: string, state: string) =>
+    this.getAttribute(name) !== state && this.setAttribute(name, state);
 
   /**
    * Called by the connectedCallback prototypical method
