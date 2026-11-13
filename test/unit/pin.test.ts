@@ -625,12 +625,17 @@ operation(Operation.SHOW, () => {
             });
 
             when("invoking `pin.show`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.show();
+                result = pin.show();
               });
 
               then("`pin.visibility` is `Visibility.VISIBLE`", () => {
                 expect(pin.visibility).toBe(Visibility.VISIBLE);
+              });
+
+              then("`pin.show` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
