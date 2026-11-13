@@ -8,6 +8,7 @@ import {
   State,
   Visibility,
   Status,
+  Appearance,
   Operation,
   Event,
   Gesture,
@@ -542,6 +543,37 @@ state(State.STATUS, () => {
         then("`status` attribute is `Status.UNPINNED`", () => {
           const value = pin.getAttribute(Attributes.STATUS);
           expect(value).toBe(Status.UNPINNED);
+        });
+      });
+    });
+  });
+});
+
+state(State.APPEARANCE, () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("a HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.appearance` getter exists", () => {
+          expect(pin.appearance).toBeDefined();
         });
       });
     });
