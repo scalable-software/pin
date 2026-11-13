@@ -274,8 +274,7 @@ export class Pin extends Component {
    * @hidden
    */
   protected _initialize = () => {
-    !this.hasAttribute(Attributes.STATUS) &&
-      this.setAttribute(Attributes.STATUS, this._status);
+    this._reflect(Attributes.STATUS, this._status);
   };
 
   /**
