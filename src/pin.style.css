@@ -155,4 +155,8 @@ svg {
     border-color: var(--button-hover-border-color);
     box-shadow: var(--button-hover-shadow);
   }
+  :host([appearance="flat"]) .icon:hover {
+    border-color: transparent;
+    box-shadow: none;
+  }
 }
