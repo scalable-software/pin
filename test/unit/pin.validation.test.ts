@@ -262,6 +262,39 @@ validation(State.APPEARANCE, () => {
           });
         });
       });
+
+      and("`value` is `invalid`", () => {
+        let value: any;
+        beforeEach(() => {
+          value = "invalid";
+        });
+        when("`Validate.appearance(value)` is called", () => {
+          let error: unknown | undefined;
+          let result;
+          beforeEach(() => {
+            try {
+              result = Validate.appearance(value);
+            } catch (err) {
+              error = err;
+            }
+          });
+
+          then("an error is thrown", () => {
+            expect(error).not.toBeUndefined();
+          });
+
+          and("an error is thrown", () => {
+            then(
+              "error message contains 'Invalid appearance value: invalid'",
+              () => {
+                expect((error as Error).message).toEqual(
+                  "Invalid appearance value: invalid"
+                );
+              }
+            );
+          });
+        });
+      });
     });
   });
 });
