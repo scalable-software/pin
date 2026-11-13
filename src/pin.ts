@@ -189,9 +189,7 @@ export class Pin extends Component implements Meta {
    * @category Events
    */
   public set onhide(handler: EventListener | null) {
-    this._onhide && this.removeEventListener(Event.ON_HIDE, this._onhide);
-    this._onhide = handler;
-    this._onhide && this.addEventListener(Event.ON_HIDE, this._onhide);
+    this._onhide = this._subscribe(Event.ON_HIDE, this._onhide, handler);
   }
 
   /**
