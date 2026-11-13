@@ -201,6 +201,9 @@ export class Pin extends Component implements Meta {
     return this._appearance;
   }
   public set appearance(appearance: Appearance | null) {
+    // Validate
+    appearance = Validate.appearance(appearance);
+
     // Mutate
     this._appearance = appearance;
   }
