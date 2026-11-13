@@ -775,3 +775,197 @@ for the tests to show.
 | When an operation validates | `.claude/context/validation.md`, Section 10 |
 | Which tests an operation needs | `.claude/context/testing.md`, Section 10 |
 | The pin's operations | `src/pin.ts` |
+
+---
+
+## Events
+
+### What an event is
+
+An event is **the component telling the outside that something happened**.
+
+The pin sends four:
+
+| Event | Sent when | Detail |
+|---|---|---|
+| `onhide` | the pin becomes hidden | `{ visibility: "hidden" }` |
+| `onshow` | the pin becomes visible | `{ visibility: "visible" }` |
+| `onpin` | the pin becomes pinned | `{ status: "pinned" }` |
+| `onunpin` | the pin becomes unpinned | `{ status: "unpinned" }` |
+
+An event reports an outcome, not an action. `onpin` does not mean "someone clicked"; it
+means "the pin is now pinned", however that came about.
+
+### Why events exist
+
+The pin does not know what pinning is for. It only knows it was pinned. The application
+around it decides what that means, for example keeping a panel open. Events are how the
+component hands that moment over without knowing who is listening.
+
+This keeps the two sides apart. The component never calls into the application, and the
+application never reaches into the component to watch its state.
+
+### Listening to an event
+
+There are two ways.
+
+**Through the property**, for one handler:
+
+```typescript
+pin.onpin = (event) => console.log(event.detail.status);
+```
+
+**Through `addEventListener`**, for as many as you like:
+
+```typescript
+pin.addEventListener("onpin", (event) => console.log(event.detail.status));
+```
+
+Note the name in the second form. The event is called `onpin`, with the `on`. Listening
+for `"pin"` hears nothing.
+
+### The `on…` property holds one handler
+
+Assigning a handler replaces the one that was there. Assigning `null` removes it.
+
+```typescript
+pin.onpin = first;
+pin.onpin = second;   // first is gone; only second is called
+pin.onpin = null;     // nothing is called
+```
+
+The property is write-only. You can assign to it, but reading `pin.onpin` does not give
+the handler back.
+
+### What a handler receives
+
+The handler receives the event, and the event carries a `detail` object describing what
+happened. The specification declares what each event's detail contains.
+
+```typescript
+pin.onpin = (event) => {
+  event.detail.status;   // "pinned"
+};
+```
+
+Read the detail, not the component. If an earlier handler has already reacted, by
+unpinning again for instance, `pin.status` may have moved on by the time your handler
+runs. The detail still says what this event was about.
+
+### When an event is sent
+
+Sending the event is the sixth step of the setter, Dispatch, from the State section:
+
+```typescript
+  // Dispatch
+  const detail = { status };
+  status === Status.PINNED && this._dispatch(Event.ON_PIN, detail);
+  status === Status.UNPINNED && this._dispatch(Event.ON_UNPIN, detail);
+```
+
+It comes last, after the state has changed and the attribute shows it. So a handler always
+sees the component in its new condition.
+
+An event is only sent for a real change:
+
+| What happened | Event sent? |
+|---|---|
+| The state changed to a new value | yes |
+| The state was set to the value it already had | no |
+| The value was rejected | no |
+
+This is why `pin.pin()` called twice sends `onpin` once.
+
+Because the setter sends the event, it does not matter how the change came about. A
+property assignment, an attribute, an operation and a click all send the same event.
+
+A rich operation may send an event of its own, when the event is about the action and not
+about one state. The Operations section shows `save` doing that.
+
+### How the `on…` property is written
+
+Each event has a private field for its handler and a setter that goes through
+`_subscribe`, a method from the base component:
+
+```typescript
+private _onpin: EventListener | null = null;
+
+public set onpin(handler: EventListener | null) {
+  this._onpin = this._subscribe(Event.ON_PIN, this._onpin, handler);
+}
+```
+
+`_subscribe` checks the new handler, removes the old one, adds the new one, and returns
+what the field should now hold. The component never calls `addEventListener` or
+`removeEventListener` for its own events.
+
+A handler is a value coming in from outside, so it is checked like any other. Something
+that is not a function is rejected, and the handler that was there stays in place:
+
+```typescript
+pin.onpin = "text";   // throws: Invalid onpin value: text
+```
+
+### How an event behaves
+
+- **It stays on the component.** An event does not travel up to parent elements. You
+  listen on the pin itself, not on something around it.
+- **It cannot be cancelled.** An event reports something that has already happened.
+- **A failing handler does no damage.** If a handler throws, the browser reports the
+  error, the other handlers still run, and the state change stands.
+
+### One handler for everything: `onevent`
+
+Every component also has `onevent`, which receives every event the component sends:
+
+```typescript
+pin.onevent = (event) => console.log(event.type, event.detail);
+```
+
+It runs after the event's own handlers. It is meant for code that follows a component as a
+whole instead of picking out single events.
+
+### Two events every component sends
+
+The base component sends two events on every component, without the component declaring
+them:
+
+| Event | Sent when |
+|---|---|
+| `connected` | the component has been added to the page and set up |
+| `disconnected` | the component has been removed from the page |
+
+They have no `on…` property of their own. They reach `onevent` like any other event.
+
+### Naming an event
+
+An event name starts with `on` and says what happened: `onpin`, `onhide`.
+
+Name it after what it means in the business, even when the browser already uses that name
+on every element, as it does for `onchange` and `onload`. Be aware of what happens then: on
+your component the name means your event, not the browser's. That is allowed, but it must
+be a decision. A test in the metadata tests lists every state, operation and event name
+that overrides a browser name, so one cannot slip in by accident.
+
+And as with operations, the class is held to its list: every event named in the metadata
+must have its `on…` property, or the code does not build. The Operations section explains
+how, under "How the component is held to its list".
+
+### Mistakes to avoid
+
+- **Listening for `"pin"` instead of `"onpin"`.** The name includes the `on`.
+- **Reading the component instead of the detail.** The state may have changed again.
+- **Sending a state's event from an operation or a handler.** The setter sends it.
+- **Sending an event before the change is made.** Dispatch is the last step.
+- **Calling a handler directly instead of dispatching.** Go through `_dispatch`.
+- **Adding or removing the listener yourself in an `on…` setter.** Use `_subscribe`.
+- **Expecting a parent element to hear the event.** It stays on the component.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for events | `.claude/context/event.md` |
+| Where Dispatch sits in a setter | `.claude/context/state.md`, Section 7 |
+| Which tests an event needs | `.claude/context/testing.md`, Section 11 |
+| The pin's events | `specifications/pin.specifications.json`, `src/pin.ts` |
