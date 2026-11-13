@@ -8,6 +8,7 @@ import {
   State,
   Visibility,
   Status,
+  Appearance,
   Operation,
   Event,
   Gesture,
@@ -542,6 +543,163 @@ state(State.STATUS, () => {
         then("`status` attribute is `Status.UNPINNED`", () => {
           const value = pin.getAttribute(Attributes.STATUS);
           expect(value).toBe(Status.UNPINNED);
+        });
+      });
+    });
+  });
+});
+
+state(State.APPEARANCE, () => {
+  given("Pin is defined in custom element registry", () => {
+    beforeEach(() => {
+      define(Pin.Tag, Pin);
+    });
+
+    and("a HTML Template is added to DOM", () => {
+      beforeEach(async () => {
+        await Pin.Template.load("pin.template.html");
+      });
+      afterEach(() => {
+        remove(Pin.Tag);
+      });
+
+      and("a new pin is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(() => {
+          pin = add<Pin>(Pin.Tag);
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`pin.appearance` getter exists", () => {
+          expect(pin.appearance).toBeDefined();
+        });
+
+        when("`pin.appearance` getter exists", () => {
+          then("`pin.appearance` is `Appearance.FLOATING`", () => {
+            expect(pin.appearance).toBe(Appearance.FLOATING);
+          });
+        });
+
+        then("`appearance` attribute does not exist", () => {
+          expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+        });
+
+        then("`pin.appearance` setter exists", () => {
+          expect(hasSetter(pin, "appearance")).toBeTrue();
+        });
+
+        and("`pin.appearance` setter exists", () => {
+          when("`pin.appearance` is set to `Appearance.FLAT`", () => {
+            beforeEach(() => {
+              pin.appearance = Appearance.FLAT;
+            });
+
+            then("`pin.appearance` is `Appearance.FLAT`", () => {
+              expect(pin.appearance).toBe(Appearance.FLAT);
+            });
+
+            then("pin `appearance` attribute is `Appearance.FLAT`", () => {
+              const value = pin.getAttribute(Attributes.APPEARANCE);
+              expect(value).toBe(Appearance.FLAT);
+            });
+
+            when("`pin.appearance` is set to `Appearance.FLOATING`", () => {
+              beforeEach(() => {
+                pin.appearance = Appearance.FLOATING;
+              });
+
+              then("`appearance` attribute does not exist", () => {
+                expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+              });
+            });
+
+            when("`appearance` attribute is set to `invalid`", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.setAttribute(Attributes.APPEARANCE, "invalid");
+                });
+              });
+
+              then("`appearance` attribute is `Appearance.FLAT`", () => {
+                const value = pin.getAttribute(Attributes.APPEARANCE);
+                expect(value).toBe(Appearance.FLAT);
+              });
+            });
+          });
+
+          when("`pin.appearance` is set to `null`", () => {
+            beforeEach(() => {
+              pin.appearance = null;
+            });
+
+            then("`pin.appearance` is `Appearance.FLOATING`", () => {
+              expect(pin.appearance).toBe(Appearance.FLOATING);
+            });
+          });
+
+          when("`appearance` attribute is set to `Appearance.FLAT`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.APPEARANCE, Appearance.FLAT);
+            });
+
+            then("`pin.appearance` is `Appearance.FLAT`", () => {
+              expect(pin.appearance).toBe(Appearance.FLAT);
+            });
+          });
+
+          when("`appearance` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.APPEARANCE, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`appearance` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.APPEARANCE)).toBeFalse();
+            });
+
+            then("`pin.appearance` is `Appearance.FLOATING`", () => {
+              expect(pin.appearance).toBe(Appearance.FLOATING);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid appearance value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid appearance value: invalid");
+              }
+            );
+          });
+
+          when("`pin.appearance` is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(() => {
+              try {
+                // @ts-expect-error
+                pin.appearance = "invalid";
+              } catch (err) {
+                error = err as Error;
+              }
+            });
+
+            then("an error is thrown", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid appearance value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid appearance value: invalid");
+              }
+            );
+          });
         });
       });
     });

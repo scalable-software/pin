@@ -4,6 +4,7 @@ import {
   State,
   Visibility,
   Status,
+  Appearance,
   Operation,
   Event,
   Gesture,
@@ -39,6 +40,10 @@ metadata(Metadata.ATTRIBUTES, () => {
         then("`Attributes.STATUS` exists", () => {
           expect(Attributes.STATUS).toBeDefined();
         });
+
+        then("`Attributes.APPEARANCE` exists", () => {
+          expect(Attributes.APPEARANCE).toBeDefined();
+        });
       });
     });
   });
@@ -70,6 +75,10 @@ metadata(Metadata.STATE, () => {
 
         then("`State.STATUS` exists", () => {
           expect(State.STATUS).toBeDefined();
+        });
+
+        then("`State.APPEARANCE` exists", () => {
+          expect(State.APPEARANCE).toBeDefined();
         });
       });
     });
@@ -118,6 +127,30 @@ metadata(State.STATUS, () => {
 
         then("`Status.UNPINNED` exists", () => {
           expect(Status.UNPINNED).toBeDefined();
+        });
+      });
+    });
+  });
+});
+
+metadata(State.APPEARANCE, () => {
+  and("Appearance imported", () => {
+    then("Appearance is defined", () => {
+      expect(Appearance).toBeDefined();
+    });
+
+    and("Appearance is defined", () => {
+      then("Appearance is an object", () => {
+        expect(typeof Appearance).toBe("object");
+      });
+
+      when("Appearance is an object", () => {
+        then("`Appearance.FLOATING` exists", () => {
+          expect(Appearance.FLOATING).toBeDefined();
+        });
+
+        then("`Appearance.FLAT` exists", () => {
+          expect(Appearance.FLAT).toBeDefined();
         });
       });
     });
