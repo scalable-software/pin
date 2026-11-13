@@ -228,7 +228,9 @@ export class Pin extends Component {
    * Show the pin button when it is hidden
    * @category Operations
    */
-  public show = () => (this.visibility = Visibility.VISIBLE);
+  public show = () => {
+    this.visibility = Visibility.VISIBLE;
+  };
 
   /**
    * Pin the pin button when it is unpinned
