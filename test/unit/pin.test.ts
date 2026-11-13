@@ -1056,6 +1056,20 @@ events(Event.ON_PIN, () => {
               pin.onpin = null;
             });
 
+            when("`pin.status` is set to `Status.PINNED` twice", () => {
+              beforeEach(() => {
+                pin.status = Status.PINNED;
+                pin.status = Status.PINNED;
+              });
+              afterEach(() => {
+                pin.status = Status.UNPINNED;
+              });
+
+              then("`pin.onpin` is called once", () => {
+                expect(onpin).toHaveBeenCalledTimes(1);
+              });
+            });
+
             and("`pin.onpin` is set to a new listener", () => {
               let onpin2: jasmine.Spy;
               beforeEach(() => {
