@@ -267,7 +267,7 @@ protected _initialize = () => {
   The setter must manage both the state value and the presence of the attribute. Assigning the default removes the attribute. Because attribute absence corresponds to the default state, nullish incoming values must be normalized to the default before reflection. Assigning the default may remove the attribute.
 
 ```typescript
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   visibility = visibility ?? Visibility.VISIBLE;
 
   visibility = Validate.visibility(visibility);
@@ -305,7 +305,7 @@ Attribute-backed writable state has two entry styles:
 
 ```typescript
 protected _attributeHandlers = {
-  [Attributes.VISIBILITY]: (value: Visibility) => (this.visibility = value),
+  [Attributes.VISIBILITY]: (value: Visibility | null) => (this.visibility = value),
   [Attributes.STATUS]: (value: Status) => (this.status = value),
 };
 ```
@@ -332,7 +332,7 @@ Note: The normalization step for optional attribute-backed state handles a speci
 Optional attribute-backed example:
 
 ```typescript
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   // Normalize — ?? handles null passed by attributeChangedCallback on attribute removal
   visibility = visibility ?? Visibility.VISIBLE;
 
@@ -657,7 +657,7 @@ public get visibility(): Visibility {
   return this._visibility;
 }
 
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   visibility = visibility ?? Visibility.VISIBLE;
   visibility = Validate.visibility(visibility);
 
@@ -698,7 +698,7 @@ Declarative attribute wiring (`_attributeHandlers`):
 
 ```typescript
 protected _attributeHandlers = {
-  [Attributes.VISIBILITY]: (value: Visibility) => (this.visibility = value),
+  [Attributes.VISIBILITY]: (value: Visibility | null) => (this.visibility = value),
   [Attributes.STATUS]: (value: Status) => (this.status = value),
 };
 ```

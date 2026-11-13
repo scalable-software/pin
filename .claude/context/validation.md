@@ -222,7 +222,7 @@ The mutation order is defined authoritatively in the state policy. The validatio
 Example showing the validator's position in the mutation path:
 
 ```typescript
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   // Normalize
   visibility = visibility ?? Visibility.VISIBLE;
 
@@ -302,7 +302,7 @@ Invocation in `pin.ts`:
 
 ```typescript
 // visibility setter — optional attribute-backed, writable
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   visibility = visibility ?? Visibility.VISIBLE;  // Normalize
   visibility = Validate.visibility(visibility);   // Validate
   if (this._visibility === visibility) return;    // Guard

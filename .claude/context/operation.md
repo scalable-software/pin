@@ -279,7 +279,7 @@ Example:
 ```typescript
 public show = () => (this.visibility = Visibility.VISIBLE);
 
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   visibility = visibility ?? Visibility.VISIBLE;
   visibility = Validate.visibility(visibility);
 

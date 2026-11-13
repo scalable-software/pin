@@ -476,7 +476,7 @@ public set onunpin(handler: EventListener | null) {
 Dispatch from within the authoritative state setters:
 
 ```typescript
-public set visibility(visibility: Visibility) {
+public set visibility(visibility: Visibility | null) {
   visibility = visibility ?? Visibility.VISIBLE;
   visibility = Validate.visibility(visibility);
 
