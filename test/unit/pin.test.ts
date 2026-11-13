@@ -290,6 +290,18 @@ state(State.VISIBILITY, () => {
             });
           });
 
+          when("`visibility` attribute is set to `invalid`", () => {
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async () => {
+                pin.setAttribute(Attributes.VISIBILITY, "invalid");
+              });
+            });
+
+            then("`visibility` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+            });
+          });
+
           when("`pin.visibility` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
