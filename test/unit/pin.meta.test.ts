@@ -56,6 +56,13 @@ metadata(Metadata.STATE, () => {
       });
 
       when("State is an object", () => {
+        then("no state name is taken by the platform", () => {
+          const taken = Object.values(State).filter(
+            (name) => name in HTMLElement.prototype
+          );
+          expect(taken).toEqual([]);
+        });
+
         then("`State.VISIBILITY` exists", () => {
           expect(State.VISIBILITY).toBeDefined();
         });
@@ -129,6 +136,13 @@ metadata(Metadata.OPERATION, () => {
       });
 
       when("Operation is an object", () => {
+        then("no operation name is taken by the platform", () => {
+          const taken = Object.values(Operation).filter(
+            (name) => name in HTMLElement.prototype
+          );
+          expect(taken).toEqual([]);
+        });
+
         then("`Operation.HIDE` exists", () => {
           expect(Operation.HIDE).toBeDefined();
         });
@@ -166,6 +180,13 @@ metadata(Metadata.EVENT, () => {
       });
 
       when("Event is an object", () => {
+        then("no event name is taken by the platform", () => {
+          const taken = Object.values(Event).filter(
+            (name) => name in HTMLElement.prototype
+          );
+          expect(taken).toEqual([]);
+        });
+
         then("`Event.ON_HIDE` exists", () => {
           expect(Event.ON_HIDE).toBeDefined();
         });
