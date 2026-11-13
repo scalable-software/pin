@@ -236,7 +236,9 @@ export class Pin extends Component {
    * Pin the pin button when it is unpinned
    * @category Operations
    */
-  public pin = () => (this.status = Status.PINNED);
+  public pin = () => {
+    this.status = Status.PINNED;
+  };
 
   /**
    * Unpin the pin button when it is pinned
