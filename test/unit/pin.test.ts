@@ -589,6 +589,18 @@ state(State.APPEARANCE, () => {
         then("`pin.appearance` setter exists", () => {
           expect(hasSetter(pin, "appearance")).toBeTrue();
         });
+
+        and("`pin.appearance` setter exists", () => {
+          when("`pin.appearance` is set to `Appearance.FLAT`", () => {
+            beforeEach(() => {
+              pin.appearance = Appearance.FLAT;
+            });
+
+            then("`pin.appearance` is `Appearance.FLAT`", () => {
+              expect(pin.appearance).toBe(Appearance.FLAT);
+            });
+          });
+        });
       });
     });
   });
