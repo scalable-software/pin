@@ -201,21 +201,23 @@ export class Pin extends Component implements Meta {
     return this._appearance;
   }
   public set appearance(appearance: Appearance | null) {
-    // Normalize
-    appearance = appearance ?? Appearance.FLOATING;
+    try {
+      // Normalize
+      appearance = appearance ?? Appearance.FLOATING;
 
-    // Validate
-    appearance = Validate.appearance(appearance);
+      // Validate
+      appearance = Validate.appearance(appearance);
 
-    // Mutate
-    this._appearance = appearance;
-
-    // Reflect
-    this._reflect(
-      Attributes.APPEARANCE,
-      this._appearance,
-      Appearance.FLOATING
-    );
+      // Mutate
+      this._appearance = appearance;
+    } finally {
+      // Reflect
+      this._reflect(
+        Attributes.APPEARANCE,
+        this._appearance,
+        Appearance.FLOATING
+      );
+    }
   }
 
   /**
