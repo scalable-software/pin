@@ -1122,6 +1122,39 @@ events(Event.ON_PIN, () => {
               pin.onpin = null;
             });
 
+            when("`pin.onpin` is set to `invalid`", () => {
+              let error: Error;
+              beforeEach(() => {
+                try {
+                  // @ts-expect-error
+                  pin.onpin = "invalid";
+                } catch (err) {
+                  error = err as Error;
+                }
+              });
+
+              then("an error is thrown", () => {
+                expect(error).toBeDefined();
+              });
+
+              then("error message contains 'Invalid onpin value: invalid'", () => {
+                expect(error.message).toBe("Invalid onpin value: invalid");
+              });
+
+              when("`pin.status` is set to `Status.PINNED`", () => {
+                beforeEach(() => {
+                  pin.status = Status.PINNED;
+                });
+                afterEach(() => {
+                  pin.status = Status.UNPINNED;
+                });
+
+                then("`pin.onpin` is still called", () => {
+                  expect(onpin).toHaveBeenCalled();
+                });
+              });
+            });
+
             when("`pin.status` is set to `Status.PINNED` twice", () => {
               beforeEach(() => {
                 pin.status = Status.PINNED;
