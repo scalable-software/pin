@@ -682,7 +682,7 @@ export const configuration: Configuration = {
   },
 } as const;
 
-export class Pin extends Component {
+export class Pin extends Component implements Meta {
   protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
   public static Template = new Template(import.meta.url);

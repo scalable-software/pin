@@ -661,7 +661,8 @@ For every operation declared in the specification, the `<component>.test.ts` mus
 Policy:
 
 - the operation must be verified as defined on the component instance using `expect(pin.{operation}).toBeDefined()`
-- calling the operation must produce the state outcome declared in the specification's `returns` contract
+- calling the operation must produce the outcome declared in the specification's `description`
+- the value the operation returns must match the specification's `returns` contract: for `void`, the result is `undefined`
 - the outcome is verified by reading the relevant state getter after calling the operation
 - when an operation is only semantically meaningful from a specific prior state (e.g., `show` requires the component to already be `hidden`), that precondition must be established in `beforeEach` before the operation is called
 - when an operation produces a bidirectional outcome (e.g., `toggle`), both directions must be verified — each direction in its own sibling `and(...)` block establishing the prior state, with the operation invoked in a nested `when("invoking ...")` block

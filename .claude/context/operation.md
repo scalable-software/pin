@@ -52,14 +52,18 @@ This defines the public action contract that the implementation must honor.
 
 # Template Variation Points
 
-Operations vary by their relationship to component state and data. The classification determines which sub-rules activate:
+There are two types of operation. One test tells them apart: **is the body a single assignment to a setter?**
 
-- **Primitive operations** — delegate to a single authoritative state mutation path (Section 7). Their semantic event is emitted by the accepted state transition, not by the operation (Section 8). Examples: `hide`, `show`, `pin`, `unpin`.
-- **Composite operations** — derive the next target from current component context and delegate through the same authoritative mutation path (Section 11). They typically have no own event because the underlying state transition emits the existing event vocabulary. Example: `toggle`.
-- **Coordinating operations** — orchestrate multiple internal steps as one public action and may dispatch their own semantic events directly when the operation itself is the semantic unit (Section 10). Examples: `save`, `cancel`.
-- **Data-bearing operations** — accept or construct a data value and delegate through the authoritative data setter (Section 13). Examples: `load`, `create`, `update`, `reset`.
+| | Pass-through | Rich |
+|---|---|---|
+| Body | one assignment to one setter | anything more |
+| Validates | never — the setter does | only a parameter it uses itself (Section 7) |
+| Events | none of its own — the setter dispatches (Section 8) | may dispatch its own (Section 10) |
+| Returns | nothing | what the specification declares (Section 6) |
+| In `Pin` | `hide`, `show`, `pin`, `unpin`, `toggle` | — |
+| In `Title` | `show`, `hide`, `enable`, `disable`, `view` | `create`, `load`, `update`, `reset`, `edit`, `save`, `cancel`, `change` |
 
-Each operation must be classifiable as exactly one type. A new operation type is a signal that this list needs to be extended, not that the operation deviates from the template.
+A pass-through may work out the value it assigns from the current state, as `toggle` does (Section 11); it is still one assignment. Every operation is exactly one of the two types.
 
 # 2) Operations Must Represent Public Actions
 
@@ -102,7 +106,7 @@ Policy:
 
 - every declared public operation must have a key in `Operation`
 - `Operation` contains only declared public operation names
-- the implementation must use operation metadata consistently as the canonical operation vocabulary
+- the metadata must export an `Operations` type, and the component class must implement it through `Meta`, so that the compiler fails the build when a declared operation is missing from the class
 
 Example pattern:
 
@@ -116,7 +120,26 @@ export const Operation = {
 } as const;
 
 export type Operation = (typeof Operation)[keyof typeof Operation];
+
+export type Operations = Record<Operation, (...parameters: any[]) => unknown>;
 ```
+
+`Meta` combines `Operations` with the equivalent types for states and events. The component implements it, importing the type on its own line:
+
+```typescript
+// <component>.meta.ts
+export type States = Record<State, unknown>;
+export type Events = Record<Event, EventListener | null>;
+
+export type Meta = States & Operations & Events;
+
+// <component>.ts
+import { type Meta } from "./pin.meta.js";
+
+export class Pin extends Component implements Meta {
+```
+
+The check runs in one direction: the class must have every member the metadata names, and it may have more. It checks that a member exists, not what it does.
 
 # 4) Every Declared Public Operation Must Be Implemented as a Public Arrow Function Class Property
 
@@ -131,16 +154,27 @@ Policy:
 
 Operations are implemented as arrow function class properties — not prototype methods — because this guarantees `this` binding at the point of definition. This makes operations safe to pass as callbacks without `.bind()`, which is important for gesture handlers and external consumers.
 
+An operation has a block body. A one-line arrow function such as `() => (this.status = Status.PINNED)` would return the assigned value and publish it as the operation's return type.
+
 Example pattern:
 
 ```typescript
-public hide = () => (this.visibility = Visibility.HIDDEN);
-public show = () => (this.visibility = Visibility.VISIBLE);
-public pin = () => (this.status = Status.PINNED);
-public unpin = () => (this.status = Status.UNPINNED);
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public hide = () => {
+  this.visibility = Visibility.HIDDEN;
+};
+public show = () => {
+  this.visibility = Visibility.VISIBLE;
+};
+public pin = () => {
+  this.status = Status.PINNED;
+};
+public unpin = () => {
+  this.status = Status.UNPINNED;
+};
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 This gives the component a stable imperative API:
@@ -179,17 +213,16 @@ private _handleClick = () => this.toggle();
 
 # 6) Public Operation Methods Must Honor the Declared Return Contract
 
-The default return contract for action-oriented operations is `void`.
-
-If an operation returns a value, that return contract must be declared explicitly in the specification.
+An operation returns what its specification declares, and nothing else.
 
 Policy:
 
 - the public operation property must honor the `returns` contract declared in the specification
-- `void` is the default return contract for action-oriented operations
-- non-`void` return contracts are valid only when explicitly declared in the specification
+- a pass-through operation returns nothing: its `returns` contract is `void`
+- a rich operation may return a value, but only when that return contract is declared explicitly in the specification
+- what an operation returns is public API: a value returned by accident is one a consumer can come to rely on
 
-Pin follows the default pattern: all declared operations return `void`.
+Pin has only pass-through operations: all of them return nothing.
 
 # 7) Operations Must Remain Thin and Delegate to the Authoritative Mutation Path
 
@@ -209,8 +242,12 @@ Policy:
 Example:
 
 ```typescript
-public hide = () => (this.visibility = Visibility.HIDDEN);
-public pin = () => (this.status = Status.PINNED);
+public hide = () => {
+  this.visibility = Visibility.HIDDEN;
+};
+public pin = () => {
+  this.status = Status.PINNED;
+};
 ```
 
 In this example, `hide()` and `pin()` remain thin because they express public action intent while delegating mutation behavior to the authoritative `visibility` and `status` state setters. The operation does not become a second mutation system.
@@ -244,7 +281,9 @@ This rule applies only to semantic events whose meaning is an accepted state out
 Example:
 
 ```typescript
-public pin = () => (this.status = Status.PINNED);
+public pin = () => {
+  this.status = Status.PINNED;
+};
 
 public set status(status: Status) {
   try {
@@ -281,7 +320,9 @@ Policy:
 Example:
 
 ```typescript
-public show = () => (this.visibility = Visibility.VISIBLE);
+public show = () => {
+  this.visibility = Visibility.VISIBLE;
+};
 
 public set visibility(visibility: Visibility | null) {
   try {
@@ -299,39 +340,79 @@ public set visibility(visibility: Visibility | null) {
 
 In this example, repeated safety is illustrated by calling `show()` when the component is already in the visible state `Visibility.VISIBLE`. The setter's guard clause detects that no accepted outcome is needed and returns without mutation or event dispatch; reflection still runs and finds the attribute already showing the state, so nothing is written.
 
-# 10) Coordinating Operations May Orchestrate Multiple Internal Steps as One Public Action
+# 10) Rich Operations May Do More Than One Thing as One Public Action
 
-Some public operations represent a coordinated component workflow rather than a single direct mutation.
-
-These are valid public operations.
+A rich operation does more than assign one value to one setter: it takes several steps, works with a parameter, or dispatches an event of its own.
 
 Policy:
 
-- a coordinating operation may mutate more than one component-owned construct
-- a coordinating operation may call other public operations or controlled internal helpers
-- a coordinating operation must preserve authoritative ownership of each affected construct
-- a coordinating operation must not duplicate mutation logic that already belongs to another authoritative mutation path
-- where semantic events belong to the operation itself rather than to a single state outcome, the operation may dispatch those events directly
+- a rich operation may mutate more than one component-owned construct
+- a rich operation may call other public operations or controlled internal helpers
+- a rich operation must preserve authoritative ownership of each affected construct
+- a rich operation must not duplicate mutation logic that already belongs to another authoritative mutation path
+- where a semantic event belongs to the operation itself rather than to a single state outcome, the operation may dispatch that event directly
+- a rich operation validates a parameter only when it uses that parameter itself (Section 7)
 
-# 11) Composite Operations May Derive the Next Target from Current Component Context
+`Pin` has no rich operation. These examples are from the `Title` component, written in the current style.
 
-Some operations do not map to a single fixed target value. Instead, they derive the next target from current component context.
+Several steps and an event of its own:
 
-These are valid public operations.
+```typescript
+public save = () => {
+  if (!this.metadata) return;
+
+  this.update();
+
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_SAVE, detail);
+
+  this.mode = Mode.VIEW;
+};
+```
+
+A parameter passed to a setter — the setter validates it, the operation does not:
+
+```typescript
+public load = (metadata: Metadata) => {
+  this.metadata = metadata;
+
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_LOAD, detail);
+};
+```
+
+Preparation before a state change:
+
+```typescript
+public edit = () => {
+  this._syncName();
+  this._focusName();
+  this.mode = Mode.EDIT;
+};
+```
+
+Neither component has an operation that uses a parameter itself, so there is no example yet of an operation that validates.
+
+# 11) A Pass-Through May Derive Its Value from Current Component Context
+
+Some pass-through operations do not assign a fixed value. Instead, they derive the value from current component context.
+
+These are still pass-through operations: the body is one assignment to one setter.
 
 Policy:
 
-- a composite operation may read current state or other internally owned component constructs to determine the next target
-- a composite operation must remain small and deterministic
-- a composite operation must not reimplement mutation logic that belongs to an authoritative mutation path
-- the derived next target must still be applied through the authoritative mutation path of the affected construct or through a controlled internal workflow
+- the operation may read current state or other internally owned component constructs to determine the value
+- the derivation must remain small and deterministic
+- the operation must not reimplement mutation logic that belongs to an authoritative mutation path
+- the derived value must still be applied through the authoritative mutation path of the affected construct
 
 Example:
 
 ```typescript
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 In this example, `toggle()` reads the current `status`, computes the opposite allowed `status`, and then delegates through the normal `status` setter. The operation remains thin because the setter still owns transition acceptance, reflection, and semantic event emission.
@@ -379,14 +460,14 @@ In this example, the click handler does not implement toggle behavior itself. It
 
 1. Declare every public action under `Operations` in the specification with `description`, `parameters`, and `returns`.
 2. Ensure operations represent callable public actions only — not state, gestures, or events.
-3. Add a key to `Operation` in `<component>.meta.ts` for every declared operation.
-4. Implement every declared operation as a public arrow function class property whose name matches the canonical operation name.
-5. Ensure the property signature honors the declared `parameters` and `returns` contract.
+3. Add a key to `Operation` in `<component>.meta.ts` for every declared operation, export the `Operations` type, and implement `Meta` on the component class.
+4. Implement every declared operation as a public arrow function class property with a block body, whose name matches the canonical operation name.
+5. Ensure the property signature honors the declared `parameters` and `returns` contract: a pass-through returns nothing.
 6. Keep every operation thin — it must not reimplement validation, guard logic, reflection, or transition logic that belongs to the authoritative mutation path.
 7. For operations that change state, delegate to the authoritative state setter. Do not dispatch semantic events from the operation itself.
 8. Ensure repeated calls are safe — repeat safety must be owned by the authoritative mutation path, not duplicated in the operation.
-9. For composite operations (e.g., `toggle`), derive the next target from current component context and delegate through the same authoritative mutation path.
-10. For coordinating operations that orchestrate multiple steps, preserve authoritative ownership of each affected construct.
+9. Classify every operation as pass-through or rich: a pass-through is one assignment to one setter, also when it derives the value (e.g., `toggle`).
+10. For rich operations, preserve authoritative ownership of each affected construct, and validate only a parameter the operation uses itself.
 11. Ensure runtime gesture handlers invoke the declared public operation rather than reimplementing the behavior inline.
 
 ---
@@ -444,7 +525,7 @@ How this specification is implemented:
     - public operation
     - delegates to the authoritative `status` state mutation path with `Status.UNPINNED`
 - `toggle`
-    - public composite operation
+    - public pass-through operation that derives its value
     - reads the current `status`
     - computes the next allowed `status`
     - delegates the derived value through the same authoritative `status` mutation path as the direct operations
@@ -452,32 +533,41 @@ How this specification is implemented:
 Implementation:
 
 ```typescript
-public hide = () => (this.visibility = Visibility.HIDDEN);
+public hide = () => {
+  this.visibility = Visibility.HIDDEN;
+};
 
-public show = () => (this.visibility = Visibility.VISIBLE);
+public show = () => {
+  this.visibility = Visibility.VISIBLE;
+};
 
-public pin = () => (this.status = Status.PINNED);
+public pin = () => {
+  this.status = Status.PINNED;
+};
 
-public unpin = () => (this.status = Status.UNPINNED);
+public unpin = () => {
+  this.status = Status.UNPINNED;
+};
 
-public toggle = () =>
-  (this.status =
-    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+public toggle = () => {
+  this.status =
+    this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+};
 ```
 
 How the implementation applies the policy:
 
 - the specification defines the public operation contract under `Operations`
-- metadata defines the canonical operation vocabulary
+- metadata defines the canonical operation vocabulary, and the class implements `Meta`, so a declared operation missing from the class fails the build
 - the component class implements each declared operation as a public arrow function class property with the same canonical name
 - operations remain thin and do not duplicate authoritative mutation logic
-- in this specification, direct operations delegate through the authoritative public state mutation path
-- composite operations may derive the next target state from current state, but still delegate through the same authoritative mutation path
+- all five are pass-through operations: each is one assignment to a state setter
+- `toggle` derives the value it assigns from current state, but still delegates through the same authoritative mutation path
 - semantic events that represent state outcomes are emitted by accepted state transitions, not by the operations directly
 - repeated calls remain safe because the delegated state setters guard and no-op when no real transition is accepted
 - runtime gestures invoke operations as the canonical public behavior entry for declared actions
 
-In this specification, all declared operations have an empty `parameters` contract and a `void` return contract, so each implementation is a nullary public arrow function class property whose effect is expressed through delegated state transition rather than through returned data.
+In this specification, all declared operations have an empty `parameters` contract and a `void` return contract, so each implementation is a public arrow function class property that takes nothing and returns nothing: its effect is expressed through the delegated state transition.
 
 # Component Operation Specification Schema
 
