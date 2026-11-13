@@ -126,18 +126,21 @@ export class Pin extends Component {
     return this._visibility;
   }
   public set visibility(visibility: Visibility | null) {
-    visibility = visibility ?? Visibility.VISIBLE;
+    try {
+      visibility = visibility ?? Visibility.VISIBLE;
 
-    visibility = Validate.visibility(visibility);
+      visibility = Validate.visibility(visibility);
 
-    if (this._visibility === visibility) return;
+      if (this._visibility === visibility) return;
 
-    this._visibility = visibility;
-
-    visibility === Visibility.HIDDEN &&
-      this.setAttribute(Attributes.VISIBILITY, visibility);
-    visibility === Visibility.VISIBLE &&
-      this.removeAttribute(Attributes.VISIBILITY);
+      this._visibility = visibility;
+    } finally {
+      this._reflect(
+        Attributes.VISIBILITY,
+        this._visibility,
+        Visibility.VISIBLE
+      );
+    }
 
     const detail = { visibility };
 
@@ -153,13 +156,15 @@ export class Pin extends Component {
     return this._status;
   }
   public set status(status: Status) {
-    status = Validate.status(status);
+    try {
+      status = Validate.status(status);
 
-    if (this._status === status) return;
+      if (this._status === status) return;
 
-    this._status = status;
-
-    this.setAttribute(Attributes.STATUS, status);
+      this._status = status;
+    } finally {
+      this._reflect(Attributes.STATUS, this._status);
+    }
 
     const detail = { status };
 
@@ -269,8 +274,7 @@ export class Pin extends Component {
    * @hidden
    */
   protected _initialize = () => {
-    !this.hasAttribute(Attributes.STATUS) &&
-      this.setAttribute(Attributes.STATUS, this._status);
+    this._reflect(Attributes.STATUS, this._status);
   };
 
   /**

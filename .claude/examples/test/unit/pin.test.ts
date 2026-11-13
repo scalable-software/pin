@@ -290,6 +290,64 @@ state(State.VISIBILITY, () => {
             });
           });
 
+          when("`visibility` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.VISIBILITY, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`visibility` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+            });
+
+            then("`pin.visibility` is `Visibility.VISIBLE`", () => {
+              expect(pin.visibility).toBe(Visibility.VISIBLE);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid visibility value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid visibility value: invalid");
+              }
+            );
+          });
+
+          when("`visibility` attribute is set to `Visibility.VISIBLE`", () => {
+            beforeEach(() => {
+              pin.setAttribute(Attributes.VISIBILITY, Visibility.VISIBLE);
+            });
+
+            then("`visibility` attribute does not exist", () => {
+              expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+            });
+          });
+
+          and("`pin.visibility` is set to `Visibility.HIDDEN`", () => {
+            beforeEach(() => {
+              pin.visibility = Visibility.HIDDEN;
+            });
+
+            when("`visibility` attribute is set to `invalid`", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.setAttribute(Attributes.VISIBILITY, "invalid");
+                });
+              });
+
+              then("`visibility` attribute is `Visibility.HIDDEN`", () => {
+                const value = pin.getAttribute(Attributes.VISIBILITY);
+                expect(value).toBe(Visibility.HIDDEN);
+              });
+            });
+          });
+
           when("`pin.visibility` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
@@ -377,6 +435,55 @@ state(State.STATUS, () => {
               expect(pin.status).toBe(Status.PINNED);
             });
           });
+
+          when("`status` attribute is set to `invalid`", () => {
+            let error: Error;
+            beforeEach(async () => {
+              await jasmine.spyOnGlobalErrorsAsync(async (reported) => {
+                pin.setAttribute(Attributes.STATUS, "invalid");
+                error = reported.calls.mostRecent()?.args[0];
+              });
+            });
+
+            then("`status` attribute is `Status.UNPINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.UNPINNED);
+            });
+
+            then("`pin.status` is `Status.UNPINNED`", () => {
+              expect(pin.status).toBe(Status.UNPINNED);
+            });
+
+            then("an error is reported", () => {
+              expect(error).toBeDefined();
+            });
+
+            then(
+              "error message contains 'Invalid status value: invalid'",
+              () => {
+                expect(error.message).toBe("Invalid status value: invalid");
+              }
+            );
+          });
+
+          and("`pin.status` is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            when("`status` attribute is removed", () => {
+              beforeEach(async () => {
+                await jasmine.spyOnGlobalErrorsAsync(async () => {
+                  pin.removeAttribute(Attributes.STATUS);
+                });
+              });
+
+              then("`status` attribute is `Status.PINNED`", () => {
+                const value = pin.getAttribute(Attributes.STATUS);
+                expect(value).toBe(Status.PINNED);
+              });
+            });
+          });
         });
 
         then("`pin.status` setter exists", () => {
@@ -409,6 +516,23 @@ state(State.STATUS, () => {
               }
             );
           });
+        });
+      });
+
+      and("a new pin with `status` attribute `invalid` is added to DOM", () => {
+        let pin: Pin;
+        beforeEach(async () => {
+          await jasmine.spyOnGlobalErrorsAsync(async () => {
+            pin = add<Pin>(Pin.Tag, { [Attributes.STATUS]: "invalid" });
+          });
+        });
+        afterEach(() => {
+          pin.remove();
+        });
+
+        then("`status` attribute is `Status.UNPINNED`", () => {
+          const value = pin.getAttribute(Attributes.STATUS);
+          expect(value).toBe(Status.UNPINNED);
         });
       });
     });
