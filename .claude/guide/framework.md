@@ -16,12 +16,17 @@ illustration instead.
 
 A state is a **named condition of a component that has a fixed set of possible values**.
 
-The pin has two:
+The pin has three:
 
 | State | Possible values | Starts as |
 |---|---|---|
 | `visibility` | `visible`, `hidden` | `visible` |
 | `status` | `pinned`, `unpinned` | `unpinned` |
+| `appearance` | `floating`, `flat` | `floating` |
+
+This section uses `visibility` and `status` as its examples. `appearance` is the simplest
+of the three: it changes how the pin looks and nothing else, so it has no operation and no
+event.
 
 At any moment each state has exactly one of its values. Together they answer the question
 "what condition is this component in right now?"
@@ -414,8 +419,8 @@ One rule decides it:
 | A UUID the component generates | the component | no |
 | A state only the component sets | the component | no |
 
-The pin has two values that come in from outside, `visibility` and `status`, so it has two
-validators.
+The pin has three values that come in from outside, `visibility`, `status` and `appearance`,
+so it has three validators.
 
 ### Where a validator lives
 
