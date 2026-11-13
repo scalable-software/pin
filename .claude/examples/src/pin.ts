@@ -13,6 +13,7 @@ import {
   Attributes,
   Visibility,
   Status,
+  Appearance,
   Event,
   Gesture,
   Key
@@ -78,6 +79,14 @@ export class Pin extends Component implements Meta {
    * @hidden
    */
   private _status: Status = Status.UNPINNED;
+
+  /**
+   * Internal Appearance state of the component
+   * @category State
+   * @default Appearance.FLOATING
+   * @hidden
+   */
+  private _appearance: Appearance = Appearance.FLOATING;
 
   /**
    * onhide triggered when pin visibility changes to hidden
@@ -185,6 +194,33 @@ export class Pin extends Component implements Meta {
   }
 
   /**
+   * Get and set the appearance of the pin button
+   * @category State
+   */
+  public get appearance(): Appearance {
+    return this._appearance;
+  }
+  public set appearance(appearance: Appearance | null) {
+    try {
+      // Normalize
+      appearance = appearance ?? Appearance.FLOATING;
+
+      // Validate
+      appearance = Validate.appearance(appearance);
+
+      // Mutate
+      this._appearance = appearance;
+    } finally {
+      // Reflect
+      this._reflect(
+        Attributes.APPEARANCE,
+        this._appearance,
+        Appearance.FLOATING
+      );
+    }
+  }
+
+  /**
    * Triggered via `.hide()`
    * @event
    * @category Events
@@ -269,7 +305,9 @@ export class Pin extends Component implements Meta {
   protected _attributeHandlers = {
     [Attributes.VISIBILITY]: (value: Visibility | null) =>
       (this.visibility = value),
-    [Attributes.STATUS]: (value: Status) => (this.status = value)
+    [Attributes.STATUS]: (value: Status) => (this.status = value),
+    [Attributes.APPEARANCE]: (value: Appearance | null) =>
+      (this.appearance = value)
   };
 
   /**

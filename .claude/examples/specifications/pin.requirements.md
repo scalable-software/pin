@@ -54,3 +54,8 @@ it looks consistent with the rest of my interface.
 
 As an **end user**, when I work with the keyboard, I want to reach the pin and pin or unpin
 with it, so that I do not need a pointing device.
+
+### STORY: Flat Appearance
+
+As a **host application**, when I place the pin inside a toolbar, I want it to appear without
+its own border and shadow, so that the toolbar reads as one surface.

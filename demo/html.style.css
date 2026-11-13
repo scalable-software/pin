@@ -32,3 +32,15 @@ pin-button {
   left: 48px;
   top: 48px;
 }
+
+/* A toolbar holding a flat pin */
+.toolbar {
+  position: absolute;
+  left: 48px;
+  top: 128px;
+  display: inline-flex;
+}
+
+.toolbar pin-button {
+  position: static;
+}

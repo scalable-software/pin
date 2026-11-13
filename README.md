@@ -161,6 +161,11 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
   - Whether the pin is pinned or unpinned.
   - **Compulsory attribute**: always present in the DOM, reflecting the current state at all times.
 
+- **`appearance`** (`floating` | `flat`)
+  - Whether the pin stands alone, with its own border, shadow and rounded corners, or lies flat inside another surface such as a toolbar.
+  - **Optional attribute**: absent from the DOM when `floating` (the default); present as `[appearance="flat"]` on the host element when flat.
+  - It changes how the pin looks, not what it does: it has no operation and sends no event.
+
 #### 4.1.2 Internal vs. Attribute-Driven State
 
 1. **Internal State**

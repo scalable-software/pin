@@ -19,7 +19,8 @@ export const CSS = "pin.style.css" as const;
  */
 export const Attributes = {
   VISIBILITY: "visibility",
-  STATUS: "status"
+  STATUS: "status",
+  APPEARANCE: "appearance"
 } as const;
 /**
  * HTML Attributes available to set
@@ -71,6 +72,21 @@ export const Status = {
  * @category Metadata
  */
 export type Status = (typeof Status)[keyof typeof Status];
+
+/**
+ * Indicates whether the component stands alone or lies flat inside another surface
+ * @category Metadata
+ * @enum
+ */
+export const Appearance = {
+  FLOATING: "floating",
+  FLAT: "flat"
+} as const;
+/**
+ * Indicates whether the component stands alone or lies flat inside another surface
+ * @category Metadata
+ */
+export type Appearance = (typeof Appearance)[keyof typeof Appearance];
 
 /**
  * @category Metadata
