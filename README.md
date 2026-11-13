@@ -178,15 +178,19 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    public get visibility() {
      return this._visibility;
    }
-   public set visibility(visibility: Visibility) {
-     visibility = visibility ?? Visibility.VISIBLE;
-     visibility = Validate.visibility(visibility);
-     if (this._visibility === visibility) return;
-     this._visibility = visibility;
-     visibility === Visibility.VISIBLE &&
-       this.removeAttribute(Attributes.VISIBILITY);
-     visibility === Visibility.HIDDEN &&
-       this.setAttribute(Attributes.VISIBILITY, visibility);
+   public set visibility(visibility: Visibility | null) {
+     try {
+       visibility = visibility ?? Visibility.VISIBLE;
+       visibility = Validate.visibility(visibility);
+       if (this._visibility === visibility) return;
+       this._visibility = visibility;
+     } finally {
+       this._reflect(
+         Attributes.VISIBILITY,
+         this._visibility,
+         Visibility.VISIBLE
+       );
+     }
      const detail = { visibility };
      visibility === Visibility.HIDDEN && this._dispatch(Event.ON_HIDE, detail);
      visibility === Visibility.VISIBLE && this._dispatch(Event.ON_SHOW, detail);
@@ -196,7 +200,8 @@ The **Pin** component uses both **internal properties** and **DOM attributes** t
    - Normalises `null` to the default before validation.
    - Validates the incoming value and throws on invalid input.
    - Guards against no-op mutations with an early return.
-   - Keeps `_visibility` in sync with `[visibility="hidden"]` in the DOM and dispatches the corresponding event on every accepted transition.
+   - Always makes the `visibility` attribute show the state, also after a rejected or ignored value, so an invalid attribute never stays in the DOM.
+   - Dispatches the corresponding event on every accepted transition.
 
 #### 4.1.3 Lifecycle & Attribute Handlers
 
