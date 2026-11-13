@@ -292,7 +292,7 @@ public set visibility(visibility: Visibility | null) {
 
 # Policy Applied to Specification
 
-The Pin component declares two writable state properties — `visibility` and `status` — both enums declared in `pin.meta.ts`. Both accept outside values through their setter, so both have a validator. None of the pin's operations takes a parameter, so no operation validates.
+The Pin component declares three writable state properties — `visibility`, `status`, and `appearance` — all enums declared in `pin.meta.ts`. Each accepts outside values through its setter, so each has a validator. None of the pin's operations takes a parameter, so no operation validates.
 
 `pin.meta.ts` — value domain declarations:
 
@@ -310,12 +310,19 @@ export const Status = {
 } as const;
 
 export type Status = (typeof Status)[keyof typeof Status];
+
+export const Appearance = {
+  FLOATING: "floating",
+  FLAT: "flat",
+} as const;
+
+export type Appearance = (typeof Appearance)[keyof typeof Appearance];
 ```
 
 `pin.validation.ts` — the full implementation:
 
 ```typescript
-import { Visibility, Status } from "./pin.meta.js";
+import { Visibility, Status, Appearance } from "./pin.meta.js";
 
 export class Validate {
   public static visibility = (value: unknown) => {
@@ -333,20 +340,28 @@ export class Validate {
     }
     return value as Status;
   };
+
+  public static appearance = (value: unknown) => {
+    const valid = Object.values(Appearance).includes(value as Appearance);
+    if (!valid) {
+      throw new Error(`Invalid appearance value: ${value}`);
+    }
+    return value as Appearance;
+  };
 }
 ```
 
 How the policy is applied:
 
 - all validation lives in `pin.validation.ts` — not in `pin.ts` or `pin.meta.ts`
-- a single exported `Validate` class contains both validators
-- both validators are `public static` arrow function class properties
-- both import their value domains from `pin.meta.ts` — no allowed values are hardcoded in `pin.validation.ts`
-- both accept `unknown` and return the narrowed metadata type on success
-- both use `Object.values(Domain).includes(value as Domain)` for membership checking
-- both throw `new Error(...)` on invalid input — no fallback is returned
-- both use the canonical error format: `` `Invalid {name} value: ${value}` ``
-- `Validate` has exactly two methods because exactly two values enter the pin from outside
+- a single exported `Validate` class contains all three validators
+- all validators are `public static` arrow function class properties
+- all import their value domains from `pin.meta.ts` — no allowed values are hardcoded in `pin.validation.ts`
+- all accept `unknown` and return the narrowed metadata type on success
+- all use `Object.values(Domain).includes(value as Domain)` for membership checking
+- all throw `new Error(...)` on invalid input — no fallback is returned
+- all use the canonical error format: `` `Invalid {name} value: ${value}` ``
+- `Validate` has exactly three methods because exactly three values enter the pin from outside
 
 Invocation in `pin.ts`:
 
