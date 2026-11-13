@@ -249,49 +249,54 @@ The classification of an attribute-backed state as **optional** or **compulsory*
   The attribute may be absent. Initialization must not force materialization of the default attribute.
 
 - **Compulsory**: explicit representation  
-  The attribute must always have an explicit DOM representation. If missing, it must be materialized in `_initialize`.
+  The attribute must always have an explicit DOM representation. `_initialize` puts it in place through `_reflect`, which writes only when the attribute does not already show the state.
 
 ```typescript
 private _status: Status = Status.UNPINNED;
 
 protected _initialize = () => {
-  !this.hasAttribute(Attributes.STATUS) &&
-    this.setAttribute(Attributes.STATUS, this._status);
+  this._reflect(Attributes.STATUS, this._status);
 };
 ```
 
 
 ### 5.2) Attribute Reflection Policy Must Match Attribute Classification
 
+Reflection makes the attribute show the state. It is done by the base component's `_reflect(name, state, initial?)`, which writes only when the attribute differs from the state. The optional `initial` argument is the whole difference between the two classifications.
+
 - **Optional**: default may be represented by attribute absence  
-  The setter must manage both the state value and the presence of the attribute. Assigning the default removes the attribute. Because attribute absence corresponds to the default state, nullish incoming values must be normalized to the default before reflection. Assigning the default may remove the attribute.
+  The setter passes the default to `_reflect` as `initial`: the attribute is absent at the default and shows the value otherwise. Because attribute absence corresponds to the default state, nullish incoming values must be normalized to the default before reflection.
 
 ```typescript
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;
 
-  visibility = Validate.visibility(visibility);
+    visibility = Validate.visibility(visibility);
 
-  if (this._visibility === visibility) return;
+    if (this._visibility === visibility) return;
 
-  this._visibility = visibility;
-
-  visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-  visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
+    this._visibility = visibility;
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
 }
 ```
 
 - **Compulsory**: current value must always be explicit  
-  The setter must always reflect the current value into the DOM using `setAttribute(...)`.
+  The setter calls `_reflect` without `initial`: the attribute always shows the current value.
 
 ```typescript
 public set status(status: Status) {
-  status = Validate.status(status);
+  try {
+    status = Validate.status(status);
 
-  if (this._status === status) return;
+    if (this._status === status) return;
 
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    this._status = status;
+  } finally {
+    this._reflect(Attributes.STATUS, this._status);
+  }
 }
 ```
 
@@ -312,9 +317,21 @@ protected _attributeHandlers = {
 
 `_attributeHandlers` are only for declarative mutation. The setter is the single unification point for writable attribute-backed state.
 
+A declarative change reaches the setter after the DOM has already changed. The setter therefore reflects whatever it does with the value — accept, ignore, or reject — so that the attribute always shows the state (Section 7):
+
+| Declarative change | State | Attribute afterwards | Error |
+|---|---|---|---|
+| valid value | changes | the new value | — |
+| invalid value | unchanged | restored to the state | reported |
+| compulsory attribute removed | unchanged | restored to the state | reported |
+| optional attribute removed | default | absent | — |
+| optional attribute set to the default, no change | unchanged | absent | — |
+
+A rejected declarative change cannot throw to the code that changed the attribute: the browser reports the validation error instead. A rejected imperative assignment throws to its caller.
+
 For readonly attribute-backed state, declarative mutation must still be intercepted in `_attributeHandlers`, but it must not become authoritative. Instead, the implementation must restore the canonical internally owned value. See Section 9.2 for the readonly interceptor pattern.
 
-## 7) Public Mutation Order Must Be Normalize → Validate → Guard → Mutate
+## 7) Public Mutation Order Must Be Normalize → Validate → Guard → Mutate → Reflect
 
 For writable state, the public mutation path must follow this order:
 
@@ -322,10 +339,17 @@ For writable state, the public mutation path must follow this order:
 2. **Validate**
 3. **Guard**
 4. **Mutate**
+5. **Reflect** — attribute-backed state only
 
 Validation must be performed by logic defined in `<component>.validation.ts`, against the value-domain metadata defined in `<component>.meta.ts`. If the normalized value is invalid, validation must fail and the mutation must not proceed.
 
-A mutation path may omit phases that are not needed for a given state, but the order of any phases that are used must remain Normalize → Validate → Guard → Mutate.
+A mutation path may omit phases that are not needed for a given state, but the order of any phases that are used must remain Normalize → Validate → Guard → Mutate → Reflect.
+
+For attribute-backed state, Reflect is not optional and always runs. The first four phases sit in a `try` block and Reflect in its `finally` block, so the attribute shows the state whether the value was accepted, ignored by the guard, or rejected by validation.
+
+- Reflect reads the backing field, not the setter's parameter: after a rejected value the parameter still holds the invalid input.
+- Reflect goes through `_reflect`, never a direct `setAttribute`: writing a value the attribute already has triggers `attributeChangedCallback` again, and a phase that always runs would loop.
+- Anything that follows an accepted change, such as event dispatch, comes after the `finally` block. The guard's `return` and the validator's error both leave through `finally` without reaching it.
 
 Note: The normalization step for optional attribute-backed state handles a specific platform behavior: `attributeChangedCallback` passes `null` as the new value when an attribute is removed from the DOM. Without normalization, this `null` would reach validation and throw. Normalization ensures attribute removal is treated as equivalent to assigning the default value. Use `??` (nullish coalescing) rather than `||` (logical OR) so that only `null` and `undefined` are normalized — any other invalid value is left for validation to reject.
 
@@ -333,19 +357,22 @@ Optional attribute-backed example:
 
 ```typescript
 public set visibility(visibility: Visibility | null) {
-  // Normalize — ?? handles null passed by attributeChangedCallback on attribute removal
-  visibility = visibility ?? Visibility.VISIBLE;
+  try {
+    // Normalize — ?? handles null passed by attributeChangedCallback on attribute removal
+    visibility = visibility ?? Visibility.VISIBLE;
 
-  // Validate
-  visibility = Validate.visibility(visibility);
+    // Validate
+    visibility = Validate.visibility(visibility);
 
-  // Guard
-  if (this._visibility === visibility) return;
+    // Guard
+    if (this._visibility === visibility) return;
 
-  // Mutate
-  this._visibility = visibility;
-  visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-  visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
+    // Mutate
+    this._visibility = visibility;
+  } finally {
+    // Reflect — absent when visible
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
 }
 ```
 
@@ -353,15 +380,19 @@ Compulsory attribute-backed example:
 
 ```typescript
 public set status(status: Status) {
-  // Validate
-  status = Validate.status(status);
+  try {
+    // Validate
+    status = Validate.status(status);
 
-  // Guard
-  if (this._status === status) return;
+    // Guard
+    if (this._status === status) return;
 
-  // Mutate
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    // Mutate
+    this._status = status;
+  } finally {
+    // Reflect — always present
+    this._reflect(Attributes.STATUS, this._status);
+  }
 }
 ```
 
@@ -481,13 +512,11 @@ public get id(): Id {
 }
 
 protected _initialize = () => {
-  !this.hasAttribute(Attributes.ID) &&
-    this.setAttribute(Attributes.ID, this._id);
+  this._reflect(Attributes.ID, this._id);
 };
 
 protected _attributeHandlers = {
-  [Attributes.ID]: (value: Id) =>
-    value !== this._id && this.setAttribute(Attributes.ID, this._id),
+  [Attributes.ID]: () => this._reflect(Attributes.ID, this._id),
 };
 ```
 
@@ -607,10 +636,10 @@ Note: the examples below are intentionally state-only and exclude event-dispatch
     - Attribute-backed, optional, writable
     - Implicit default (`visible`), no forced `_initialize` materialization
     - Getter returns the canonical internal state
-    - Setter normalizes nullish input — including `null` passed by `attributeChangedCallback` when the attribute is removed — validates against metadata, and reflects/removes the attribute
+    - Setter normalizes nullish input — including `null` passed by `attributeChangedCallback` when the attribute is removed — validates against metadata, and always reflects: the attribute is absent when visible
 - `status`
     - Attribute-backed, compulsory, writable
-    - Explicit DOM representation, must be materialized in `_initialize` when absent
+    - Explicit DOM representation, put in place by `_initialize` through `_reflect`
     - Getter returns the canonical internal state
     - Setter validates against metadata and always keeps the attribute explicit
 - `locked`
@@ -658,14 +687,16 @@ public get visibility(): Visibility {
 }
 
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;
-  visibility = Validate.visibility(visibility);
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;
+    visibility = Validate.visibility(visibility);
 
-  if (this._visibility === visibility) return;
+    if (this._visibility === visibility) return;
 
-  this._visibility = visibility;
-  visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-  visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
+    this._visibility = visibility;
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
 }
 ```
 
@@ -680,17 +711,19 @@ public get status(): Status {
 }
 
 public set status(status: Status) {
-  status = Validate.status(status);
+  try {
+    status = Validate.status(status);
 
-  if (this._status === status) return;
+    if (this._status === status) return;
 
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    this._status = status;
+  } finally {
+    this._reflect(Attributes.STATUS, this._status);
+  }
 }
 
 protected _initialize = () => {
-  !this.hasAttribute(Attributes.STATUS) &&
-    this.setAttribute(Attributes.STATUS, this._status);
+  this._reflect(Attributes.STATUS, this._status);
 };
 ```
 
@@ -745,15 +778,15 @@ public set locked(locked: Locked) {
 6. Ensure validation enforces the value domains declared in `<component>.meta.ts`.
 7. If attribute-backed, declare the state in `Attributes` and include it in `State`.
 8. If non-attribute, declare the state in `State` but not in `Attributes`.
-9. If attribute-backed and compulsory, materialize the attribute in `_initialize()` when absent.
+9. If attribute-backed and compulsory, put the attribute in place in `_initialize()` through `_reflect`.
 10. If attribute-backed and optional, do not force default attribute materialization in `_initialize()`.
 11. If attribute-backed and writable, map declarative mutation in `_attributeHandlers`.
 12. If attribute-backed and readonly, intercept declarative mutation in `_attributeHandlers` and restore the canonical internal value.
-13. Implement the public mutation path using normalize → validate → guard → mutate.
+13. Implement the public mutation path using normalize → validate → guard → mutate → reflect; for attribute-backed state, reflect in a `finally` block, from the backing field, so it always runs.
 14. Validate incoming values against metadata value domains.
 15. If validation fails, the mutation must not proceed.
-16. For optional attribute-backed state, use `??` to normalize `null` and `undefined` to the default — this handles `attributeChangedCallback` passing `null` when an attribute is removed. Manage both value and attribute presence during reflection.
-17. For compulsory attribute-backed state, always keep the current value explicitly reflected in the DOM attribute using a single `setAttribute(...)` call.
+16. For optional attribute-backed state, use `??` to normalize `null` and `undefined` to the default — this handles `attributeChangedCallback` passing `null` when an attribute is removed. Pass the default to `_reflect` as `initial`.
+17. For compulsory attribute-backed state, call `_reflect` without `initial` so the attribute always shows the current value.
 18. For non-attribute state, choose external contract: read-only or writable.
 19. For readonly state, ensure mutation remains internally owned and external mutation is non-authoritative.
 

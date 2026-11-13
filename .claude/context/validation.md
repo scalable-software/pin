@@ -212,9 +212,9 @@ Validators are called by `<component>.ts` inside the public setter of each valid
 Policy:
 
 - validation must be invoked inside the setter — the authoritative mutation path
-- validation is the second step of the mutation order, after normalization and before the guard: **Normalize → Validate → Guard → Mutate**
+- validation is the second step of the mutation order, after normalization and before the guard: **Normalize → Validate → Guard → Mutate → Reflect**
 - the return value of the validator — the narrowed typed value — must replace the raw input for the remainder of the mutation path
-- if validation throws, the mutation path must not proceed past that point
+- if validation throws, the state must not change; for attribute-backed state the setter's `finally` block still reflects, so the attribute returns to the state
 - gesture handlers and operations must not invoke validators directly — they route through the setter which owns validation
 
 The mutation order is defined authoritatively in the state policy. The validation policy governs the implementation of the validator itself, not the order it is called in.
@@ -223,17 +223,22 @@ Example showing the validator's position in the mutation path:
 
 ```typescript
 public set visibility(visibility: Visibility | null) {
-  // Normalize
-  visibility = visibility ?? Visibility.VISIBLE;
+  try {
+    // Normalize
+    visibility = visibility ?? Visibility.VISIBLE;
 
-  // Validate — narrowed return value replaces the raw input
-  visibility = Validate.visibility(visibility);
+    // Validate — narrowed return value replaces the raw input
+    visibility = Validate.visibility(visibility);
 
-  // Guard
-  if (this._visibility === visibility) return;
+    // Guard
+    if (this._visibility === visibility) return;
 
-  // Mutate
-  this._visibility = visibility;
+    // Mutate
+    this._visibility = visibility;
+  } finally {
+    // Reflect
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
   ...
 }
 ```
@@ -303,18 +308,26 @@ Invocation in `pin.ts`:
 ```typescript
 // visibility setter — optional attribute-backed, writable
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;  // Normalize
-  visibility = Validate.visibility(visibility);   // Validate
-  if (this._visibility === visibility) return;    // Guard
-  this._visibility = visibility;                  // Mutate
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;  // Normalize
+    visibility = Validate.visibility(visibility);   // Validate
+    if (this._visibility === visibility) return;    // Guard
+    this._visibility = visibility;                  // Mutate
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE); // Reflect
+  }
   ...
 }
 
 // status setter — compulsory attribute-backed, writable
 public set status(status: Status) {
-  status = Validate.status(status);     // Validate (no normalization step)
-  if (this._status === status) return;  // Guard
-  this._status = status;                // Mutate
+  try {
+    status = Validate.status(status);     // Validate (no normalization step)
+    if (this._status === status) return;  // Guard
+    this._status = status;                // Mutate
+  } finally {
+    this._reflect(Attributes.STATUS, this._status); // Reflect
+  }
   ...
 }
 ```

@@ -246,12 +246,15 @@ Example:
 public pin = () => (this.status = Status.PINNED);
 
 public set status(status: Status) {
-  status = Validate.status(status);
+  try {
+    status = Validate.status(status);
 
-  if (this._status === status) return;
+    if (this._status === status) return;
 
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    this._status = status;
+  } finally {
+    this._reflect(Attributes.STATUS, this._status);
+  }
 
   const detail = { status };
 
@@ -280,18 +283,20 @@ Example:
 public show = () => (this.visibility = Visibility.VISIBLE);
 
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;
-  visibility = Validate.visibility(visibility);
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;
+    visibility = Validate.visibility(visibility);
 
-  if (this._visibility === visibility) return;
+    if (this._visibility === visibility) return;
 
-  this._visibility = visibility;
-  visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-  visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
+    this._visibility = visibility;
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
 }
 ```
 
-In this example, repeated safety is illustrated by calling `show()` when the component is already in the visible state `Visibility.VISIBLE`. The setter's guard clause detects that no accepted outcome is needed and returns without mutation, reflection, or event dispatch.
+In this example, repeated safety is illustrated by calling `show()` when the component is already in the visible state `Visibility.VISIBLE`. The setter's guard clause detects that no accepted outcome is needed and returns without mutation or event dispatch; reflection still runs and finds the attribute already showing the state, so nothing is written.
 
 # 10) Coordinating Operations May Orchestrate Multiple Internal Steps as One Public Action
 

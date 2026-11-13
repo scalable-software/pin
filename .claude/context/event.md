@@ -272,12 +272,15 @@ Example pattern:
 
 ```typescript
 public set status(status: Status) {
-  status = Validate.status(status);
+  try {
+    status = Validate.status(status);
 
-  if (this._status === status) return;
+    if (this._status === status) return;
 
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    this._status = status;
+  } finally {
+    this._reflect(Attributes.STATUS, this._status);
+  }
 
   const detail = { status };
 
@@ -286,7 +289,7 @@ public set status(status: Status) {
 }
 ```
 
-In this example, the event is emitted only after validation succeeds, the guard allows the transition, and the canonical state has been updated to the accepted outcome.
+In this example, the event is emitted only after validation succeeds, the guard allows the transition, and the canonical state has been updated to the accepted outcome. The dispatch lines sit after the `finally` block: a rejected or ignored value leaves through `finally` and never reaches them.
 
 # 9) Naming Must Be Predictably Transformed Across Layers
 
@@ -477,14 +480,16 @@ Dispatch from within the authoritative state setters:
 
 ```typescript
 public set visibility(visibility: Visibility | null) {
-  visibility = visibility ?? Visibility.VISIBLE;
-  visibility = Validate.visibility(visibility);
+  try {
+    visibility = visibility ?? Visibility.VISIBLE;
+    visibility = Validate.visibility(visibility);
 
-  if (this._visibility === visibility) return;
+    if (this._visibility === visibility) return;
 
-  this._visibility = visibility;
-  visibility === Visibility.VISIBLE && this.removeAttribute(Attributes.VISIBILITY);
-  visibility === Visibility.HIDDEN && this.setAttribute(Attributes.VISIBILITY, visibility);
+    this._visibility = visibility;
+  } finally {
+    this._reflect(Attributes.VISIBILITY, this._visibility, Visibility.VISIBLE);
+  }
 
   const detail = { visibility };
 
@@ -493,12 +498,15 @@ public set visibility(visibility: Visibility | null) {
 }
 
 public set status(status: Status) {
-  status = Validate.status(status);
+  try {
+    status = Validate.status(status);
 
-  if (this._status === status) return;
+    if (this._status === status) return;
 
-  this._status = status;
-  this.setAttribute(Attributes.STATUS, status);
+    this._status = status;
+  } finally {
+    this._reflect(Attributes.STATUS, this._status);
+  }
 
   const detail = { status };
 
