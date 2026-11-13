@@ -294,8 +294,9 @@ A key press goes to the element that has focus. A keyboard gesture on an element
 Policy:
 
 - the target of a keyboard gesture must be focusable
-- an element that is not focusable by itself, such as a `div`, is made focusable in the template with `tabindex="0"`
-- such an element also declares its `role` in the template, so that assistive technology announces what it is
+- an element that is not focusable by itself, such as a `div`, is made focusable with `tabindex="0"`
+- such an element also declares its `role`, so that assistive technology announces what it is
+- both are declared under `attributes` on the composition part and realized in the template (see the composition policy, Section 10)
 - an element the user can click should also be operable by keyboard
 
 Example:
