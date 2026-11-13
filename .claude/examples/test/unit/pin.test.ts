@@ -569,12 +569,17 @@ operation(Operation.HIDE, () => {
 
         and("`pin.hide` method exists", () => {
           when("invoking `pin.hide`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.hide();
+              result = pin.hide();
             });
 
             then("`pin.visibility` is `Visibility.HIDDEN`", () => {
               expect(pin.visibility).toBe(Visibility.HIDDEN);
+            });
+
+            then("`pin.hide` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
@@ -620,12 +625,17 @@ operation(Operation.SHOW, () => {
             });
 
             when("invoking `pin.show`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.show();
+                result = pin.show();
               });
 
               then("`pin.visibility` is `Visibility.VISIBLE`", () => {
                 expect(pin.visibility).toBe(Visibility.VISIBLE);
+              });
+
+              then("`pin.show` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
@@ -664,12 +674,17 @@ operation(Operation.PIN, () => {
 
         and("`pin.pin` method exists", () => {
           when("invoking `pin.pin`", () => {
+            let result: unknown;
             beforeEach(() => {
-              pin.pin();
+              result = pin.pin();
             });
 
             then("`pin.status` is `Status.PINNED`", () => {
               expect(pin.status).toBe(Status.PINNED);
+            });
+
+            then("`pin.pin` returns nothing", () => {
+              expect(result).toBeUndefined();
             });
           });
         });
@@ -715,12 +730,17 @@ operation(Operation.UNPIN, () => {
             });
 
             when("invoking `pin.unpin`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.unpin();
+                result = pin.unpin();
               });
 
               then("`pin.status` is `Status.UNPINNED`", () => {
                 expect(pin.status).toBe(Status.UNPINNED);
+              });
+
+              then("`pin.unpin` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });
@@ -767,12 +787,17 @@ operation(Operation.TOGGLE, () => {
             });
 
             when("invoking `pin.toggle`", () => {
+              let result: unknown;
               beforeEach(() => {
-                pin.toggle();
+                result = pin.toggle();
               });
 
               then("`pin.status` is `Status.PINNED`", () => {
                 expect(pin.status).toBe(Status.PINNED);
+              });
+
+              then("`pin.toggle` returns nothing", () => {
+                expect(result).toBeUndefined();
               });
             });
           });

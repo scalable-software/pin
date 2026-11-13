@@ -17,6 +17,8 @@ import {
   Gesture
 } from "./pin.meta.js";
 
+import { type Meta } from "./pin.meta.js";
+
 // Validation
 import { Validate } from "./pin.validation.js";
 
@@ -37,7 +39,7 @@ export const configuration: Configuration = {
 /**
  * @category Pin
  */
-export class Pin extends Component {
+export class Pin extends Component implements Meta {
   /**
    * The tag name of the pin
    * @category Configuration
@@ -220,33 +222,42 @@ export class Pin extends Component {
    * Hide the pin button when it is visible
    * @category Operations
    */
-  public hide = () => (this.visibility = Visibility.HIDDEN);
+  public hide = () => {
+    this.visibility = Visibility.HIDDEN;
+  };
 
   /**
    * Show the pin button when it is hidden
    * @category Operations
    */
-  public show = () => (this.visibility = Visibility.VISIBLE);
+  public show = () => {
+    this.visibility = Visibility.VISIBLE;
+  };
 
   /**
    * Pin the pin button when it is unpinned
    * @category Operations
    */
-  public pin = () => (this.status = Status.PINNED);
+  public pin = () => {
+    this.status = Status.PINNED;
+  };
 
   /**
    * Unpin the pin button when it is pinned
    * @category Operations
    */
-  public unpin = () => (this.status = Status.UNPINNED);
+  public unpin = () => {
+    this.status = Status.UNPINNED;
+  };
 
   /**
    * Pin the pin button when it is unpinned, and unpin it when it is pinned
    * @category Operations
    */
-  public toggle = () =>
-    (this.status =
-      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED);
+  public toggle = () => {
+    this.status =
+      this.status === Status.PINNED ? Status.UNPINNED : Status.PINNED;
+  };
 
   /**
    * List operations to perform for selected attributes being observed in the DOM.

@@ -115,3 +115,27 @@ export const Gesture = {
  * @category Metadata
  */
 export type Gesture = (typeof Gesture)[keyof typeof Gesture];
+
+/**
+ * Every state the component must have
+ * @category Metadata
+ */
+export type States = Record<State, unknown>;
+
+/**
+ * Every operation the component must have
+ * @category Metadata
+ */
+export type Operations = Record<Operation, (...parameters: any[]) => unknown>;
+
+/**
+ * Every event the component must have a subscription property for
+ * @category Metadata
+ */
+export type Events = Record<Event, EventListener | null>;
+
+/**
+ * Everything the metadata says the component has: implemented by the component
+ * @category Metadata
+ */
+export type Meta = States & Operations & Events;
