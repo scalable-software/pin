@@ -134,6 +134,7 @@ svg {
 ======================= */
 :host([appearance="flat"]) .icon {
   border-color: transparent;
+  border-radius: 0;
   box-shadow: none;
 }
 
