@@ -427,6 +427,8 @@ Nine pairs and two `TESTING` commits. Every pair after the first asserts somethi
 - **Visual gestures.** A test cannot hover, so a gesture declared with `effects` has no specs.
 - **Styles.** No spec reads how the component is drawn.
 
+Not yet described here, because the `pin` has none of them: tests for data, for a state that is not attribute-backed, and for a readonly state.
+
 # 9) Checklist
 
 1. Test every construct for existence, value and behaviour.
