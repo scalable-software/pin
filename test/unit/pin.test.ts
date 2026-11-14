@@ -1233,6 +1233,17 @@ events(Event.ON_SHOW, () => {
                 });
               });
 
+              when("`pin.visibility` is set to `Visibility.VISIBLE` twice", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("`pin.onshow` is called once", () => {
+                  expect(onshow).toHaveBeenCalledTimes(1);
+                });
+              });
+
               and("`pin.onshow` is set to a new listener", () => {
                 let onshow2: jasmine.Spy;
                 beforeEach(() => {
