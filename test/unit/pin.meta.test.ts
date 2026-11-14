@@ -161,8 +161,16 @@ metadata(State.STATUS, () => {
           expect(Status.PINNED).toBeDefined();
         });
 
+        then("`Status.PINNED` is `pinned`", () => {
+          expect(Status.PINNED).toBe("pinned");
+        });
+
         then("`Status.UNPINNED` exists", () => {
           expect(Status.UNPINNED).toBeDefined();
+        });
+
+        then("`Status.UNPINNED` is `unpinned`", () => {
+          expect(Status.UNPINNED).toBe("unpinned");
         });
       });
     });
