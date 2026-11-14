@@ -297,16 +297,32 @@ metadata(Metadata.EVENT, () => {
           expect(Event.ON_HIDE).toBeDefined();
         });
 
+        then("`Event.ON_HIDE` is `onhide`", () => {
+          expect(Event.ON_HIDE).toBe("onhide");
+        });
+
         then("`Event.ON_SHOW` exists", () => {
           expect(Event.ON_SHOW).toBeDefined();
+        });
+
+        then("`Event.ON_SHOW` is `onshow`", () => {
+          expect(Event.ON_SHOW).toBe("onshow");
         });
 
         then("`Event.ON_PIN` exists", () => {
           expect(Event.ON_PIN).toBeDefined();
         });
 
+        then("`Event.ON_PIN` is `onpin`", () => {
+          expect(Event.ON_PIN).toBe("onpin");
+        });
+
         then("`Event.ON_UNPIN` exists", () => {
           expect(Event.ON_UNPIN).toBeDefined();
+        });
+
+        then("`Event.ON_UNPIN` is `onunpin`", () => {
+          expect(Event.ON_UNPIN).toBe("onunpin");
         });
       });
     });
