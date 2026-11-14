@@ -17,6 +17,10 @@ metadata(Metadata.TAG, () => {
     then("Tag is defined", () => {
       expect(Tag).toBeDefined();
     });
+
+    then("Tag is `pin-button`", () => {
+      expect(Tag).toBe("pin-button");
+    });
   });
 });
 
@@ -37,12 +41,24 @@ metadata(Metadata.ATTRIBUTES, () => {
           expect(Attributes.VISIBILITY).toBeDefined();
         });
 
+        then("`Attributes.VISIBILITY` is `visibility`", () => {
+          expect(Attributes.VISIBILITY).toBe("visibility");
+        });
+
         then("`Attributes.STATUS` exists", () => {
           expect(Attributes.STATUS).toBeDefined();
         });
 
+        then("`Attributes.STATUS` is `status`", () => {
+          expect(Attributes.STATUS).toBe("status");
+        });
+
         then("`Attributes.APPEARANCE` exists", () => {
           expect(Attributes.APPEARANCE).toBeDefined();
+        });
+
+        then("`Attributes.APPEARANCE` is `appearance`", () => {
+          expect(Attributes.APPEARANCE).toBe("appearance");
         });
       });
     });
@@ -73,12 +89,24 @@ metadata(Metadata.STATE, () => {
           expect(State.VISIBILITY).toBeDefined();
         });
 
+        then("`State.VISIBILITY` is `visibility`", () => {
+          expect(State.VISIBILITY).toBe("visibility");
+        });
+
         then("`State.STATUS` exists", () => {
           expect(State.STATUS).toBeDefined();
         });
 
+        then("`State.STATUS` is `status`", () => {
+          expect(State.STATUS).toBe("status");
+        });
+
         then("`State.APPEARANCE` exists", () => {
           expect(State.APPEARANCE).toBeDefined();
+        });
+
+        then("`State.APPEARANCE` is `appearance`", () => {
+          expect(State.APPEARANCE).toBe("appearance");
         });
       });
     });
@@ -101,8 +129,16 @@ metadata(State.VISIBILITY, () => {
           expect(Visibility.VISIBLE).toBeDefined();
         });
 
+        then("`Visibility.VISIBLE` is `visible`", () => {
+          expect(Visibility.VISIBLE).toBe("visible");
+        });
+
         then("`Visibility.HIDDEN` exists", () => {
           expect(Visibility.HIDDEN).toBeDefined();
+        });
+
+        then("`Visibility.HIDDEN` is `hidden`", () => {
+          expect(Visibility.HIDDEN).toBe("hidden");
         });
       });
     });
@@ -125,8 +161,16 @@ metadata(State.STATUS, () => {
           expect(Status.PINNED).toBeDefined();
         });
 
+        then("`Status.PINNED` is `pinned`", () => {
+          expect(Status.PINNED).toBe("pinned");
+        });
+
         then("`Status.UNPINNED` exists", () => {
           expect(Status.UNPINNED).toBeDefined();
+        });
+
+        then("`Status.UNPINNED` is `unpinned`", () => {
+          expect(Status.UNPINNED).toBe("unpinned");
         });
       });
     });
@@ -149,8 +193,16 @@ metadata(State.APPEARANCE, () => {
           expect(Appearance.FLOATING).toBeDefined();
         });
 
+        then("`Appearance.FLOATING` is `floating`", () => {
+          expect(Appearance.FLOATING).toBe("floating");
+        });
+
         then("`Appearance.FLAT` exists", () => {
           expect(Appearance.FLAT).toBeDefined();
+        });
+
+        then("`Appearance.FLAT` is `flat`", () => {
+          expect(Appearance.FLAT).toBe("flat");
         });
       });
     });
@@ -181,20 +233,40 @@ metadata(Metadata.OPERATION, () => {
           expect(Operation.HIDE).toBeDefined();
         });
 
+        then("`Operation.HIDE` is `hide`", () => {
+          expect(Operation.HIDE).toBe("hide");
+        });
+
         then("`Operation.SHOW` exists", () => {
           expect(Operation.SHOW).toBeDefined();
+        });
+
+        then("`Operation.SHOW` is `show`", () => {
+          expect(Operation.SHOW).toBe("show");
         });
 
         then("`Operation.PIN` exists", () => {
           expect(Operation.PIN).toBeDefined();
         });
 
+        then("`Operation.PIN` is `pin`", () => {
+          expect(Operation.PIN).toBe("pin");
+        });
+
         then("`Operation.UNPIN` exists", () => {
           expect(Operation.UNPIN).toBeDefined();
         });
 
+        then("`Operation.UNPIN` is `unpin`", () => {
+          expect(Operation.UNPIN).toBe("unpin");
+        });
+
         then("`Operation.TOGGLE` exists", () => {
           expect(Operation.TOGGLE).toBeDefined();
+        });
+
+        then("`Operation.TOGGLE` is `toggle`", () => {
+          expect(Operation.TOGGLE).toBe("toggle");
         });
       });
     });
@@ -225,16 +297,32 @@ metadata(Metadata.EVENT, () => {
           expect(Event.ON_HIDE).toBeDefined();
         });
 
+        then("`Event.ON_HIDE` is `onhide`", () => {
+          expect(Event.ON_HIDE).toBe("onhide");
+        });
+
         then("`Event.ON_SHOW` exists", () => {
           expect(Event.ON_SHOW).toBeDefined();
+        });
+
+        then("`Event.ON_SHOW` is `onshow`", () => {
+          expect(Event.ON_SHOW).toBe("onshow");
         });
 
         then("`Event.ON_PIN` exists", () => {
           expect(Event.ON_PIN).toBeDefined();
         });
 
+        then("`Event.ON_PIN` is `onpin`", () => {
+          expect(Event.ON_PIN).toBe("onpin");
+        });
+
         then("`Event.ON_UNPIN` exists", () => {
           expect(Event.ON_UNPIN).toBeDefined();
+        });
+
+        then("`Event.ON_UNPIN` is `onunpin`", () => {
+          expect(Event.ON_UNPIN).toBe("onunpin");
         });
       });
     });
@@ -258,8 +346,16 @@ metadata(Metadata.GESTURE, () => {
           expect(Gesture.CLICK).toBeDefined();
         });
 
+        then("`Gesture.CLICK` is `click`", () => {
+          expect(Gesture.CLICK).toBe("click");
+        });
+
         then("`Gesture.KEYDOWN` exists", () => {
           expect(Gesture.KEYDOWN).toBeDefined();
+        });
+
+        then("`Gesture.KEYDOWN` is `keydown`", () => {
+          expect(Gesture.KEYDOWN).toBe("keydown");
         });
       });
     });
@@ -281,6 +377,10 @@ metadata(Metadata.KEY, () => {
       when("Key is an object", () => {
         then("`Key.ENTER` exists", () => {
           expect(Key.ENTER).toBeDefined();
+        });
+
+        then("`Key.ENTER` is `Enter`", () => {
+          expect(Key.ENTER).toBe("Enter");
         });
       });
     });

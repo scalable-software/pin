@@ -1,143 +1,164 @@
 # Requirements
 
-This document defines an implementation policy for **component requirements**, then illustrates how the policy is applied to a component.
+This document describes how the intent of a component is recorded: what a requirements file contains, when a story is written into it, how a story is worded, and how the change is committed.
 
-This document is intentionally **requirements** only, but part of a set of implementation policies which together define the policies which should be followed to transform specifications into an implementation which is predictable, maintainable, and production-ready at scale.
+It is a workflow. What happens to a story after it is written — the issue, the branch, the pull request — is described in `github.md`.
 
-Requirements are the intent layer of a component: they record **why** the component exists and **which needs** it serves. Every other layer is derived from them.
-
----
-
-# How to Read This Policy
-
-Rules in this policy fall into three strengths. Read each rule with its strength in mind:
-
-- **Principles** are non-negotiable. They derive from framework correctness or TDD discipline and hold for every component. A conflict with a principle is a defect.
-- **Templates** are invariant skeletons with explicit variation points. The skeleton applies to every component; specific steps activate or deactivate based on the component's declared classification (e.g., attribute-backed vs non-attribute, readonly vs writable, payload-bearing vs payload-free). Variation is part of the template, not a deviation from it.
-- **Conventions** are canonical defaults that keep implementations readable across components. A second component may deviate when its shape genuinely warrants it; the deviation should be explained at review time, not forbidden by the policy.
-
-When applying this policy to a new component, classify each rule before reconciling conflicts. A conflict with a principle is a defect; a conflict with a template means a variation point needs to be made explicit; a conflict with a convention is a documented deviation.
+The examples are from the `pin` component.
 
 ---
 
-# 1) Requirements Must Be Declared in a Dedicated File
+# 1) Where a Requirement Sits
 
-Each component must declare its requirements in `specifications/<component>.requirements.md`, next to `<component>.specifications.json`.
+Requirements are the first of four records of a component. Each answers one question, at its own level of detail.
 
-Policy:
-
-- the requirements file is the durable record of the component's intent
-- the requirements file contains requirements only — it must not explain what a requirements file is or how it is used; that explanation belongs to this policy
-- the requirements file is versioned with the component, so intent, contract, implementation, and tests evolve together
-
-# 2) Each Artefact Answers One Question
-
-Requirements are one layer in a chain of artefacts. Each artefact answers exactly one question at its own level of detail:
-
-| Artefact | Level | Answers | Lifetime |
+| Record | Level | The question it answers | How long it lives |
 |---|---|---|---|
-| `<component>.requirements.md` | Intent | Why does the component exist, and for whom? | Life of the component |
-| Issue | Work item | What counts as done? | Until the story is delivered |
-| `<component>.specifications.json` | Contract | What is the public contract? | Life of the component |
-| `test/unit/*` | Proof | Is the contract honoured? | Life of the component |
+| `<component>.requirements.md` | intent | Why does the component exist, and for whom? | the life of the component |
+| the issue | work item | What counts as done? | until the work is delivered |
+| `<component>.specifications.json` | contract | What is the public contract? | the life of the component |
+| `test/unit/*` | proof | Is the contract honoured? | the life of the component |
 
-Policy:
+Requirements stay at the level of intent. They never repeat what a lower record already says.
 
-- requirements must stay at the level of intent
-- requirements must not repeat what a lower layer already records
+# 2) The Requirements File
 
-# 3) Requirements Must Not Contain Acceptance Criteria
+Each component records its requirements in `specifications/<component>.requirements.md`, next to its specification.
 
-Acceptance criteria define when a story is done. They belong to the story's issue while the story is in progress, and to the tests once it is delivered.
+- It contains requirements only. It does not explain what a requirements file is or how it is used; this document does that.
+- It is versioned with the component, so intent, contract, implementation and tests change together.
 
-Policy:
+# 3) What the File Contains
 
-- requirements must not contain Given/When/Then acceptance criteria
-- requirements must not describe constructs — state, data, operations, events, gestures, or composition; these belong to the specification
-- requirements must not describe implementation or verification detail
-- acceptance criteria are written in the story's issue (see the workflow policy)
+The file is a list of features, and each feature contains stories.
 
-This keeps one durable home for each level of detail: intent in the requirements, contract in the specification, criteria in the tests.
+- **A feature** is a capability that delivers a benefit. It groups every story that serves that capability, whenever the story was written.
+- **A story** is one persona's need.
 
-# 4) Requirements Must Be Structured as Features Containing Stories
+Every file has at least one feature, and every story in the file sits under exactly one feature.
 
-The backlog levels used by this framework are:
+## 3.1) A feature
 
-- **Feature** — a capability that delivers a benefit; a group of stories. A feature is too large to deliver in one merge and is complete when all of its stories are delivered.
-- **Story** — one persona's need, small enough to deliver and verify on one branch.
+A feature is a second-level section titled `FEATURE: <title>`. It declares four things.
 
-Policy:
+| Part | What it says |
+|---|---|
+| **Benefit** | the value the capability delivers, in one or two sentences |
+| **Personas** | everyone its stories are written for, each with a one-line description |
+| **In scope** | what the capability covers |
+| **Out of scope** | what a reader might expect, but the capability deliberately does not cover |
 
-- every requirements file declares at least one feature
-- every story belongs to exactly one feature
-- a feature is never delivered directly; it is delivered through its stories
-- defects are not requirements: a fix restores a requirement that already exists and is not recorded in the requirements file
+Out of scope matters most where the component's responsibility ends and the host application's begins. Say so explicitly.
 
-# 5) A Feature Must Declare Its Benefit, Personas, and Scope
+## 3.2) A story
 
-Each feature is a level-two section titled `FEATURE: <title>` and must declare:
+A story is a third-level section titled `STORY: <title>`, under its feature. It contains the story statement and nothing else.
 
-- **Benefit** — the value the capability delivers, in one or two sentences
-- **Personas** — every persona its stories are written for, each with a one-line role description
-- **In scope** — what the capability covers
-- **Out of scope** — what a reader might reasonably expect but the capability deliberately does not cover
+## 3.3) What stays out
 
-Policy:
+| Not in the file | Where it belongs |
+|---|---|
+| acceptance criteria | the story's issue, and the tests once the work is delivered |
+| states, data, operations, events, gestures, composition | the specification |
+| implementation and test detail | the code and the tests |
+| defects | a fix restores a requirement that already exists; it is not a requirement |
 
-- personas are declared per feature; a story must only use personas declared by its feature
-- personas name the role of whoever has the need — for a component this is typically the person using it (*end user*) and the application embedding it (*host application*)
-- out of scope must be explicit wherever the component's responsibility ends and the host application's begins
+This keeps one home for each level of detail.
 
-# 6) A Story Must Be Expressed in the Canonical User Story Form
+# 4) Writing a Story
 
-Each story is a level-three section titled `STORY: <title>` beneath its feature, containing the story statement in the canonical form:
+A story has one form:
 
-```
+```text
 As a <persona>, when <context>, I want <need>, so that <value>.
 ```
 
-Policy:
+- `when <context>` may be left out when the need applies in every context.
+- `so that <value>` is never left out. It is the reason the story exists.
+- The story states a need, not a solution. It names no construct, no API and no implementation.
+- A story may hold more than one statement when one deliverable serves several personas. Each statement uses the same form.
 
-- the persona must be declared by the feature
-- `when <context>` may be omitted when the need applies in every context
-- `so that <value>` must not be omitted — it is the reason the story exists
-- a story may contain more than one statement when a single deliverable serves several personas; each statement uses the canonical form
-- the story states a need, not a solution — it must not name constructs, APIs, or implementation
+```markdown
+### STORY: Pin and Unpin
 
-# 7) Story Titles Must Be Predictably Transformed Across Layers
+As an **end user**, when an element is important to what I am doing, I want to pin it in
+place and unpin it when I no longer need it, so that I control what stays on screen.
 
-A story's title is the link between the requirements and the delivery chain defined in the workflow policy.
+As a **host application**, I want to be told whenever the pin is pinned or unpinned, so that
+I can fix or release the element accordingly.
+```
 
-Transformation pattern:
+# 5) Personas
 
-| Layer | Example |
-|---|---|
-| Requirements | `### STORY: Visibility Control` |
-| Issue title | `STORY: Visibility Control` |
-| Branch | `story/visibility-control` |
-| Merge commit | `STORY: Visibility Control` |
+A persona names the role of whoever has the need.
 
-Policy:
+- Personas are declared by the feature. A story in the file uses only the personas its feature declares.
+- For a component these are typically the person using it, the *end user*, and the application embedding it, the *host application*.
+- Work on the package itself has no feature: a build change, an upgrade, a workflow. Its story is written for the *maintainer*, the person who builds, releases and keeps the component.
 
-- the story title in the requirements file and the issue title must be identical
-- the issue body repeats the story statement and adds its Given/When/Then acceptance criteria
-- a feature may be tracked as a parent issue titled `FEATURE: <title>` whose sub-issues are its stories
-- `FEATURE` never appears on a branch, commit, or merge commit
+# 6) Does the Story Go in the File?
 
-# 8) Requirements Changes Are Recorded Through `REQUIREMENTS:` Commits
+Not every story is recorded. Ask one question: **does this story describe something that stays true for the life of the component?**
 
-Policy:
+| The story | Example | Where it lives |
+|---|---|---|
+| lasts | the pin can be operated by keyboard | the requirements file, and its issue |
+| is a one-time event | the pin moves to a newer base component | its issue only |
 
-- every change to a requirements file is a `REQUIREMENTS:` commit
-- a new story is recorded through the first commit on its `story/<title>` branch, unless it is already recorded
-- one `REQUIREMENTS:` commit per story
-- renaming a story is a change across every layer of the transformation pattern in Section 7 and must keep those layers aligned
+A story that is recorded belongs to the feature whose capability it serves. A story that is not recorded has no feature.
 
----
+# 7) A Feature in the File and a Feature in Delivery
 
-# Policy Applied to a Component
+The word *feature* is used for two things, and they are kept apart.
 
-`specifications/pin.requirements.md`:
+**In the requirements file**, a feature is a capability. It keeps collecting stories for as long as the component lives.
+
+**In delivery**, what is delivered together depends on when the stories were written.
+
+| The stories | Delivered on | Merged as |
+|---|---|---|
+| defined together, as a new feature | one `feature/<title>` branch, one story after another | `FEATURE: <title>` |
+| one story added to a feature that already exists | its own `story/<title>` branch | `STORY: <title>` |
+| one story that is in no feature | its own `story/<title>` branch | `STORY: <title>` |
+
+So a story can sit under a feature in the file and still be delivered alone.
+
+# 8) Adding a Story
+
+1. Write the story in its one form.
+2. Decide whether it lasts. If it does not, it goes in its issue only, and the steps below do not apply.
+3. Add it to the file as `### STORY: <title>`, under the feature whose capability it serves.
+4. Read that feature's benefit, in scope and out of scope again. A new story often widens the scope; update those parts in the same change.
+5. Commit the change as the first commit on the story's branch.
+
+A new feature is added the same way: its section with benefit, personas and scope, then its stories.
+
+# 9) The Title Is the Link
+
+A story's title connects the requirements file to everything that follows. It is the same at every stage.
+
+| Stage | A story | A feature delivered as a whole |
+|---|---|---|
+| Requirements file | `### STORY: Visibility Control` | `## FEATURE: Pinnable UI Elements` |
+| Issue | `STORY: Visibility Control` | `FEATURE: Pinnable UI Elements`, with its stories as sub-issues |
+| Branch | `story/visibility-control` | `feature/pinnable-ui-elements` |
+| Merge commit | `STORY: Visibility Control` | `FEATURE: Pinnable UI Elements` |
+
+Renaming a story means renaming it at every stage that already exists.
+
+# 10) Committing the Change
+
+- Every change to a requirements file is a `REQUIREMENTS:` commit.
+- There is one `REQUIREMENTS:` commit for each story, and it carries the changes to the feature's scope that the story brings.
+- It is the first commit on the story's branch, unless the story is already recorded.
+
+```text
+REQUIREMENTS: Record the flat appearance story
+```
+
+# 11) A Requirements File
+
+`specifications/pin.requirements.md`, shortened:
 
 ```markdown
 # Pin — Requirements
@@ -177,33 +198,16 @@ hide the pin and show it again later, so that the end user only sees controls th
 ...
 ```
 
-How the policy is applied:
+# 12) Checklist
 
-- the file lives at `specifications/pin.requirements.md`, next to `pin.specifications.json`
-- the file contains requirements only — no explanation of the file itself
-- one feature declares its benefit, personas, and scope
-- out of scope marks where the pin's responsibility ends and the host application's begins
-- every story uses a persona declared by the feature and the canonical user story form
-- no story contains acceptance criteria, constructs, or implementation detail
-- each story title is identical to its issue title and merge-commit title
-
----
-
-# Policy Checklist
-
-A compliant component must:
-
-1. Declare requirements in `specifications/<component>.requirements.md`.
-2. Keep the requirements file free of explanation about the file itself.
-3. Keep requirements at the level of intent.
-4. Exclude acceptance criteria from the requirements file — write them in the story's issue.
-5. Exclude constructs and implementation detail from the requirements file.
-6. Declare at least one feature as `## FEATURE: <title>`.
-7. Declare each feature's benefit, personas, in scope, and out of scope.
-8. Declare each story as `### STORY: <title>` beneath exactly one feature.
-9. Express each story as `As a <persona>, when <context>, I want <need>, so that <value>.`
-10. Use only personas declared by the story's feature.
-11. Never omit `so that <value>`.
-12. Keep fixes out of the requirements file.
-13. Keep each story title identical across requirements, issue, and merge commit, and kebab-cased in the branch.
-14. Record every requirements change through a `REQUIREMENTS:` commit, one per story.
+1. Record requirements in `specifications/<component>.requirements.md`, and nothing else in that file.
+2. Keep requirements at the level of intent: no acceptance criteria, no constructs, no implementation, no defects.
+3. Group stories under features; give every feature its benefit, personas, in scope and out of scope.
+4. Write every story as `As a <persona>, when <context>, I want <need>, so that <value>.`, and never leave out the value.
+5. Use only the personas the story's feature declares; write work on the package itself for the maintainer.
+6. Record a story only when it stays true for the life of the component.
+7. Put a recorded story under the feature whose capability it serves.
+8. When a story is added, read the feature's benefit and scope again and update them in the same commit.
+9. Deliver stories defined together on one feature branch; deliver a story added later, or one in no feature, on its own story branch.
+10. Keep the title identical in the requirements file, the issue and the merge commit, and in lower case with hyphens in the branch.
+11. Make one `REQUIREMENTS:` commit for each story, as the first commit on its branch.

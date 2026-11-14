@@ -359,6 +359,7 @@ For attribute-backed state, Reflect is not optional and always runs. The first f
 
 - Reflect reads the backing field, not the setter's parameter: after a rejected value the parameter still holds the invalid input.
 - Reflect goes through `_reflect`, never a direct `setAttribute`: writing a value the attribute already has triggers `attributeChangedCallback` again, and a phase that always runs would loop.
+- The setter's parameter carries the name of its state: `set visibility(visibility)`, `set status(status)`. An event's detail can then be written in shorthand, `{ visibility }`. Validators and attribute handlers are generic and keep `value`.
 - Dispatch, and anything else that follows an accepted change, comes after the `finally` block. The guard's `return` and the validator's error both leave through `finally` without reaching it.
 
 Note: The normalization step for optional attribute-backed state handles a specific platform behavior: `attributeChangedCallback` passes `null` as the new value when an attribute is removed from the DOM. Without normalization, this `null` would reach validation and throw. Normalization ensures attribute removal is treated as equivalent to assigning the default value. Use `??` (nullish coalescing) rather than `||` (logical OR) so that only `null` and `undefined` are normalized — any other invalid value is left for validation to reject.

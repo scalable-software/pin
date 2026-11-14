@@ -251,6 +251,10 @@ state(State.VISIBILITY, () => {
           });
         });
 
+        then("`visibility` attribute does not exist", () => {
+          expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+        });
+
         then("`pin.visibility` setter exists", () => {
           expect(hasSetter(pin, "visibility")).toBeTrue();
         });
@@ -271,6 +275,16 @@ state(State.VISIBILITY, () => {
             then("pin `visibility` attribute is `Visibility.HIDDEN`", () => {
               const value = pin.getAttribute(Attributes.VISIBILITY);
               expect(value).toBe(Visibility.HIDDEN);
+            });
+
+            when("`pin.visibility` is set to `Visibility.VISIBLE`", () => {
+              beforeEach(() => {
+                pin.visibility = Visibility.VISIBLE;
+              });
+
+              then("`visibility` attribute does not exist", () => {
+                expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+              });
             });
           });
 
@@ -501,6 +515,21 @@ state(State.STATUS, () => {
         });
 
         and("`pin.status` setter exists", () => {
+          when("`pin.status` is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            then("`pin.status` is `Status.PINNED`", () => {
+              expect(pin.status).toBe(Status.PINNED);
+            });
+
+            then("pin `status` attribute is `Status.PINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.PINNED);
+            });
+          });
+
           when("`pin.status` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
@@ -1204,6 +1233,17 @@ events(Event.ON_SHOW, () => {
                 });
               });
 
+              when("`pin.visibility` is set to `Visibility.VISIBLE` twice", () => {
+                beforeEach(() => {
+                  pin.visibility = Visibility.VISIBLE;
+                  pin.visibility = Visibility.VISIBLE;
+                });
+
+                then("`pin.onshow` is called once", () => {
+                  expect(onshow).toHaveBeenCalledTimes(1);
+                });
+              });
+
               and("`pin.onshow` is set to a new listener", () => {
                 let onshow2: jasmine.Spy;
                 beforeEach(() => {
@@ -1458,6 +1498,17 @@ events(Event.ON_UNPIN, () => {
                   then("`pin.onunpin` is still called", () => {
                     expect(onunpin).toHaveBeenCalled();
                   });
+                });
+              });
+
+              when("`pin.status` is set to `Status.UNPINNED` twice", () => {
+                beforeEach(() => {
+                  pin.status = Status.UNPINNED;
+                  pin.status = Status.UNPINNED;
+                });
+
+                then("`pin.onunpin` is called once", () => {
+                  expect(onunpin).toHaveBeenCalledTimes(1);
                 });
               });
 

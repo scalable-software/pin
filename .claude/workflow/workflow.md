@@ -1,180 +1,193 @@
 # Workflow
 
-This document defines the implementation policy for **branching, commit sequencing, and TDD discipline**. It is the authoritative reference for how work is recorded in git history. The reference standard is the commit history of the `scalable.software/pin` component — the canonical example of this policy applied end to end.
+This document describes how a piece of work moves from an idea to a release. It is the map: it gives the whole path in order, and it holds the two parts that have no document of their own, branches and commits.
 
----
+Each stage of the path has its own document.
 
-# How to Read This Policy
-
-Rules in this policy fall into three strengths:
-
-- **Principles** are non-negotiable: the FAIL-before-PASS ordering, the one-concern-per-commit rule, the prefix vocabulary, and the identical-title traceability chain.
-- **Templates** are invariant skeletons with variation points: the per-layer commit sequences activate per story depending on which layers the story touches.
-- **Conventions** are canonical defaults: branch naming families, message grammar details. Deviations should be explainable at review time.
-
----
-
-# 1) Traceability Chain
-
-Work is traceable from the requirement that motivates it to the merge commit that delivers it. One title is predictably transformed across every layer:
-
-```
-<component>.requirements.md  →  issue  →  branch  →  layer commits  →  merge commit
-```
-
-| Layer | Story example | Fix example |
-|---|---|---|
-| Requirements | `### STORY: Visibility Control` | — |
-| Issue title | `STORY: Visibility Control` | `FIX: Hidden pin still clickable` |
-| Issue body | user story + Given/When/Then acceptance criteria | defect description + Given/When/Then acceptance criteria |
-| Branch | `story/visibility-control` | `fix/hidden-pin-still-clickable` |
-| Layer commits | `REQUIREMENTS:`, `STATE:`, `OPERATION:`, `EVENT:` … | `STATE:`, `EVENT:` … |
-| Merge commit | `STORY: Visibility Control` | `FIX: Hidden pin still clickable` |
-
-- The issue title and the merge-commit title are **identical**.
-- The branch slug is the kebab-case of the title without its prefix.
-- The requirements policy (`requirements.md`) defines the requirements file; this policy defines everything from the issue onward.
-
-**Backlog levels:**
-
-- **Feature** — a capability that delivers a benefit; a group of stories. It is declared as a `FEATURE:` section in `<component>.requirements.md` and may be tracked as a parent issue whose sub-issues are its stories. A feature is never delivered in a single merge, so `FEATURE` never appears on a branch, a commit, or a merge commit. A feature is complete when all of its stories are merged.
-- **Story** — one persona's need, small enough to deliver and verify on one branch.
-- **Fix** — a defect against behaviour that already exists.
-
-# 2) Branching
-
-- One story or fix per branch. Behavioral work is never committed directly to `main`; documentation-only changes may be.
-- **Backlog branch families** mirror the backlog item type of the issue they deliver:
-  - `story/<title>` — a user story declared in `<component>.requirements.md`
-  - `fix/<title>` — a defect against existing behaviour
-- **Non-backlog branch families** in use:
-  - `migration/<component>` — component metadata migrations (see migration.md)
-  - `machine/<name>` — work on the Machine host component or machine internals
-  - `workflow/<name>` — app workflow work
-  - `upgrade/<name>`, `refactor/<name>` — as named
-  - `ai/<name>` — agent instructions and context
-- A branch closes with its final `DOCUMENTATION:` commits. The closure title goes on the **merge commit** only, never on a commit added to the branch: `STORY: <title>` for stories, `FIX: <title>` for fixes, `MIGRATION: <summary>` for migrations.
-- Version commits are produced by `npm version` (message is the bare version, e.g. `0.14.0`) and pushed together with their tag: `git push origin main --follow-tags`.
-
-## 2.1) Branch Lifecycle
-
-A backlog branch moves through the following steps, in order:
-
-1. **Issue first** — the branch is created only after its issue exists. The branch name is derived from the issue title, never the other way round.
-2. **Create** — the specialist doing the work creates the branch, after the human's `Go`, from an up-to-date `main`:
-   ```
-   git switch main
-   git pull origin main
-   git switch -c story/visibility-control
-   ```
-3. **Work** — commits follow the pipeline order (Section 6). The branch is pushed to origin with upstream tracking on its first push (`git push -u origin story/visibility-control`) and may be pushed at any time after that.
-4. **Close** — when the branch ends with its final `DOCUMENTATION:` commits and every gate passes, the specialist pushes it and opens a pull request:
-   - the pull request title is identical to the issue title: `STORY: Visibility Control`
-   - the pull request body links the issue with a closing keyword: `Closes #1`
-5. **Merge** — the human merges the pull request with a **merge commit** whose title is the closure title. Squash and rebase merges are not used: they would erase the FAIL/PASS history that records the component's contract.
-6. **Retain** — merged branches are kept on origin, as the canonical `pin` history shows.
-
-Non-backlog branches follow the same lifecycle; where they have no issue, step 1 does not apply and the pull request body describes the change instead of linking an issue.
-
-# 3) Commit Anatomy
-
-Every commit message is:
-
-```
-PREFIX: message [-> FAIL | -> PASS]
-```
-
-- `PREFIX` is an ALL-CAPS concern word followed by a colon.
-- `message` is super-succinct and, for behavioral commits, **is the test sentence** (see Section 5).
-- TDD pairs carry the `-> FAIL` / `-> PASS` suffix; both commits of a pair use the **identical message**, differing only in the suffix.
-
-Canonical prefixes, in pipeline order where applicable:
-
-| Prefix | Concern |
+| Document | What it covers |
 |---|---|
-| `REQUIREMENTS:` | Adding or changing a `*.requirements.md` file |
-| `SPECIFICATIONS:` | Adding or changing a `*.specifications.json` file |
-| `COMPOSITION:` | Template structure, cached element references |
-| `STYLE:` | CSS — one commit **per rule/selector block** |
-| `STATE:` | State vocabulary, value domains, state contracts, machine regions/transitions |
-| `DATA:` | Data vocabulary, context, canonical data behavior |
-| `VALIDATION:` | Validators in `*.validation.ts` |
-| `OPERATION:` | Public operations |
-| `EVENT:` | Event vocabulary, subscription properties, emission |
-| `GESTURE:` | Gesture vocabulary and wiring |
-| `TESTING:` | Test-only changes: coverage completion for existing behavior, test refactors, description alignment |
-| `CONFIG:` | Tooling and runner configuration (karma, wallaby, importmaps, `.mcp.json`) |
-| `PACKAGE:` | Dependencies, exports/imports surface, package metadata, file removal in favor of packages |
-| `DOCUMENTATION:` | Docs: README, workflows.md, policy files, gate records, generated API docs |
-| `AI:` | Agent instructions and context (`.claude/**`) |
-| `STORY:` | Merge-commit title for `story/<title>` branches — identical to the issue title |
-| `FIX:` | Merge-commit title for `fix/<title>` branches — identical to the issue title |
-| `MIGRATION:` | Merge-commit title for `migration/<component>` branches |
+| `requirements.md` | recording the intent: features and stories |
+| `specifications.md` | deriving the contract from a story |
+| `testing.md` | building and proving each construct, test first |
+| `github.md` | issues, pull requests and releases |
 
-`STORY:`, `FIX:`, and `MIGRATION:` are closure titles: they appear only on merge commits.
+What a component must look like is not workflow. That is in `.claude/policies/`.
 
-# 4) TDD Pairs and Granularity
+---
 
-**The granularity unit is one assertion, not one layer.** Each observable fact about the component gets its own FAIL/PASS pair. A layer therefore produces a *sequence* of small pairs, not one bundled pair.
+# 1) The Path
 
-The canonical per-construct sequence (from the pin history):
+For each piece of work:
 
-1. vocabulary constant exists — one pair per constant and per member:
-   - `STATE: \`Visibility\` exists -> FAIL` / `-> PASS`
-   - `STATE: \`Visibility.VISIBLE\` exists -> FAIL` / `-> PASS`
-2. API member exists:
-   - `STATE: \`pin.visibility\` getter exists -> FAIL` / `-> PASS`
-   - `STATE: \`pin.visibility\` setter exists -> FAIL` / `-> PASS`
-3. each behavior, one pair per assertion:
-   - `STATE: \`pin.visibility\` getter returns \`Visibility.VISIBLE\` -> FAIL/PASS`
-   - `STATE: set \`pin.visibility\` to \`Visibility.HIDDEN\` updates state -> FAIL/PASS`
-   - `STATE: set \`pin.visibility\` to \`null\` updates state to \`Visibility.VISIBLE\` -> FAIL/PASS`
-   - `STATE: set \`pin.visibility\` to \`Visibility.HIDDEN\` sets \`visibility\` attribute to \`Visibility.HIDDEN\` -> FAIL/PASS`
-   - `STATE: set \`visibility\` attribute to \`Visibility.HIDDEN\` sets \`pin.visibility\` to \`Visibility.HIDDEN\` -> FAIL/PASS`
+| # | Step | Described in |
+|---|---|---|
+| 1 | Write the user story and its acceptance criteria | `requirements.md`, `github.md` |
+| 2 | Open the issue, titled with its type | `github.md` |
+| 3 | Update `main` and create the branch `<family>/<title>` | Section 2 |
+| 4 | Triage the change when it is not obvious: find out what it touches before changing anything | — |
+| 5 | Record the story in the requirements file, when it lasts | `requirements.md` |
+| 6 | Declare what the story needs in the specification | `specifications.md` |
+| 7 | Build each construct, test first, in the order of the concerns, running the check that fits each change | Sections 3 to 5, `testing.md` |
+| 8 | Update the README and the API docs where the change made them inaccurate | Section 6 |
+| 9 | Push the branch and open the pull request | `github.md` |
+| 10 | Wait for the test check to pass | `github.md` |
+| 11 | **Human:** review and merge, with the issue title as the merge title | `github.md` |
+| 12 | Switch to `main` and pull; test when behaviour could have changed | `github.md` |
 
-Operations follow the same trio: `\`Operation.PIN\` exists` → `\`pin.pin\` method exists` → `Invoke \`pin.pin\` sets \`pin.status\` to \`Status.PINNED\`` — each a pair.
+For each release, by the human:
 
-Non-TDD layers are still atomic single commits: one `REQUIREMENTS:` commit per story; one `STYLE:` commit per CSS rule; one `CONFIG:` commit per configuration entry; one `PACKAGE:` commit per dependency concern.
+| # | Step | Described in |
+|---|---|---|
+| 13 | Decide to release and choose the level | `github.md` |
+| 14 | Check the number and what the package will contain | `github.md` |
+| 15 | `npm version <level>`, then push with the tag | `github.md` |
+| 16 | Write the notes for the consumer and create the release | `github.md` |
+| 17 | Watch the publish workflow and confirm the version on npm | `github.md` |
 
-# 5) The Message Is the Test Sentence
+Not every piece of work takes every step. A story that does not last skips step 5. A story that changes nothing the component offers skips step 6. A chore may go from step 4 straight to the change.
 
-For behavioral commits, the message is the BDD description of the behavior being pinned — not a summary of the edit:
+# 2) Branches
 
-- identifiers appear in backticks exactly as they appear in code: `` `pin.status` ``, `` `Status.PINNED` ``, `` `Operation.TOGGLE` ``
-- the sentence states the observable outcome: *what is true after the transition*, not *what was changed in which file*
-- reading `git log --oneline` in reverse must reconstruct the component's contract assertion-by-assertion, without opening any file
+## 2.1) One piece of work, one branch
 
-Good: `EVENT: \`pin.onpin\` listener is called when \`pin.status\` changes from \`Status.UNPINNED\` to \`Status.PINNED\` -> PASS`
+A branch carries one piece of work: the one its issue describes. It starts from an up-to-date `main` and is named `<family>/<title>`, the title in lower case with hyphens.
 
-Bad: `EVENT: implement pin events` (bundled, no contract information, no identifiers)
-
-# 6) Pipeline Ordering
-
-Commits within a story or fix follow the implementation pipeline where the touched layers apply:
-
-```
-REQUIREMENTS → SPECIFICATIONS → COMPOSITION → STYLE → STATE → VALIDATION → OPERATION → EVENT → GESTURE → DOCUMENTATION → merge (STORY | FIX)
+```text
+git switch main
+git pull origin main
+git switch -c story/flat-appearance
 ```
 
-- A story branch opens with the `REQUIREMENTS:` commit that records the story in `<component>.requirements.md`, unless the story is already recorded there.
-- A fix branch normally has no `REQUIREMENTS:` commit: a defect is measured against requirements that already exist.
+## 2.2) The family
 
-After the merge: version commit (`npm version`), then trailing `PACKAGE:` / `DOCUMENTATION:` chores (API docs generation, README updates).
+The family says what kind of work the branch carries. It is the type of the issue, in lower case.
 
-# 7) Policy Checklist
+| Family | The work | FAIL/PASS pairs |
+|---|---|---|
+| `feature/` | a new feature: all of its stories, one after another | one for each fact; none for a story that changes no behaviour |
+| `story/` | one persona's need | one for each fact; none when the story changes no behaviour |
+| `fix/` | a defect in behaviour that already exists | always: the first pair reproduces the defect |
+| `refactor/` | code restructured without changing its behaviour | none: the existing tests must stay green |
+| `upgrade/` | a dependency or tool moved to a newer version | none |
+| `chore/` | maintenance that changes no behaviour | none |
+| `docs/` | documentation only | none |
+| `ai/` | agent instructions and context | none |
 
-1. Every story or fix starts as an issue whose title is `STORY: <title>` or `FIX: <title>` and whose body carries Given/When/Then acceptance criteria.
-2. Every story is recorded in `<component>.requirements.md` under its feature, with the same title as its issue.
-3. One branch per story or fix, named `story/<title>` or `fix/<title>`; other work uses an established non-backlog family.
-4. Create a backlog branch only after its issue exists, from an up-to-date `main`, after the human's `Go`.
-5. Close the branch with a pull request whose title is identical to the issue title and whose body contains `Closes #<issue>`.
-6. Merge with a merge commit — never squash or rebase — and keep the merged branch on origin.
-7. Every commit: `PREFIX: message`, one concern, one atomic change.
-8. Every behavioral change: FAIL commit first, PASS commit second, identical message, `->` suffix.
-9. One assertion per pair — vocabulary member, API member existence, and each behavior separately.
-10. Message is the test sentence with backticked identifiers.
-11. Non-TDD layers: one atomic change per commit (per story, per CSS rule, per config entry).
-12. Layer commits follow pipeline order.
-13. The branch closes with `DOCUMENTATION:` commits; the merge commit carries the closure title, identical to the issue title.
-14. `FEATURE` names a group of stories only — never a branch, commit, or merge commit.
-15. Version via `npm version`; push with `--follow-tags`.
+A pair is needed only where a commit changes behaviour that a test can observe.
+
+## 2.3) Keep branches short and merge them in order
+
+A branch that is built on another unmerged branch cannot be merged, or even reviewed on its own, until the one beneath it is. Finish and merge a branch before starting the next one whenever the next does not strictly need it.
+
+# 3) Commits
+
+## 3.1) One concern, one commit
+
+Every commit changes one thing, and its message is:
+
+```text
+PREFIX: message
+```
+
+The prefix names the concern. The message says what is now true.
+
+## 3.2) The prefixes
+
+| Prefix | The concern |
+|---|---|
+| `REQUIREMENTS:` | the requirements file |
+| `SPECIFICATIONS:` | the specification |
+| `COMPOSITION:` | the template and the cached elements |
+| `STATE:` | a state: its metadata, getter, setter and reflection |
+| `VALIDATION:` | a validator, and a setter or operation rejecting a value |
+| `OPERATION:` | an operation |
+| `EVENT:` | an event: its metadata, subscription property and dispatch |
+| `STYLE:` | the stylesheet |
+| `GESTURE:` | a gesture: its metadata, listener and handler |
+| `TESTING:` | specs for behaviour that already exists |
+| `DOCUMENTATION:` | the README, the demo page and the generated API docs |
+| `PACKAGE:` | dependencies and package metadata |
+| `CONFIG:` | tooling: the test runner, the build, the workflows |
+| `AI:` | agent instructions and context, in `.claude/` |
+
+The type of an issue — `STORY`, `FEATURE`, `FIX`, `CHORE` and the others — is never a commit prefix. It appears once, as the title of the merge commit.
+
+## 3.3) The message
+
+**A pair** states one fact about the component. Both commits carry the same message and differ only in the suffix.
+
+```text
+STATE: set `pin.appearance` to `Appearance.FLAT` updates state -> FAIL
+STATE: set `pin.appearance` to `Appearance.FLAT` updates state -> PASS
+```
+
+- Identifiers are in backticks, exactly as they appear in the code.
+- The message states an outcome — what is true afterwards — not what was edited.
+- What belongs in one pair is described in `testing.md`: one fact about one construct.
+
+**A single commit** says what it does, starting with a verb.
+
+```text
+SPECIFICATIONS: Declare the `appearance` state
+STYLE: `:host([appearance="flat"]) .icon` has no border colour and no shadow
+DOCUMENTATION: Describe the `appearance` state in the README
+```
+
+**How small a single commit is:**
+
+| Concern | One commit for each |
+|---|---|
+| `REQUIREMENTS:`, `SPECIFICATIONS:` | story |
+| `STYLE:` | rule |
+| `CONFIG:`, `PACKAGE:` | setting or dependency |
+| `TESTING:` | fact |
+
+The version commit is made by `npm version`. Its message is the bare version, such as `0.2.2`.
+
+## 3.4) What the history is for
+
+Read from oldest to newest, the commits of a branch state the component's contract one fact at a time, without opening a file. That is the test of a good message: could someone rebuild the specification from the log?
+
+# 4) The Order of the Concerns
+
+A feature or story is built in this order. Each concern uses only what came before it.
+
+```text
+REQUIREMENTS → SPECIFICATIONS → COMPOSITION → STATE → VALIDATION → OPERATION → EVENT → STYLE → GESTURE → DOCUMENTATION
+```
+
+- Composition comes first because everything else refers to its parts.
+- An operation changes a state, so the state exists first; an event reports that change, so it comes after both.
+- Style comes after the states it reacts to, and a gesture comes last because it calls an operation on a part.
+
+A concern the work does not touch is skipped.
+
+Within a construct, the next concern may be needed before the current one is finished. A state's setter rejects a value by calling its validator, so the validator's commits come in the middle of the state's. Follow the order as far as each fact allows, and never write code that the next fact does not need yet.
+
+# 5) Building, Test First
+
+Each construct is declared, and then given its behaviours one at a time, with a failing run before every change. `testing.md` describes the loop, what to test for each kind of construct, and what goes in one commit.
+
+Two checks run before any test: the specification is checked against the schema of each policy, and the code is compiled. A branch is ready when `npm test` passes and the build compiles.
+
+# 6) Closing the Branch
+
+Before the pull request, bring everything that describes the component back in step with it.
+
+- **The README,** where the change made it inaccurate.
+- **The API docs,** regenerated with `npm run document` when the public surface changed.
+- **The demo page,** when there is something new to see.
+
+These are the last commits on the branch, each a `DOCUMENTATION:` commit. The branch has no closing commit of its own: its title is given to the merge commit.
+
+# 7) Checklist
+
+1. Follow the path in order: story, issue, branch, requirement, specification, constructs, documentation, pull request.
+2. Carry one piece of work on one branch, named `<family>/<title>`, started from an up-to-date `main`.
+3. Merge a branch before building another on top of it, whenever possible.
+4. Change one thing in each commit, and name its concern in the prefix.
+5. Never use an issue type as a commit prefix; it belongs to the merge commit.
+6. Write a pair wherever a commit changes behaviour a test can observe: FAIL first, then PASS, with the same message.
+7. State an outcome in the message, with identifiers in backticks.
+8. Build in the order of the concerns, skipping the ones the work does not touch.
+9. Close the branch with its `DOCUMENTATION:` commits, with `npm test` passing and the build compiling.

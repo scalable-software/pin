@@ -174,7 +174,7 @@ like the name of a state or an operation: other things depend on it.
 |---|---|
 | The rules for composition | `.claude/policies/composition.md` |
 | How a gesture names its target | `.claude/policies/gesture.md` |
-| Which tests composition needs | `.claude/workflow/testing.md`, Section 8 |
+| Which tests composition needs | `.claude/workflow/testing.md`, Section 6.2 |
 | The pin's composition | `specifications/pin.specifications.json`, `src/pin.template.html` |
 
 ---
@@ -497,7 +497,7 @@ The state never changes to a bad value. What differs is how you find out.
 The second and third rows cannot throw to the code that changed the attribute. That is how
 browsers treat custom elements, not a choice of this framework. In a test, a reported error
 fails the spec unless the test catches it with `jasmine.spyOnGlobalErrorsAsync`; the
-testing policy shows the pattern.
+testing workflow shows the pattern.
 
 ### How a state starts
 
@@ -557,7 +557,7 @@ same setter, and behave identically from there.
 |---|---|
 | The rules for state, with every flavour | `.claude/policies/state.md` |
 | How validators are written | `.claude/policies/validation.md` |
-| Which tests a state needs | `.claude/workflow/testing.md` |
+| Which tests a state needs | `.claude/workflow/testing.md`, Section 6.3 |
 | How events follow from state changes | `.claude/policies/event.md` |
 | The pin's own state | `specifications/pin.specifications.json`, `src/pin.ts` |
 
@@ -735,7 +735,7 @@ allowed", shows each case.
 |---|---|
 | The rules for validators | `.claude/policies/validation.md` |
 | Where validation sits in a setter | `.claude/policies/state.md`, Section 7 |
-| Which tests a validator needs | `.claude/workflow/testing.md`, Section 6 |
+| Which tests a validator needs | `.claude/workflow/testing.md`, Section 6.4 |
 | The pin's validators | `src/pin.validation.ts` |
 
 ---
@@ -948,7 +948,7 @@ for the tests to show.
 |---|---|
 | The rules for operations | `.claude/policies/operation.md` |
 | When an operation validates | `.claude/policies/validation.md`, Section 10 |
-| Which tests an operation needs | `.claude/workflow/testing.md`, Section 10 |
+| Which tests an operation needs | `.claude/workflow/testing.md`, Section 6.5 |
 | The pin's operations | `src/pin.ts` |
 
 ---
@@ -1142,7 +1142,7 @@ how, under "How the component is held to its list".
 |---|---|
 | The rules for events | `.claude/policies/event.md` |
 | Where Dispatch sits in a setter | `.claude/policies/state.md`, Section 7 |
-| Which tests an event needs | `.claude/workflow/testing.md`, Section 11 |
+| Which tests an event needs | `.claude/workflow/testing.md`, Section 6.6 |
 | The pin's events | `specifications/pin.specifications.json`, `src/pin.ts` |
 
 ---
@@ -1329,5 +1329,5 @@ Visual gestures are not tested, because a test cannot hover.
 |---|---|
 | The rules for gestures | `.claude/policies/gesture.md` |
 | Which operation a handler may call | `.claude/policies/operation.md`, Section 12 |
-| Which tests a gesture needs | `.claude/workflow/testing.md`, Section 12 |
+| Which tests a gesture needs | `.claude/workflow/testing.md`, Section 6.7 |
 | The pin's gestures | `specifications/pin.specifications.json`, `src/pin.ts`, `src/pin.style.css` |
