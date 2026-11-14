@@ -16,6 +16,8 @@ building and styling that control themselves.
 
 - Expressing and reporting the pinned or unpinned intent for one element.
 - Showing or hiding the control depending on context.
+- Operating the control with a pointer or with the keyboard.
+- Standing alone, or sitting flat inside another surface such as a toolbar.
 - Visual feedback on interaction and consistency with the device colour theme.
 
 **Out of scope**
