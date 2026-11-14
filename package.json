@@ -18,7 +18,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean.test": "node ./tasks/clean.test.mjs",
-    "pretest": "npm run clean.test && tsc --project tsconfig.test.json",
+    "check.specification": "node ./tasks/check.specification.mjs",
+    "pretest": "npm run clean.test && npm run check.specification && tsc --project tsconfig.test.json",
     "test": "karma start",
     "posttest": "npm run clean.test",
     "prebuild": "node ./tasks/clean.build.mjs",
