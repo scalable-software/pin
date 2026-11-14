@@ -515,6 +515,21 @@ state(State.STATUS, () => {
         });
 
         and("`pin.status` setter exists", () => {
+          when("`pin.status` is set to `Status.PINNED`", () => {
+            beforeEach(() => {
+              pin.status = Status.PINNED;
+            });
+
+            then("`pin.status` is `Status.PINNED`", () => {
+              expect(pin.status).toBe(Status.PINNED);
+            });
+
+            then("pin `status` attribute is `Status.PINNED`", () => {
+              const value = pin.getAttribute(Attributes.STATUS);
+              expect(value).toBe(Status.PINNED);
+            });
+          });
+
           when("`pin.status` is set to `invalid`", () => {
             let error: Error;
             beforeEach(() => {
