@@ -251,6 +251,10 @@ state(State.VISIBILITY, () => {
           });
         });
 
+        then("`visibility` attribute does not exist", () => {
+          expect(pin.hasAttribute(Attributes.VISIBILITY)).toBeFalse();
+        });
+
         then("`pin.visibility` setter exists", () => {
           expect(hasSetter(pin, "visibility")).toBeTrue();
         });
