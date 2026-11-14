@@ -118,7 +118,13 @@ Before committing, check the change four ways.
 
 **Nothing is declared twice.** A value that is a state is not also an operation; a look that the stylesheet draws is not also an attribute of a part.
 
-**Each section follows its policy.** Every policy prints the schema for its section. The changed section must satisfy it.
+**Each section follows its policy.** Every policy prints the schema for its section, and the specification is checked against all of them:
+
+```text
+npm run check.specification
+```
+
+The same check runs at the start of `npm test`, so a specification that breaks a policy stops the tests before they begin.
 
 # 6) Committing the Change
 
@@ -174,5 +180,5 @@ One story added a state and nothing else. The other added no state at all, and r
 6. Choose each name once, here, from the words of the business.
 7. Declare what exists; leave how it looks to the stylesheet and how it works to the code.
 8. Check that every criterion can be met by what is declared, and that every new entry answers a criterion.
-9. Check the changed section against the schema in its policy.
+9. Run `npm run check.specification` to check every section against the schema in its policy.
 10. Make one `SPECIFICATIONS:` commit for the story, after its `REQUIREMENTS:` commit.
