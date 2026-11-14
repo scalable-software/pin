@@ -85,4 +85,3 @@ One file for each stage, in `.claude/workflow/`.
 ### Also in `.claude/`
 
 - `examples/` — the exact copy of the implementation, for other repositories to read. In this repository, read `src/`, `specifications/` and `test/` directly.
-- `notes/` — plans recorded for later. They are not rules.
