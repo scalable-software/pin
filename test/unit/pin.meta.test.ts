@@ -378,6 +378,10 @@ metadata(Metadata.KEY, () => {
         then("`Key.ENTER` exists", () => {
           expect(Key.ENTER).toBeDefined();
         });
+
+        then("`Key.ENTER` is `Enter`", () => {
+          expect(Key.ENTER).toBe("Enter");
+        });
       });
     });
   });
