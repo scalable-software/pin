@@ -89,12 +89,24 @@ metadata(Metadata.STATE, () => {
           expect(State.VISIBILITY).toBeDefined();
         });
 
+        then("`State.VISIBILITY` is `visibility`", () => {
+          expect(State.VISIBILITY).toBe("visibility");
+        });
+
         then("`State.STATUS` exists", () => {
           expect(State.STATUS).toBeDefined();
         });
 
+        then("`State.STATUS` is `status`", () => {
+          expect(State.STATUS).toBe("status");
+        });
+
         then("`State.APPEARANCE` exists", () => {
           expect(State.APPEARANCE).toBeDefined();
+        });
+
+        then("`State.APPEARANCE` is `appearance`", () => {
+          expect(State.APPEARANCE).toBe("appearance");
         });
       });
     });
