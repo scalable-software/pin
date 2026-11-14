@@ -852,7 +852,7 @@ Policy:
 - the event dispatched as a consequence of the state change must be verified as having been called
 - for gestures that trigger a bidirectional toggle, both directions must be verified in sequence: a second interaction block nested inside the first restores the prior state and confirms the reverse outcome
 - visual gestures declared with `effects` are realized entirely in CSS — they do not require JavaScript assertions in the test suite
-- when a gesture needs an element to be focusable, the composition suite must verify the template attributes that make it so, such as `tabindex` and `role`
+- every attribute a composition part declares under `attributes`, such as `tabindex` and `role`, must be verified in the composition suite, on the realized element
 
 Example:
 

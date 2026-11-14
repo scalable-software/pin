@@ -37,6 +37,7 @@ A composition definition may also include:
 - `id`
 - `class`
 - `cached`
+- `attributes`
 
 Interpretation:
 
@@ -44,6 +45,7 @@ Interpretation:
 - `type` defines the structural or element kind used to realize that part
 - `contains` defines the direct child parts of that structural part in the composition contract
 - `id` and `class` define structural identity where relevant to template realization
+- `attributes` declares the attributes of the part that carry meaning, such as `role` and `tabindex` (Section 10)
 - if `contains` is absent, the part is treated as a leaf part in the declared composition
 - if `cached` is `true`, the implementation must create a cached element reference for that part on the component instance
 - if `cached` is absent or `false`, the part is realized in the template but does not require a cached runtime reference
@@ -65,7 +67,8 @@ Example specification:
     "contains": ["svg.pinned", "svg.unpinned"],
     "type": "div",
     "class": "icon",
-    "cached": true
+    "cached": true,
+    "attributes": { "tabindex": "0", "role": "button" }
   },
   "svg.pinned": {
     "description": "The SVG icon used for the pinned mode.",
@@ -99,6 +102,7 @@ Policy:
 - composition must not be used to declare interaction input
 - composition must not be used to declare semantic outcome
 - composition must not be used to declare presentation attributes such as `fill`, `height`, `width`, or `viewBox` — these belong to CSS or the template
+- composition may declare attributes that carry meaning, such as `role` and `tabindex` (Section 10)
 
 Examples of valid composition entries:
 
@@ -154,7 +158,7 @@ Part names trace directly to template elements and CSS selectors:
 | Part name | Template element | CSS selector |
 |---|---|---|
 | `template` | `<template id="pin-button">` | — |
-| `div.icon` | `<div class="icon">` | `.icon` |
+| `div.icon` | `<div class="icon" tabindex="0" role="button">` | `.icon` |
 | `svg.pinned` | `<svg class="pinned">` | `.pinned` or `svg.pinned` |
 | `svg.unpinned` | `<svg class="unpinned">` | `.unpinned` or `svg.unpinned` |
 
@@ -162,7 +166,7 @@ Example:
 
 ```html
 <template id="pin-button">
-  <div class="icon">
+  <div class="icon" tabindex="0" role="button">
     <svg class="pinned">...</svg>
     <svg class="unpinned">...</svg>
   </div>
@@ -228,7 +232,7 @@ Example template:
 
 ```html
 <template id="pin-button">
-  <div class="icon">...</div>
+  <div class="icon" tabindex="0" role="button">...</div>
 </template>
 ```
 
@@ -276,6 +280,25 @@ Benefits:
 
 The composition contract defines the full structure. The runtime cache defines only the internal structural references that runtime behavior depends on, as declared by `cached: true` in the specification.
 
+## 5.1) The Cache Is Filled When the Component Is Connected
+
+The cache is filled in `_cache`, a hook the base component calls each time the component is connected to the page, before `_initialize` and `_addEventListeners`.
+
+```typescript
+protected elements: { icon: HTMLDivElement | null } = { icon: null };
+
+protected _cache = () => {
+  this.elements.icon = this.root.querySelector(".icon");
+};
+```
+
+Policy:
+
+- every cached reference must be assigned in `_cache`, and nowhere else
+- every cached reference is `null` until the component is connected, and is typed to say so
+- code that can run before the component is connected must not depend on a cached reference: a setter can run that early, when its attribute is present in markup or its property is assigned before the element is added to the page
+- code that uses a cached reference must allow for `null`, as in `this.elements.icon?.addEventListener(...)`
+
 # 6) Cached Element Reference Names Must Prefer the Deepest Unambiguous Composition Name
 
 When a composition part is cached for runtime use, its cached reference name should be derived from the class portion of its CSS-selector part name.
@@ -294,7 +317,7 @@ Policy:
 Preferred pattern:
 
 - composition part: `div.icon`
-- template realization: `<div class="icon">`
+- template realization: `<div class="icon" tabindex="0" role="button">`
 - runtime cache: `elements.icon`
 
 Also valid when qualification is required:
@@ -473,6 +496,8 @@ Policy:
 - composition may identify structural identity such as `class` or `id` when that identity is part of template realization
 - composition must not define presentation rules, visual appearance, or styling behavior
 - composition must not declare presentation attributes such as `fill`, `height`, `width`, `viewBox`, or `stroke` — these belong to CSS or the template
+- composition declares, under `attributes`, the attributes that carry meaning: if behavior or accessibility would break when the attribute is removed, it is part of the contract
+- every attribute declared under `attributes` must be realized in the template with the declared value
 - CSS must remain the authoritative layer for presentation concerns
 - state-reflective styling may target composition parts, but the styling logic itself belongs to CSS rather than to composition
 - composition may declare that a structural part exists; CSS may define how that part appears in different states or interaction conditions
@@ -518,6 +543,7 @@ Policy:
 
 - declared composition must be realized through `<component>.template.html`
 - the component class must use the framework template-loading mechanism to realize that template
+- the host must load the template before the component is defined: a component constructed without its template cannot build its structure
 - component logic must not become a competing source of structural truth by manually constructing the declared internal DOM tree
 - runtime logic may cache, read, update, or attach listeners to realized structural parts, but it should depend on the realized template rather than constructing those parts imperatively
 - composition remains declarative when structure is defined in the template and loaded through the framework mechanism
@@ -620,7 +646,8 @@ Specification fragment:
       "contains": ["svg.pinned", "svg.unpinned"],
       "type": "div",
       "class": "icon",
-      "cached": true
+      "cached": true,
+      "attributes": { "tabindex": "0", "role": "button" }
     },
     "svg.pinned": {
       "description": "The SVG icon used for the pinned mode.",
@@ -654,8 +681,9 @@ Applied to `Pin`:
     - loaded through component configuration with `template: { id: Tag }`
 - `div.icon`
     - declared as a structural child of `template` with `cached: true`
-    - realized by `<div class="icon">`
-    - cached as `elements.icon` — the class `icon` is the cached name
+    - declared with the attributes `tabindex` and `role`, because the keyboard gesture depends on them
+    - realized by `<div class="icon" tabindex="0" role="button">`
+    - cached as `elements.icon` — the class `icon` is the cached name, assigned in `_cache`
     - used as the runtime gesture target
 - `svg.pinned`
     - declared as a structural child of `div.icon`
@@ -697,7 +725,7 @@ Template:
 
 ```html
 <template id="pin-button">
-  <div class="icon">
+  <div class="icon" tabindex="0" role="button">
     <svg class="pinned">...</svg>
     <svg class="unpinned">...</svg>
   </div>
@@ -741,14 +769,14 @@ A compliant component must:
 2. Define each composition part using the required specification contract.
 3. Name composition parts using CSS-selector notation — `{type}.{class}` when a class distinguishes the part, or `{type}` when the type alone is sufficient.
 4. Distinguish composition from state, data, operations, events, and gestures.
-5. Avoid declaring presentation attributes such as `fill`, `height`, `width`, or `viewBox` in composition — these belong to CSS or the template.
+5. Avoid declaring presentation attributes such as `fill`, `height`, `width`, or `viewBox` in composition — these belong to CSS or the template. Declare under `attributes` only the attributes that carry meaning, such as `role` and `tabindex`, and realize each in the template.
 6. Avoid declaring framework-injected infrastructure such as stylesheet link elements as composition parts.
 7. Realize every declared composition part in `<component>.template.html`.
 8. Preserve declared parent-child containment relationships in the realized template.
 9. Keep root template identity predictably aligned across specification, metadata, configuration, and template.
 10. Use the framework template-loading mechanism as the authoritative realization path for declared composition.
 11. Avoid manual component-side DOM construction as a competing source of structural truth for declared composition.
-12. Declare `cached: true` on every composition part that runtime logic reads from, writes to, attaches listeners to, or otherwise depends on as an explicit DOM target.
+12. Declare `cached: true` on every composition part that runtime logic reads from, writes to, attaches listeners to, or otherwise depends on as an explicit DOM target. Assign every cached reference in `_cache`, and never depend on one in code that can run before the component is connected.
 13. Cache every composition part declared with `cached: true` as an explicit element reference on the component instance.
 14. Derive cached element reference names from the class portion of the CSS-selector part name.
 15. Add qualification to cached element reference names only when needed to avoid ambiguity.
@@ -821,6 +849,14 @@ JSON Schema:
       "cached": {
         "type": "boolean",
         "description": "When true, the implementation must create a cached element reference for this part on the component instance. Declare cached: true on every part that runtime logic reads from, writes to, or attaches listeners to."
+      },
+      "attributes": {
+        "type": "object",
+        "description": "Attributes of the part that carry meaning: behavior or accessibility would break if one were removed, for example role and tabindex. Presentation attributes such as fill, height, width and viewBox are not declared here.",
+        "minProperties": 1,
+        "additionalProperties": {
+          "type": "string"
+        }
       }
     }
   }
@@ -843,7 +879,8 @@ Example JSON:
       "contains": ["svg.pinned", "svg.unpinned"],
       "type": "div",
       "class": "icon",
-      "cached": true
+      "cached": true,
+      "attributes": { "tabindex": "0", "role": "button" }
     },
     "svg.pinned": {
       "description": "The SVG icon used for the pinned mode.",

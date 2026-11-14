@@ -10,6 +10,176 @@ illustration instead.
 
 ---
 
+## Composition
+
+### What composition is
+
+Composition is **what a component is made of**: its parts, and how they sit inside each
+other.
+
+The pin is made of four parts:
+
+```text
+template
+└── div.icon
+    ├── svg.unpinned
+    └── svg.pinned
+```
+
+| Part | What it is |
+|---|---|
+| `template` | the container that holds the pin's markup |
+| `div.icon` | the area the user clicks |
+| `svg.unpinned` | the picture shown when the pin is not pinned |
+| `svg.pinned` | the picture shown when the pin is pinned |
+
+Composition says what exists. It says nothing about how a part looks, what condition the
+component is in, or what happens on a click. Those belong to the stylesheet, to state and
+to gestures.
+
+### How a part is named
+
+A part is named the way CSS would select it: its element type, a dot, its class. So
+`div.icon` is a `div` with the class `icon`. The name is the same in the specification, in
+the template and in the stylesheet, so you can follow a part from one file to the next.
+
+### Where composition is written down
+
+| File | Job | For the icon |
+|---|---|---|
+| `pin.specifications.json` | Declares the parts and their nesting | `"div.icon": { "contains": [...] }` |
+| `pin.template.html` | Builds them | `<div class="icon" ...>` |
+| `pin.style.css` | Styles them | `.icon { ... }` |
+| `pin.ts` | Keeps a reference to the ones it needs | `this.elements.icon` |
+
+### The template builds the structure
+
+The markup lives in its own file:
+
+```html
+<template id="pin-button">
+  <div class="icon" tabindex="0" role="button">
+    <svg class="unpinned">...</svg>
+    <svg class="pinned">...</svg>
+  </div>
+</template>
+```
+
+The component never builds these elements in code. It copies the template into itself when
+it is created, and that is the only way its structure comes into being. If the structure
+must change, the template changes.
+
+One thing is asked of whoever uses the component: load the template before defining the
+component, because a component created without its template has nothing to copy.
+
+```typescript
+await Pin.Template.load("pin.template.html");
+customElements.define(Pin.Tag, Pin);
+```
+
+### What the specification says about a part, and what it leaves out
+
+```json
+"div.icon": {
+  "description": "The main container of the pin component.",
+  "type": "div",
+  "class": "icon",
+  "cached": true,
+  "attributes": { "tabindex": "0", "role": "button" },
+  "contains": ["svg.unpinned", "svg.pinned"]
+}
+```
+
+It declares what the part is, what is inside it, and any attribute that carries meaning.
+It leaves out everything about appearance.
+
+To decide whether an attribute belongs in the specification, ask one question: **would the
+component behave differently, or become harder to use, if the attribute were removed?**
+
+| Attribute | If it were removed | In the specification? |
+|---|---|---|
+| `tabindex`, `role` on the icon | the keyboard could no longer reach it | yes |
+| `height`, `width`, `fill` on a picture | it would only look different | no |
+
+### Both pictures are always there
+
+The template contains both pictures, pinned and unpinned, at all times. Nothing is added
+or removed when the pin is toggled. The stylesheet decides which one is visible, by
+looking at the `status` attribute:
+
+```css
+:host([status="pinned"]) .pinned {
+  display: inline-block;
+}
+:host([status="pinned"]) .unpinned {
+  display: none;
+}
+```
+
+This is the general pattern. Composition provides every part the component could ever
+show. State says which condition applies. The stylesheet turns the condition into what is
+visible. The component's code never shows or hides a part itself.
+
+### Keeping a reference to a part
+
+The component needs to reach some parts from its code, for instance to listen for a click
+on the icon. A part marked `"cached": true` in the specification gets a reference:
+
+```typescript
+protected elements: { icon: HTMLDivElement | null } = { icon: null };
+
+protected _cache = () => {
+  this.elements.icon = this.root.querySelector(".icon");
+};
+```
+
+Only the parts the code actually uses are cached. The two pictures are not: the stylesheet
+handles them and the code never touches them.
+
+The reference is named after the part's class: `div.icon` becomes `elements.icon`.
+
+### A reference is empty until the component is on the page
+
+`_cache` runs when the component is added to the page. Until then, every reference is
+`null`. That is why the type says `HTMLDivElement | null`, and why the code writes
+`this.elements.icon?.addEventListener(...)` with a question mark.
+
+This matters more than it looks. A setter can run before the component is on the page, for
+example when an attribute is already present in the markup. So a setter must never depend
+on a cached reference.
+
+### Changing a part changes the contract
+
+Because the same name runs through four files, renaming or removing a part is never a
+one-line change. Renaming `div.icon` means changing the specification, the template, the
+stylesheet, the cache and every gesture that names it as its target. Treat a part's name
+like the name of a state or an operation: other things depend on it.
+
+### Mistakes to avoid
+
+- **Building elements in the component's code.** The template builds the structure.
+- **Showing or hiding a part from code.** Reflect the state and let the stylesheet decide.
+- **Putting sizes or colours in the specification.** They belong to the template or the
+  stylesheet.
+- **Leaving out an attribute the component depends on.** `tabindex` and `role` are part of
+  the contract.
+- **Using a cached reference in a setter.** It may still be `null`.
+- **Caching a part the code never uses.** Cache only what is needed.
+- **Looking a part up with `querySelector` wherever it is needed.** Look it up once, in
+  `_cache`.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for composition | `.claude/context/composition.md` |
+| How a gesture names its target | `.claude/context/gesture.md` |
+| Which tests composition needs | `.claude/context/testing.md`, Section 8 |
+| The pin's composition | `specifications/pin.specifications.json`, `src/pin.template.html` |
+
+---
+
+
 ## State
 
 ### What state is

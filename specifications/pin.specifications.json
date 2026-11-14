@@ -8,42 +8,28 @@
       "description": "The HTML template for the pin component.",
       "type": "template",
       "id": "pin-button",
-      "contains": ["link", "div.icon"]
-    },
-    "link": {
-      "description": "A link element that references the component's stylesheet.",
-      "type": "link",
-      "attributes": {
-        "rel": "stylesheet",
-        "href": "./pin.style.css"
-      }
+      "contains": ["div.icon"]
     },
     "div.icon": {
       "description": "The main container of the pin component.",
       "type": "div",
       "cached": true,
       "class": "icon",
+      "attributes": {
+        "tabindex": "0",
+        "role": "button"
+      },
       "contains": ["svg.unpinned", "svg.pinned"]
     },
     "svg.unpinned": {
       "description": "The SVG icon representing the unpinned state.",
       "type": "svg",
-      "class": "unpinned",
-      "attributes": {
-        "height": "24px",
-        "width": "24px",
-        "viewBox": "0 0 20 20"
-      }
+      "class": "unpinned"
     },
     "svg.pinned": {
       "description": "The SVG icon representing the pinned state.",
       "type": "svg",
-      "class": "pinned",
-      "attributes": {
-        "height": "24px",
-        "width": "24px",
-        "viewBox": "0 0 20 20"
-      }
+      "class": "pinned"
     }
   },
   "States": {
