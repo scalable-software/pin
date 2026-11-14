@@ -42,6 +42,7 @@
   "devDependencies": {
     "@types/jasmine": "^5.1.4",
     "@web/dev-server": "^0.4.6",
+    "ajv": "^8.20.0",
     "jasmine": "^5.1.0",
     "karma": "^6.4.3",
     "karma-chrome-launcher": "^3.2.0",
