@@ -233,20 +233,40 @@ metadata(Metadata.OPERATION, () => {
           expect(Operation.HIDE).toBeDefined();
         });
 
+        then("`Operation.HIDE` is `hide`", () => {
+          expect(Operation.HIDE).toBe("hide");
+        });
+
         then("`Operation.SHOW` exists", () => {
           expect(Operation.SHOW).toBeDefined();
+        });
+
+        then("`Operation.SHOW` is `show`", () => {
+          expect(Operation.SHOW).toBe("show");
         });
 
         then("`Operation.PIN` exists", () => {
           expect(Operation.PIN).toBeDefined();
         });
 
+        then("`Operation.PIN` is `pin`", () => {
+          expect(Operation.PIN).toBe("pin");
+        });
+
         then("`Operation.UNPIN` exists", () => {
           expect(Operation.UNPIN).toBeDefined();
         });
 
+        then("`Operation.UNPIN` is `unpin`", () => {
+          expect(Operation.UNPIN).toBe("unpin");
+        });
+
         then("`Operation.TOGGLE` exists", () => {
           expect(Operation.TOGGLE).toBeDefined();
+        });
+
+        then("`Operation.TOGGLE` is `toggle`", () => {
+          expect(Operation.TOGGLE).toBe("toggle");
         });
       });
     });
