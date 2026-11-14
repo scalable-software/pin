@@ -41,12 +41,24 @@ metadata(Metadata.ATTRIBUTES, () => {
           expect(Attributes.VISIBILITY).toBeDefined();
         });
 
+        then("`Attributes.VISIBILITY` is `visibility`", () => {
+          expect(Attributes.VISIBILITY).toBe("visibility");
+        });
+
         then("`Attributes.STATUS` exists", () => {
           expect(Attributes.STATUS).toBeDefined();
         });
 
+        then("`Attributes.STATUS` is `status`", () => {
+          expect(Attributes.STATUS).toBe("status");
+        });
+
         then("`Attributes.APPEARANCE` exists", () => {
           expect(Attributes.APPEARANCE).toBeDefined();
+        });
+
+        then("`Attributes.APPEARANCE` is `appearance`", () => {
+          expect(Attributes.APPEARANCE).toBe("appearance");
         });
       });
     });
