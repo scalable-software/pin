@@ -193,8 +193,16 @@ metadata(State.APPEARANCE, () => {
           expect(Appearance.FLOATING).toBeDefined();
         });
 
+        then("`Appearance.FLOATING` is `floating`", () => {
+          expect(Appearance.FLOATING).toBe("floating");
+        });
+
         then("`Appearance.FLAT` exists", () => {
           expect(Appearance.FLAT).toBeDefined();
+        });
+
+        then("`Appearance.FLAT` is `flat`", () => {
+          expect(Appearance.FLAT).toBe("flat");
         });
       });
     });
