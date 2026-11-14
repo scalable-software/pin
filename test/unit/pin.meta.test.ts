@@ -17,6 +17,10 @@ metadata(Metadata.TAG, () => {
     then("Tag is defined", () => {
       expect(Tag).toBeDefined();
     });
+
+    then("Tag is `pin-button`", () => {
+      expect(Tag).toBe("pin-button");
+    });
   });
 });
 
