@@ -16,6 +16,8 @@ Rules in this policy fall into three strengths. Read each rule with its strength
 
 When applying this policy to a new component, classify each rule before reconciling conflicts. A conflict with a principle is a defect; a conflict with a template means a variation point needs to be made explicit; a conflict with a convention is a documented deviation.
 
+The examples in this policy come from the pin, the reference component; from the title, where the pin has none; and, where neither has one, from an invented case. They show how a rule turns into a specification entry, code and tests. They are illustrations, not a model to copy: a component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. Apply the rules, and the principles behind them, in the context of the component in front of you.
+
 ---
 
 ## 1) State Contract Must Be Declared in Specification
@@ -56,7 +58,7 @@ The classification of each declared state determines which sub-rules of this pol
 - **`attribute` present, `attribute.optional: false`** — activates explicit-default materialization (Section 5.1) and compulsory attribute reflection (Section 5.2). Null normalization does not apply.
 - **`attribute` absent** — Sections 3–7 do not apply. The state participates only in the non-attribute access contract (Section 8).
 - **`readonly: false`** — activates the public setter and the writable mutation path. If attribute-backed, the state participates in declarative mutation via `_attributeHandlers` (Section 6).
-- **`readonly: true`** — no public setter; if attribute-backed, declarative mutation is intercepted to restore the canonical value (Section 9.2). Internal mutation only.
+- **`readonly: true`** — no public setter; a state the component changes has a private setter instead (Section 9). If attribute-backed, declarative mutation is intercepted to restore the canonical value (Section 9.2). Internal mutation only.
 
 These are declared variation points of the template. A state whose classification activates a combination not described here is a signal that this list needs to be extended, not that the state deviates from the template.
 
@@ -71,6 +73,8 @@ Policy:
 
 - All `Attributes` are state.
 - Not all state is attribute-backed.
+- A state's values are primitives: strings, numbers, booleans or `null`. A primitive cannot be changed in place, so a state setter needs no copy of the value it stores.
+- A member whose value is an object or a list is not state but data, even when its values could be listed: it follows the data policy, whose mutation path clones the value and freezes the copy (see the data policy, Sections 2 and 8).
 
 ### 2.1) State Value Domains Must Be Defined in Metadata
 
@@ -433,13 +437,34 @@ This rule applies to both:
 
 Readonly therefore does **not** mean the value never changes. It means the value is **not writable from the outside**. The component implementation retains ownership of mutation.
 
+A state whose value the component computes is always readonly. Whether it is computed from the component's data, from another state, or from an editing surface, the outside has nothing to compute it from, so it must never set it. Its specification declares `readonly: true`, and its `description` says what it is computed from.
+
+How a readonly state is changed:
+
+- a readonly state that the component changes has a **private setter** next to its public getter, and the component changes it only through that setter
+- the private setter follows the mutation order of Section 7 without its Validate phase: the component produces the value itself, so the state has no validator (see the validation policy, Section 9)
+- `private` is checked by the compiler only: at runtime the setter exists, and a caller in plain JavaScript can still assign the state; its specs therefore check at compile time that an assignment from outside the component does not compile, with `@ts-expect-error` on that assignment
+- a readonly state that never changes after construction, such as a generated `id`, has no setter at all
+
+```typescript
+then("assigning `title.content` outside the title does not compile", () => {
+  const assign = () => {
+    // @ts-expect-error: the setter of `content` is private
+    title.content = Content.NAME;
+  };
+  expect(assign).toEqual(jasmine.any(Function));
+});
+```
+
+If the setter were made public, `@ts-expect-error` would have no error to expect, and the test file would no longer compile.
+
 ### 9.1) Non-Attribute Readonly State
 
 For non-attribute state with `readonly: true`:
 
 - expose a public getter
 - do not expose a public setter
-- internal logic may update the canonical value
+- when internal logic updates the canonical value, it does so through a private setter
 
 This is the standard pattern for runtime-only derived, lifecycle, or persistence state.
 
@@ -451,18 +476,20 @@ private _persisted: Persisted = Persisted.NONE;
 public get persisted(): Persisted {
   return this._persisted;
 }
+private set persisted(persisted: Persisted) {
+  // Guard
+  if (this._persisted === persisted) return;
 
-// Internal mutation only
-protected _markPersisted = (timestamp: Timestamp) => {
-  this._persisted = timestamp;
-};
+  // Mutate
+  this._persisted = persisted;
+}
 ```
 
 In this pattern:
 
 - the state is readable from the component API
 - the state is not reflected to the DOM
-- the state is mutated only by internal component logic
+- the state is mutated only by internal component logic, through its private setter
 
 ### 9.2) Attribute-Backed Readonly State
 
@@ -538,6 +565,34 @@ In this pattern:
 - external mutation attempts do not become authoritative
 - the DOM is restored to the canonical value
 
+A readonly attribute-backed state that the component changes, such as a state computed from data, also has a private setter. Its Reflect phase sits in `finally`, as for a writable state (Section 7), and its attribute handler restores the canonical value instead of calling the setter.
+
+Example: `content`, computed by the `Title` from its name
+
+```typescript
+private _content: Content = Content.EMPTY;
+
+public get content(): Content {
+  return this._content;
+}
+private set content(content: Content) {
+  try {
+    // Guard
+    if (this._content === content) return;
+
+    // Mutate
+    this._content = content;
+  } finally {
+    // Reflect
+    this._reflect(Attributes.CONTENT, this._content);
+  }
+}
+
+protected _attributeHandlers = {
+  [Attributes.CONTENT]: () => this._reflect(Attributes.CONTENT, this._content),
+};
+```
+
 ### 9.3) Canonical Source of Truth May Be Stored or Computed
 
 Readonly state must have a canonical internal source of truth.
@@ -562,6 +617,15 @@ A computed getter is valid as long as:
 - the value is internally owned
 - no public setter is exposed
 - external mutation is not authoritative
+
+A computed state therefore takes one of two forms:
+
+| Form | When | What it has |
+|---|---|---|
+| **computed on every read** | a non-attribute state that is cheap to compute | a getter that computes the value, and no backing field and no setter |
+| **computed when its inputs change, and stored** | an attribute-backed state, or one whose change other code must see | a backing field, and a private setter that the component calls whenever an input changes (Section 9.2) |
+
+An attribute-backed computed state is always stored: its attribute must be reflected at the moment the value changes, and a getter that computes on read has no moment to do it.
 
 ### 9.4) Readonly Does Not Replace Optional / Compulsory Classification
 
@@ -660,7 +724,7 @@ Note: the examples below are intentionally state-only and exclude event-dispatch
 - `persisted`
     - Non-attribute, read-only
     - Runtime-only state, not in `Attributes`, not observed via callback pipeline
-    - Public getter only; updated internally by other component logic
+    - Public getter; a private setter for updates by internal component logic
 
 `<component>.validation.ts` for this specification:
 
@@ -764,8 +828,13 @@ private _persisted: Persisted = Persisted.NONE;
 public get persisted(): Persisted {
   return this._persisted;
 }
+private set persisted(persisted: Persisted) {
+  // Guard
+  if (this._persisted === persisted) return;
 
-// No setter since readonly
+  // Mutate
+  this._persisted = persisted;
+}
 ```
 
 `locked` implementation (non-attribute, writable):
@@ -811,7 +880,9 @@ public set locked(locked: Locked) {
 16. For optional attribute-backed state, use `??` to normalize `null` and `undefined` to the default — this handles `attributeChangedCallback` passing `null` when an attribute is removed. Pass the default to `_reflect` as `initial`.
 17. For compulsory attribute-backed state, call `_reflect` without `initial` so the attribute always shows the current value.
 18. For non-attribute state, choose external contract: read-only or writable.
-19. For readonly state, ensure mutation remains internally owned and external mutation is non-authoritative.
+19. For readonly state, ensure mutation remains internally owned and external mutation is non-authoritative: a state the component changes has a private setter, without a validator, and its specs check at compile time that it cannot be assigned from outside.
+20. Declare every state the component computes as readonly; store it, with a private setter, when it is attribute-backed.
+21. Keep every state's values primitive; declare a member whose value is an object or a list as data.
 
 ---
 

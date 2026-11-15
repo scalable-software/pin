@@ -1,6 +1,6 @@
 # Workflow
 
-This document describes how a piece of work moves from an idea to a release. It is the map: it gives the whole path in order, and it holds the two parts that have no document of their own, branches and commits.
+This document describes how a piece of work moves from an idea to a release, and on to the close of its card. It is the map: it gives the whole path in order, and it holds the two parts that have no document of their own, branches and commits.
 
 Each stage of the path has its own document.
 
@@ -10,6 +10,8 @@ Each stage of the path has its own document.
 | `specifications.md` | deriving the contract from a story |
 | `testing.md` | building and proving each construct, test first |
 | `github.md` | issues, pull requests and releases |
+| `demo.md` | the demo page: what it shows, how it is built, and when it changes |
+| `governance.md` | cards and posts: how work arrives from the board, and how it is reported back |
 
 What a component must look like is not workflow. That is in `.claude/policies/`.
 
@@ -34,15 +36,23 @@ For each piece of work:
 | 11 | **Human:** review and merge, with the issue title as the merge title | `github.md` |
 | 12 | Switch to `main` and pull; test when behaviour could have changed | `github.md` |
 
-For each release, by the human:
+For each release, by the human, or by the developer when the human asks, that time:
 
 | # | Step | Described in |
 |---|---|---|
 | 13 | Decide to release and choose the level | `github.md` |
 | 14 | Check the number and what the package will contain | `github.md` |
 | 15 | `npm version <level>`, then push with the tag | `github.md` |
-| 16 | Write the notes for the consumer and create the release | `github.md` |
+| 16 | Write the title and the notes for the consumer, and create the release | `github.md` |
 | 17 | Watch the publish workflow and confirm the version on npm | `github.md` |
+
+After each release:
+
+| # | Step | Described in |
+|---|---|---|
+| 18 | Close the cards whose work the release contains, and report in their threads | `governance.md` |
+
+The work arrives as a card, and ends when its card is closed: `governance.md` §5 gives the card's part in the steps of the path. Work without a card starts at step 1 and ends at step 17.
 
 Not every piece of work takes every step. A story that does not last skips step 5. A story that changes nothing the component offers skips step 6. A chore may go from step 4 straight to the change.
 
@@ -66,7 +76,7 @@ The family says what kind of work the branch carries. It is the type of the issu
 |---|---|---|
 | `feature/` | a new feature: all of its stories, one after another | one for each fact; none for a story that changes no behaviour |
 | `story/` | one persona's need | one for each fact; none when the story changes no behaviour |
-| `fix/` | a defect in behaviour that already exists | always: the first pair reproduces the defect |
+| `fix/` | a defect in behaviour that already exists | always: the first pair reproduces the defect; none when the fix changes only the layout |
 | `refactor/` | code restructured without changing its behaviour | none: the existing tests must stay green |
 | `upgrade/` | a dependency or tool moved to a newer version | none |
 | `chore/` | maintenance that changes no behaviour | none |
@@ -74,6 +84,8 @@ The family says what kind of work the branch carries. It is the type of the issu
 | `ai/` | agent instructions and context | none |
 
 A pair is needed only where a commit changes behaviour that a test can observe.
+
+A fix that changes only the layout, in style rules that no state selects, has no pair: no spec reads how the component is drawn (`testing.md` §8). It is one `STYLE:` commit, checked in the browser with values that show the defect, and the pull request says what was checked.
 
 ## 2.3) Keep branches short and merge them in order
 
@@ -91,6 +103,8 @@ PREFIX: message
 
 The prefix names the concern. The message says what is now true.
 
+A commit carries no `Co-Authored-By` trailer: it never names Claude as a co-author (`github.md` §2).
+
 ## 3.2) The prefixes
 
 | Prefix | The concern |
@@ -99,6 +113,7 @@ The prefix names the concern. The message says what is now true.
 | `SPECIFICATIONS:` | the specification |
 | `COMPOSITION:` | the template and the cached elements |
 | `STATE:` | a state: its metadata, getter, setter and reflection |
+| `DATA:` | a data item: its metadata, getter, setter, ownership and synchronization |
 | `VALIDATION:` | a validator, and a setter or operation rejecting a value |
 | `OPERATION:` | an operation |
 | `EVENT:` | an event: its metadata, subscription property and dispatch |
@@ -153,11 +168,12 @@ Read from oldest to newest, the commits of a branch state the component's contra
 A feature or story is built in this order. Each concern uses only what came before it.
 
 ```text
-REQUIREMENTS → SPECIFICATIONS → COMPOSITION → STATE → VALIDATION → OPERATION → EVENT → STYLE → GESTURE → DOCUMENTATION
+REQUIREMENTS → SPECIFICATIONS → COMPOSITION → STATE → DATA → VALIDATION → OPERATION → EVENT → STYLE → GESTURE → DOCUMENTATION
 ```
 
 - Composition comes first because everything else refers to its parts.
-- An operation changes a state, so the state exists first; an event reports that change, so it comes after both.
+- Data comes after state, because a data item synchronizes the states computed from it.
+- An operation changes a state or data, so they exist first; an event reports that change, so it comes after both.
 - Style comes after the states it reacts to, and a gesture comes last because it calls an operation on a part.
 
 A concern the work does not touch is skipped.
@@ -176,7 +192,7 @@ Before the pull request, bring everything that describes the component back in s
 
 - **The README,** where the change made it inaccurate.
 - **The API docs,** regenerated with `npm run document` when the public surface changed.
-- **The demo page,** when there is something new to see.
+- **The demo page,** when there is something new to see, as `demo.md` describes.
 
 These are the last commits on the branch, each a `DOCUMENTATION:` commit. The branch has no closing commit of its own: its title is given to the merge commit.
 

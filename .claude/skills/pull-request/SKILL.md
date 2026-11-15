@@ -26,7 +26,7 @@ Hand the finished branch to the human for review.
    - `npm test` passes and `npm run build` compiles.
    - The tree is clean.
    - The README and the API docs are accurate.
-   - `.claude/examples/` is identical to `src/`, `specifications/` and `test/`, where the repository has it.
+   - In the pin's own repository, `.claude/examples/` is identical to `src/`, `specifications/` and `test/`.
    - `main` has no unpushed commits.
    - The branch is not built on a branch that is still unmerged.
 2. **Push the branch.**
@@ -35,10 +35,11 @@ Hand the finished branch to the human for review.
    - The body is `Closes #<issue>`, then a line or two naming work that goes beyond the issue.
    - No generated-by footer.
 4. **Wait for the test check:** `gh pr checks --watch`. "No checks reported" straight after opening means the check has not appeared yet; run it again.
+5. **Report on the card,** when the work has one: link the pull request, and reply in the card's thread with the report after the pull request (`governance.md` §6; the calls are in §8.2).
 
 ## Stop
 
-Stop when the check has passed, and report the pull request's link. The human reviews and merges.
+Stop when the check has passed and the card, when there is one, has its link and its report. Then report the pull request's link. The human reviews and merges.
 
 Merge only when the human asks, this time. Then:
 
@@ -49,4 +50,7 @@ Merge only when the human asks, this time. Then:
 ## Done when
 
 - The pull request is open, with the issue's title, and its check has passed.
+- The card, when there is one, links the pull request, and its thread has the report.
 - You have reported what was checked and what was not.
+
+The card is closed with `/close`, once the release that contains the merge is made.

@@ -1,8 +1,12 @@
 # Pin
 
-This repository is `@scalable.software/pin`: the `<pin-button>` web component. It is also the **reference component** — the example that the guide, the policies and the workflows in `.claude/` are written against. When they and the code disagree, one of them is wrong; say so.
+This repository is `@scalable.software/pin`: the `<pin-button>` web component. It is also the **reference component**.
 
-It is built on the base component, `@scalable.software/component`, which lives in another repository. Never change the base component from here. When the pin needs something from it, describe the change for the human.
+The guide, the policies and the workflows in `.claude/` hold for every component, and each repository applies them in the context of its own component. They are illustrated with the pin and, where the pin has no example, with the title. The pin shows how the pieces link: a rule, the specification entry it shapes, the code that follows it and the test that proves it. It is an illustration, not a model to copy: another component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. When the policies and the code here disagree, one of them is wrong; say so.
+
+The package in `.claude/` is the canon. It is changed in the title first, then copied here and to every web component. Propose a change to it in the title, not here; this repository's own file is this `CLAUDE.md`.
+
+It is built on the base component, `@scalable.software/component`, which lives in another repository. Never change it from here. When the pin needs something from it, describe the change for the human.
 
 ## Starting a session
 
@@ -12,13 +16,15 @@ The human opens a session with **`Yo`**. That is not the signal to start working
 2. **Report.** Say what you will work on, your plan, what you checked, which documents you read, and what is unclear. Then stop.
 3. **Start on `Go`.** Only the word `Go` is approval; it may be scoped ("Go, first step only").
 
+The pin has no bucket on the Planner boards. Its work comes from the human directly, without a card (`governance.md` §5): it starts at step 1 of the path and writes nothing on the board.
+
 ## What always applies
 
 - **Propose before changing a document in `.claude/`.** Say what you would change and why, and change it when the human agrees.
 - **Test first.** See a spec fail before writing the code that makes it pass.
 - **One concern in each commit,** named by its prefix. Commit when the human asks.
 - **The human merges and releases.** Do not push, open or merge a pull request, open an issue, or release unless asked.
-- **Keep the example identical.** `.claude/examples/` holds an exact copy of `src/`, `specifications/` and `test/`. When one of those changes, copy the change in the same branch.
+- **Keep the example identical.** `.claude/examples/` holds an exact copy of `src/`, `specifications/` and `test/`. When one of those changes, copy the change in the same branch. Every other repository reads the pin through that copy.
 - **Check, then claim.** Run the suite or try it in a browser before saying something works, and say what you did not check.
 
 ## Commands
@@ -41,7 +47,7 @@ The human opens a session with **`Yo`**. That is not the signal to start working
 | `test/unit/` | three test files: metadata, validation, component |
 | `demo/` | the demo page |
 | `docs/` | generated API docs; never edit by hand |
-| `.claude/` | the guide, the policies, the workflows, the example copy |
+| `.claude/` | the guide, the policies, the add-on guides, the workflows, the skills, the example copy |
 
 ## Where to find what
 
@@ -49,7 +55,7 @@ Three sets of documents describe how components are built here. **Do not read th
 
 ### The guide: why it works this way
 
-`.claude/guide/framework.md` explains the framework to someone new, one section for each construct: Composition, State, Validation, Operations, Events, Gestures.
+`.claude/guide/framework.md` explains the framework to someone new, one section for each construct: Composition, State, Data, Validation, Operations, Events, Gestures.
 
 Read a section when you need to understand how a construct works before changing it, or when you have to explain it to someone.
 
@@ -60,13 +66,22 @@ One file for each construct, in `.claude/policies/`. Each ends with a checklist.
 | Before you add or change… | Read |
 |---|---|
 | a part of the template, or a cached element | `composition.md` |
+| data: its type, its validator, or an operation that creates, loads or changes it | `data.md` |
 | a state, its setter or its attribute | `state.md` |
 | a validator, or anything that rejects a value | `validation.md` |
 | an operation | `operation.md` |
 | an event, or an `on…` property | `event.md` |
 | a gesture, a listener or a handler | `gesture.md` |
 
-The data policy, `.claude/context/data.md`, is not reviewed yet. Treat it as a draft. The pin has no data.
+`data.md` is illustrated with the title, not the pin, because the pin has no data.
+
+### The add-ons: how a component uses one
+
+One file for each add-on, in `.claude/add-ons/`. Each explains the pieces an add-on brings, who owns each of them, and how they work together. They are guides, not policies: they have no checklist to audit against and no schema. The pin uses no add-on.
+
+| When you… | Read |
+|---|---|
+| add a text that depends on the language, or change how a component follows the language | `localizer.md` |
 
 ### The workflows: how the work is done
 
@@ -79,8 +94,10 @@ One file for each stage, in `.claude/workflow/`.
 | change the specification | `specifications.md` |
 | write tests, or decide what goes in one commit | `testing.md` |
 | open an issue or a pull request, or prepare a release | `github.md` |
+| change the demo page | `demo.md` |
+| take up a card, read or answer a post, or close a card | `governance.md` |
 
-`workflow.md` is the map: it gives the whole path from a story to a release and points to the other four. Start there when you are unsure which one applies.
+`workflow.md` is the map: it gives the whole path from a story to a release, and points to the other six. Start there when you are unsure which one applies.
 
 ### Also in `.claude/`
 

@@ -4,7 +4,7 @@ This document describes how a developer tests a component while building it: wha
 
 It is a workflow, not a set of rules for the component itself. The rules for each construct are in `.claude/policies/`. Branching, pull requests and releases are in `workflow.md`.
 
-Every example is from the `pin` component.
+Every example is from the `pin` component, except those for data, a computed state and a rich operation, which come from the `title`, since the pin has none of them. They illustrate how a test is written; a component's tests come from its own specification.
 
 ---
 
@@ -20,7 +20,7 @@ Every construct is tested for three things.
 
 All three are written as granular `then` statements, one assertion each. They differ in what protects the component:
 
-- **Existence** is also guaranteed by the compiler. A missing metadata key does not compile, and `implements Meta` makes the build fail when a state, operation or event named in the metadata is missing from the class. Existence tests therefore document the component — they make the test report an inventory of it — more than they protect it.
+- **Existence** is also guaranteed by the compiler. A missing metadata key does not compile, and `implements Meta` makes the build fail when a state, data item, operation or event named in the metadata is missing from the class. Existence tests therefore document the component — they make the test report an inventory of it — more than they protect it.
 - **Value** is protected only by tests. Nothing else notices when `Visibility.HIDDEN` stops being `hidden`, although the stylesheet and the specification both depend on that exact word.
 - **Behaviour** is protected only by tests.
 
@@ -73,6 +73,7 @@ Each top-level suite uses the wrapper for its concern. The wrapper records the c
 | `utility(name, spec)` | a static utility | `Utilities.*` from the helper |
 | `composition(name, spec)` | structure and cached elements | `Composition.*` from the helper |
 | `state(name, spec)` | a state | `State.*` |
+| `data(name, spec)` | a data item | `Datum.*` |
 | `operation(name, spec)` | an operation | `Operation.*` |
 | `events(name, spec)` | an event | `Event.*` |
 | `gesture(name, spec)` | a gesture | `Gesture.*` |
@@ -83,9 +84,9 @@ The name is always a constant, never a string.
 
 Suites follow the order of the specification.
 
-- **`<component>.meta.test.ts`:** `Tag`, `Attributes`, `State` followed by one suite for each value list, `Operation`, `Event`, `Gesture` followed by any list a gesture condition uses, such as `Key`.
+- **`<component>.meta.test.ts`:** `Tag`, `Attributes`, `State` followed by one suite for each value list, `Datum` followed by the value domains and formats its fields use, such as `Type` and `Uuid`, `Operation`, `Event`, `Gesture` followed by any list a gesture condition uses, such as `Key`.
 - **`<component>.validation.test.ts`:** one suite for each validator, in the order they are declared.
-- **`<component>.test.ts`:** configuration, utilities, composition, states, operations, events, gestures.
+- **`<component>.test.ts`:** configuration, utilities, composition, states, data, operations, events, gestures.
 
 ## 3.4) Setting up the component
 
@@ -124,7 +125,7 @@ state(State.VISIBILITY, () => {
 
 Every spec gets a new component, so a spec does not need to put a state back when it is done.
 
-The outermost block is `given` for suites about structure and contract — metadata, validation, state, and the template and stylesheet suites — and `and` for suites about runtime behaviour: cached elements, operations, events and gestures.
+The outermost block is `given` for suites about structure and contract — metadata, validation, state, data, and the template and stylesheet suites — and `and` for suites about runtime behaviour: cached elements, operations, events and gestures.
 
 # 4) The Working Loop
 
@@ -175,13 +176,13 @@ The subject line stays short. When the individual facts of a declaration are wor
 
 ## 6.1) Metadata
 
-For each list in `<component>.meta.ts`: `Tag`, `Attributes`, `State`, each value list, `Operation`, `Event`, `Gesture`, and any list a gesture condition uses.
+For each list in `<component>.meta.ts`: `Tag`, `Attributes`, `State`, each value list, `Datum`, each value domain and format a data field uses, `Operation`, `Event`, `Gesture`, and any list a gesture condition uses. A format holds a pattern rather than values: its spec checks that the pattern matches a valid value and rejects an invalid one.
 
 | Category | Specs |
 |---|---|
 | Existence | the list is defined; it is an object; each key exists |
 | Value | each key holds the value the specification gives it |
-| Value | for `State`, `Operation` and `Event`: the names that override one every HTML element already has, which is an empty list when there are none |
+| Value | for `State`, `Datum`, `Operation` and `Event`: the names that override one every HTML element already has, which is an empty list when there are none |
 
 ```typescript
 metadata(State.VISIBILITY, () => {
@@ -242,11 +243,17 @@ A single value such as `Tag` has no keys: its suite checks that it is defined an
 | Behaviour | the setter exists; setting a valid value updates the getter | writable state |
 | Behaviour | setting an invalid value throws, with the exact message | writable state |
 | Behaviour | setting `null` leaves the getter at the default | a state that normalizes |
-| Behaviour | setting a value shows it on the attribute | attribute-backed |
+| Behaviour | setting a value shows it on the attribute | writable, attribute-backed |
 | Behaviour | setting the default removes the attribute | optional attribute |
-| Behaviour | setting the attribute updates the getter | attribute-backed |
-| Behaviour | setting the attribute to an invalid value leaves the getter unchanged, restores the attribute, and reports the error with the exact message | attribute-backed |
+| Behaviour | setting the attribute updates the getter | writable, attribute-backed |
+| Behaviour | setting the attribute to an invalid value leaves the getter unchanged, restores the attribute, and reports the error with the exact message | writable, attribute-backed |
 | Behaviour | removing the attribute restores it | compulsory attribute |
+| Behaviour | assigning the state from outside the component does not compile | readonly state with a private setter |
+| Behaviour | setting the attribute, to any value, restores it and reports no error | readonly, attribute-backed |
+| Behaviour | a component added with the attribute in its markup starts at the default | readonly, attribute-backed |
+| Behaviour | the state follows what it is computed from | computed state |
+
+A readonly state's private setter is checked at compile time, as in Section 6.4: an assignment from outside, marked `// @ts-expect-error`.
 
 An invalid value assigned to a property is caught in the test:
 
@@ -298,7 +305,73 @@ when("`status` attribute is set to `invalid`", () => {
 });
 ```
 
-## 6.4) Validation
+## 6.4) Data
+
+The `pin` has no data, so the examples here are from the `title` and its `metadata`. A data suite uses the `data` wrapper, named by `Datum.*`.
+
+| Category | Specs | For |
+|---|---|---|
+| Existence | the getter exists | every data item |
+| Value | on a component that is never connected, the getter returns `null` | data that can be unloaded |
+| Value | once connected, the getter returns the data the component created | data created on connect |
+| Behaviour | the setter exists; setting a valid value: the getter equals it | writable data |
+| Behaviour | the getter returns a copy: not the value that was set, and frozen | every data item |
+| Behaviour | changing the value that was set, afterwards, leaves the getter unchanged | every data item |
+| Behaviour | assigning a field of the getter's value throws a `TypeError` and changes nothing | every data item |
+| Behaviour | setting an invalid value throws, with the exact message, and leaves the getter unchanged | writable data |
+| Behaviour | setting `null` throws `Invalid {name} value: null` and leaves the getter unchanged | data that can be unloaded |
+| Behaviour | assigning `null` does not compile | data that can be unloaded |
+| Behaviour | setting a value updates each derived state and each projection | data with derived state or projections |
+| Behaviour | setting a value leaves every state the user chooses as it was | a component with such a state |
+| Behaviour | data loaded before the component is connected is kept, and drawn, once it is connected | every data item |
+| Behaviour | data is kept when the component is removed and added again | every data item |
+
+- When the component creates data on connect, the only component without data is one that is never connected. Make it with `document.createElement(Title.Tag)`, not `add`.
+- Test data is valid data: a constant such as `ID` holds a real UUID, never `"1"`.
+
+Ownership is tested on a value the spec keeps a reference to:
+
+```typescript
+when("`title.metadata` is set to `pathway`", () => {
+  beforeEach(() => {
+    title.metadata = pathway;
+  });
+
+  then("`title.metadata` is a copy, not `pathway` itself", () => {
+    expect(title.metadata).not.toBe(pathway);
+  });
+
+  then("`title.metadata` is frozen", () => {
+    expect(Object.isFrozen(title.metadata)).toBeTrue();
+  });
+
+  when("`pathway.name` is changed afterwards", () => {
+    beforeEach(() => {
+      pathway.name = "Changed";
+    });
+
+    then("`title.metadata.name` is still `Test`", () => {
+      expect(title.metadata?.name).toBe("Test");
+    });
+  });
+});
+```
+
+What the compiler must refuse is tested at compile time, with `@ts-expect-error` on the line it must refuse:
+
+```typescript
+then("assigning `null` to `title.metadata` does not compile", () => {
+  const assign = () => {
+    // @ts-expect-error: the setter of `metadata` does not accept `null`
+    title.metadata = null;
+  };
+  expect(assign).toEqual(jasmine.any(Function));
+});
+```
+
+The `then` checks nothing that matters at runtime, and the function is never called: the compiler does the check. If the setter accepted `null`, `@ts-expect-error` would have no error to expect, and the test file would not compile. The check needs `strictNullChecks`, without which `null` can be assigned to any type.
+
+## 6.5) Validation
 
 One suite for each validator.
 
@@ -309,6 +382,8 @@ One suite for each validator.
 | Behaviour | for an invalid value: an error is thrown, with the exact message |
 
 The value is set in one `beforeEach`, the validator is called in a `try`/`catch` in the next, and the error and the result are asserted in separate `then` statements.
+
+A structure, such as `metadata`, has one valid value with every field, and one invalid value for each rule the data policy gives it (Section 4): a value that is not a plain object, an undeclared field, and for each field, one that is absent (`required`) and one that fails its check (`invalid`).
 
 ```typescript
 and("`value` is `invalid`", () => {
@@ -338,7 +413,7 @@ and("`value` is `invalid`", () => {
 });
 ```
 
-## 6.5) Operations
+## 6.6) Operations
 
 | Category | Specs |
 |---|---|
@@ -348,8 +423,24 @@ and("`value` is `invalid`", () => {
 
 - When the outcome only shows from a particular starting state, that state is set first: `show` is tested on a hidden pin.
 - An operation that goes both ways, such as `toggle`, is tested in each direction.
+- An operation that sets a state the user chooses, such as the title's `mode`, is tested from each starting point that ends differently: `load` with a name, and without one.
+- An operation that needs data is tested on a component without data, a component that is never connected: it does nothing and sends no event.
+- When an operation calls another, or sets a state after its own event, the order of the events is part of its outcome. Record it with `onevent`, which receives every event the component sends:
 
-## 6.6) Events
+```typescript
+let order: string[];
+beforeEach(() => {
+  order = [];
+  title.onevent = (event: { type: string }) => order.push(event.type);
+  title.save();
+});
+
+then("the events are `onupdate`, `onsave`, then `onview`", () => {
+  expect(order).toEqual([Event.ON_UPDATE, Event.ON_SAVE, Event.ON_VIEW]);
+});
+```
+
+## 6.7) Events
 
 | Category | Specs |
 |---|---|
@@ -359,12 +450,13 @@ and("`value` is `invalid`", () => {
 | Behaviour | a second listener replaces the first: the old one is not called, the new one is |
 | Behaviour | a value that is not a function throws with `Invalid {event} value: {value}`, and the previous listener is still called |
 | Behaviour | setting a state to the value it already has does not call the listener again |
+| Behaviour | for an event that carries data: the `detail` holds the stored value, `toBe` the getter's value and frozen, never the value passed in |
 
 - Listeners are spies: `jasmine.createSpy`.
 - The payload is asserted with `toHaveBeenCalledWith(jasmine.objectContaining({ detail: { … } }))`.
 - When the event needs a starting state, that state is set before the listener is assigned, so the listener does not record the change that set it up.
 
-## 6.7) Gestures
+## 6.8) Gestures
 
 For each behavioural gesture, every trigger is tested end to end: the interaction on the realized element, the state that results, and the event that follows.
 
@@ -425,9 +517,9 @@ Nine pairs and two `TESTING` commits. Every pair after the first asserts somethi
 # 8) What Is Not Tested
 
 - **Visual gestures.** A test cannot hover, so a gesture declared with `effects` has no specs.
-- **Styles.** No spec reads how the component is drawn.
+- **Styles.** No spec reads how the component is drawn. A style rule that a state selects, such as `:host([mode="view"]) .label`, is covered by that state's specs, which check the attribute the rule selects on. A layout rule that no state selects, such as how far a part may shrink, has nothing a spec can read: a defect in one is fixed with a `STYLE:` commit alone, and checked in the browser (`workflow.md` §2.2).
 
-Not yet described here, because the `pin` has none of them: tests for data, for a state that is not attribute-backed, and for a readonly state.
+Not yet described here, because neither the `pin` nor the `title` has one: tests for a state that is not attribute-backed.
 
 # 9) Checklist
 
@@ -445,3 +537,5 @@ Not yet described here, because the `pin` has none of them: tests for data, for 
 12. Give both commits of a pair the same message: the construct for a declaration, the outcome for a behaviour.
 13. Add a spec that already passes in a `TESTING:` commit.
 14. Catch an invalid property value with `try`/`catch`, and an invalid attribute value with `jasmine.spyOnGlobalErrorsAsync`.
+15. Test a data item for ownership, the unloaded state, connection and what follows from it.
+16. Check at compile time what the compiler must refuse, with `@ts-expect-error` on the line it must refuse.

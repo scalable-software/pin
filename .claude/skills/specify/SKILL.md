@@ -44,7 +44,7 @@ Stop and show:
 - each new entry;
 - a table of each acceptance criterion and the entry that meets it.
 
-Commit when the human approves: one `REQUIREMENTS:` commit, then one `SPECIFICATIONS:` commit.
+Commit when the human approves: one `REQUIREMENTS:` commit, then one `SPECIFICATIONS:` commit. When the work has a card, tick the checklist items these commits complete (`governance.md` §5, step 6; the calls are in §8.2).
 
 Stop earlier when a criterion cannot be met by any entry, or an entry cannot be traced to a criterion. One of the two is wrong, and the human decides which.
 

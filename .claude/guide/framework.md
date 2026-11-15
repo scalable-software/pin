@@ -4,9 +4,14 @@ This guide explains how components in this framework work and why they are built
 they are. It is written for a developer who is new to the framework. The policies in
 `.claude/policies/` are the rules; this guide is the explanation behind them.
 
-The examples come from the `pin` component (`<pin-button>`), the reference implementation
-of the framework. Where the pin has no example of something, the guide says so and uses an
-illustration instead.
+The examples come from the `pin` component (`<pin-button>`), the reference component of
+the framework, whose copy is in `.claude/examples/`. Where the pin has no example of
+something, the guide says so and uses an illustration instead, most often from the `title`.
+
+The pin illustrates; it is not a model to copy. It shows how the pieces of a component link, so
+that the principles can be seen at work once. A component's states, operations, events,
+gestures, tests and specification come from its own requirements, never from the pin's,
+and each repository applies the principles in the context of its own component.
 
 ---
 
@@ -175,7 +180,7 @@ like the name of a state or an operation: other things depend on it.
 | The rules for composition | `.claude/policies/composition.md` |
 | How a gesture names its target | `.claude/policies/gesture.md` |
 | Which tests composition needs | `.claude/workflow/testing.md`, Section 6.2 |
-| The pin's composition | `specifications/pin.specifications.json`, `src/pin.template.html` |
+| The pin's composition | `.claude/examples/specifications/pin.specifications.json`, `.claude/examples/src/pin.template.html` |
 
 ---
 
@@ -204,6 +209,11 @@ At any moment each state has exactly one of its values. Together they answer the
 State is not the same as data. State is a *condition* chosen from a short list (`pinned` or
 `unpinned`). Data is *content* the component holds, such as a name or a record. If you can
 list every possible value up front, it is state.
+
+A state's values are always simple: strings, numbers, booleans or `null`. Nothing can change
+such a value from the inside, so a state setter can store what it is given. A member whose
+value is an object or a list is data, even if you could list its values: the Data section
+explains how a component copies and freezes such a value, so that no one else can change it.
 
 ### One source of truth
 
@@ -282,10 +292,11 @@ Put together:
 | Attribute-backed, compulsory, writable | `"attribute": { "optional": false }`, `"readonly": false` | `status` |
 | Non-attribute, writable | no `attribute`, `"readonly": false` | a `locked` flag |
 | Non-attribute, readonly | no `attribute`, `"readonly": true` | a `persisted` timestamp |
-| Attribute-backed, readonly | `attribute` present, `"readonly": true` | a value the component generates and shows |
+| Attribute-backed, readonly | `attribute` present, `"readonly": true` | the title's `content` |
 
-The pin uses only the first two. The other three are described in the state policy, but no
-code in this repository exercises them yet.
+The pin uses only the first two. The title's `content`, which says whether the title holds a
+name, is the last one; "A state the component computes", below, explains it. The other two are described in
+the state policy.
 
 ### The ways to change a state
 
@@ -361,7 +372,8 @@ Which of the three ways exist depends on the flavour:
 | Readonly | no | no | if the component offers one |
 
 For a readonly state, an operation is the only way the outside can cause a change. The
-outside still cannot choose the value; it asks, and the component decides.
+outside still cannot choose the value; it asks, and the component decides. An attribute set
+from outside on a readonly state is simply put back to the state's value.
 
 ### What the setter does
 
@@ -483,6 +495,53 @@ the pin is visible.
 A compulsory state does neither. For `status`, a missing attribute is not a valid request,
 so `null` goes to validation and is rejected like any other bad value.
 
+### A state the component computes
+
+Some states are not chosen by anyone: the component **computes** them from something else.
+The title's `content` is one. It is `empty` while the title has no name and `name` once it
+has one, so the stylesheet can grey out the label and disable the save button.
+
+A computed state is **always readonly**. The outside has nothing to compute it from, so it
+must never set it. The specification says so with `"readonly": true`, and the
+`description` says what the state is computed from.
+
+The component still has to change it, so the state gets a **private setter** next to its
+public getter:
+
+```typescript
+public get content(): Content {
+  return this._content;
+}
+private set content(content: Content) {
+  try {
+    if (this._content === content) return;                 // Guard
+
+    this._content = content;                               // Mutate
+  } finally {
+    this._reflect(Attributes.CONTENT, this._content);      // Reflect
+  }
+}
+```
+
+It is the same setter as before, with one step fewer: there is no Validate. The title
+produces the value itself, so there is nothing to check. Inside the class the code reads as
+usual, `this.content = Content.NAME`; outside it, the compiler refuses the assignment.
+
+`private` is a promise checked by the compiler, not by the browser. Code in plain JavaScript
+can still assign `content`. So the test for it is a compile-time test: an assignment from
+outside, marked `// @ts-expect-error`. If someone ever made the setter public, the marked
+line would no longer be an error, and the test file would stop compiling.
+
+A computed state comes in one of two forms:
+
+| Form | What it has | When |
+|---|---|---|
+| computed on every read | only a getter, which works the value out | a state with no attribute that is cheap to compute |
+| stored, with a private setter | a field, and a private setter the component calls when an input changes | a state with an attribute, like `content` |
+
+A state with an attribute must be stored: its attribute has to change at the moment the
+value changes, and a getter that only computes when it is read has no such moment.
+
 ### What happens with a value that is not allowed
 
 The state never changes to a bad value. What differs is how you find out.
@@ -550,6 +609,8 @@ same setter, and behave identically from there.
 - **Typing a value as a string.** Use the constant from `pin.meta.ts`.
 - **Leaving out the guard.** Without it, setting a state to the value it already has would
   send a second event.
+- **Making a computed state writable.** If the component works a value out, the outside
+  must not be able to set it.
 
 ### Where the rules are
 
@@ -559,7 +620,245 @@ same setter, and behave identically from there.
 | How validators are written | `.claude/policies/validation.md` |
 | Which tests a state needs | `.claude/workflow/testing.md`, Section 6.3 |
 | How events follow from state changes | `.claude/policies/event.md` |
-| The pin's own state | `specifications/pin.specifications.json`, `src/pin.ts` |
+| The pin's own state | `.claude/examples/specifications/pin.specifications.json`, `.claude/examples/src/pin.ts` |
+
+---
+
+## Data
+
+### What data is
+
+Data is **content the component holds for the application** that uses it: a record, a
+document, a selection.
+
+The pin has no data, so this section's examples come from the `title` component
+(`<app-title>`), which shows the name of a clinical pathway and lets its author rename it.
+The title holds one data item, `metadata`:
+
+| Field | What it is | Example |
+|---|---|---|
+| `id` | the pathway's identifier, a UUID | `"5f0c…"` |
+| `name` | the pathway's name; empty until the user names it | `"Sepsis"` |
+| `type` | the kind of map the title holds | `"pathway"` |
+
+The difference from state is the one the State section gave: you can list every value of a
+state up front, but not every name a user might give a pathway. When a component needs to
+know something *about* its data, such as "does it have a name?", that question is a state,
+computed from the data: the title's `content`.
+
+### Where data is written down
+
+Data appears in the same four files as a state, with more names in the metadata.
+
+| File | Job | For `metadata` |
+|---|---|---|
+| `title.specifications.json` | Declares the data, its fields, and its flavour | `"Data": { "metadata": { "type": "Metadata", "properties": { … } } }` |
+| `title.meta.ts` | Names the data item, and gives its shape | `Datum.METADATA`, `type Metadata = { id, name, type }`, `Uuid`, `Type` |
+| `title.validation.ts` | Rejects a value that does not have that shape | `Validate.metadata(value)` |
+| `title.ts` | Holds the value and changes it | `_metadata`, `get metadata()`, `set metadata()` |
+
+The names pair up as they do for the other constructs:
+
+| One name | The record of all of them |
+|---|---|
+| `State` | `States` |
+| `Datum` | `Data` |
+| `Operation` | `Operations` |
+| `Event` | `Events` |
+
+`Data` is part of `Meta`, the type the class promises to match (see "How the component is
+held to its list" under Operations). If the class lost its `metadata` getter, the code would
+not build.
+
+### The flavours of data
+
+Three questions, answered in the specification, decide which flavour a data item is.
+
+- **Is it a structure?** `metadata` is: it has fields, declared under `properties`. A
+  structure is checked field by field. Data without fields, such as a single number, is
+  checked like a state's value.
+- **May the outside assign it?** `"readonly": false` gives it a public setter, as for a
+  state. `metadata` is writable: `title.metadata = { … }`.
+- **Can there be no data yet?** `"default": null` says the data is `null` until it is
+  created or loaded. `metadata` can be: a title has no pathway before it has been given one
+  or has made one.
+
+### The component owns its data
+
+This is the rule that matters most, and it is easy to miss. Consider:
+
+```typescript
+const pathway = { id: "5f0c…", name: "Sepsis", type: Type.PATHWAY };
+title.load(pathway);
+
+pathway.name = "Stroke";   // the caller changes its own object later
+```
+
+If the title kept `pathway` itself, it would now be called "Stroke". No validation would
+have run, and the label on the screen would still say "Sepsis". The same happens if anyone
+writes `title.metadata.name = "Stroke"`.
+
+So a component never keeps the object it is given. It keeps **a deep-frozen copy**, and that
+copy is what the getter and every event hand out:
+
+```typescript
+metadata = structuredClone(metadata);
+this._metadata = this._freeze(metadata);
+```
+
+`structuredClone` makes the copy, nested objects and lists included, and `_freeze` freezes
+it, every level deep. The copy comes first so that the title freezes its own object, never
+the one the caller still holds. After that:
+
+- the caller can change its own object; the title's copy does not change;
+- `title.metadata.name = "Stroke"` throws an error, instead of changing the data unseen;
+- to change the data, you assign a new value:
+  `title.metadata = { ...title.metadata, name: "Stroke" }`.
+
+`_freeze` belongs in the base component, next to `_reflect`. Until it is there, a component
+that has data defines it itself, as a protected method.
+
+### What the setter does
+
+A data setter has its own steps: one that a state setter does not have, and two fewer.
+
+```typescript
+public set metadata(metadata: Metadata) {
+  metadata = Validate.metadata(metadata);    // 1. Validate
+
+  metadata = structuredClone(metadata);      // 2. Clone
+
+  this._metadata = this._freeze(metadata);   // 3. Mutate
+
+  this._updateLabel();                       // 4. Synchronize
+  this._syncContent();
+}
+```
+
+1. **Validate** — check the whole structure. `Validate.metadata` rejects anything that is not
+   an object, any field the specification does not declare, and any field that fails its
+   own check: `id` must be a UUID, `name` a string, `type` one of `Type`.
+2. **Clone** — make the title's own copy. It comes after Validate, so only checked data is
+   copied, and before Mutate, so the freeze never touches the caller's object.
+3. **Mutate** — freeze the copy and keep it.
+4. **Synchronize** — bring what depends on the data up to date (see below).
+
+A state setter needs no Clone: its values are primitives, which nothing can change in place.
+And two steps of the state setter are missing here, on purpose:
+
+- **No Guard.** The copy is a new object, so it is never `===` to the old one, and comparing
+  would never stop anything. Synchronizing again is harmless: each state it touches has its
+  own guard.
+- **No Dispatch.** A data setter sends no event. Events about data come from the operations
+  that load, create or save it, because only they know what happened: "loaded" and "saved"
+  can be the very same assignment.
+
+### No data yet: `null`
+
+A title that has not been given a pathway, and has not made one, has none: `title.metadata`
+is `null`.
+
+- The outside can **read** that there is no data, but can never **assign** `null`. The
+  setter's type does not allow it, and the validator rejects it at runtime.
+- An operation that needs the data does nothing while there is none. `save()` without
+  metadata saves nothing and sends no event.
+
+### What follows from the data
+
+When the data changes, two kinds of things follow it.
+
+| What | In the title | How it is updated |
+|---|---|---|
+| **a computed state** | `content`: `name` when there is a name, `empty` when there is none | through its private setter, so it guards and reflects like any state |
+| **a projection**: a part of the template that shows the data | the label, which shows the name, or the placeholder | written to the cached element; skipped while there is none |
+
+What does **not** follow the data is a state that someone chooses. The title's `mode`, view or
+edit, is the user's choice. If the data set it, then accepting a typed name would end the
+edit, and a host loading a pathway would pull the user out of what they were doing. So the
+operations set `mode`, each as a deliberate step:
+
+| Operation | `mode` afterwards |
+|---|---|
+| `create`, `reset` | `edit`: a new pathway has no name, so the user is asked for one |
+| `load` | `view` when the pathway has a name, `edit` when it has none |
+| `update` | unchanged: the user is still editing |
+| `save` | `view`: the edit is finished |
+| `cancel` | `view` when there is a saved name to go back to; otherwise still `edit` |
+
+### Operations around data
+
+The operations that work with data follow the same rule as the ones that work with state:
+they assign through the setter, and never change the stored value themselves. Because the
+stored value is frozen, they cannot anyway: they build the next whole value.
+
+```typescript
+public update = () => {
+  if (!this.metadata) return;
+
+  this.metadata = { ...this.metadata, name: this._readName() };   // a new value
+
+  const detail = { metadata: this.metadata };
+  this._dispatch(Event.ON_UPDATE, detail);
+};
+```
+
+- `create` makes a new value with a fresh UUID and an empty name.
+- `load` passes its parameter to the setter, which validates it; `load` does not.
+- `update` builds the next value from the stored one.
+- Each sends its own event after the setter has accepted the value, with the **stored** value
+  in `detail`: `this.metadata`, never the parameter, which is not the component's copy.
+
+When one operation calls another, the events arrive in the order of the work. `save` calls
+`update`, so the host hears `onupdate`, then `onsave`, then `onview` as `save` ends the edit.
+
+### The editing surface is not the data
+
+The title's input field is where the user types a new name. It is **not** the data. What the
+user types is tentative until they save it.
+
+- `edit()` copies the stored name into the input.
+- `save()` reads the input and assigns a new value through the setter.
+- `cancel()` copies the stored name back into the input.
+- While the user types, `content` follows the input rather than the data, so the save button
+  can show whether there is something to save. Saving or cancelling works it out from the
+  data again.
+
+`save()` with an empty name does nothing. The stylesheet greys out the save button, but a
+rule that only the stylesheet draws is not a rule: code could still call `save()`.
+
+### Data and the page
+
+A component can be given data before it is on the page, and it can be taken off the page and
+put back. Neither may lose the data.
+
+- Data assigned before connection is kept.
+- When the title is connected and has no data, it creates some, so a new title always has a
+  pathway to name. When it already has data, it keeps it, and only draws the label, which it
+  could not do before it was on the page.
+- A title that is moved, removed and added again, keeps its data.
+
+### Mistakes to avoid
+
+- **Keeping the object you were given.** Keep a frozen copy: `structuredClone`, then `_freeze`.
+- **Freezing the object you were given.** Clone it first, or you freeze the caller's object.
+- **Changing a field of the stored value.** Build a new value and assign it.
+- **Adding a guard or an event to a data setter.** Synchronizing again is safe; events belong
+  to operations.
+- **Letting the data set a chosen state such as `mode`.** Let each operation set it.
+- **Putting the parameter in an event's `detail`.** Put the stored value.
+- **Treating the input field as the data.** Only saving makes it data.
+- **Declaring a placeholder as a field's default.** "Clinical Pathway" is how an empty name
+  is shown, not the name itself.
+
+### Where the rules are
+
+| Topic | Policy |
+|---|---|
+| The rules for data, with every flavour | `.claude/policies/data.md` |
+| How a structure is validated | `.claude/policies/data.md`, Section 4, and `.claude/policies/validation.md` |
+| Computed, readonly state | `.claude/policies/state.md`, Section 9 |
+| Which tests data needs | `.claude/workflow/testing.md`, Section 6.4 |
+| The title's own data | in the title's repository, `Intuitive.Pathways/Components/Title/`: `specifications/title.specifications.json`, `src/title.ts` |
 
 ---
 
@@ -735,8 +1034,8 @@ allowed", shows each case.
 |---|---|
 | The rules for validators | `.claude/policies/validation.md` |
 | Where validation sits in a setter | `.claude/policies/state.md`, Section 7 |
-| Which tests a validator needs | `.claude/workflow/testing.md`, Section 6.4 |
-| The pin's validators | `src/pin.validation.ts` |
+| Which tests a validator needs | `.claude/workflow/testing.md`, Section 6.5 |
+| The pin's validators | `.claude/examples/src/pin.validation.ts` |
 
 ---
 
@@ -924,8 +1223,10 @@ says which one:
 Property 'unpin' is missing in type 'Pin' but required in type 'Operations'.
 ```
 
-`Meta` covers states and events the same way: every state must have its getter, and every
-event its `on…` property.
+`Meta` covers states, data and events the same way: every state and every data item must
+have its getter, and every event its `on…` property. The pin has no data, so its `Meta` has
+no `Data` part; a component with data, such as the title, adds `Data = Record<Datum, unknown>`
+to it.
 
 The check runs in one direction. The class must have everything the metadata names; it may
 have more. And it only proves that a member exists. Whether `unpin` really unpins is still
@@ -948,8 +1249,8 @@ for the tests to show.
 |---|---|
 | The rules for operations | `.claude/policies/operation.md` |
 | When an operation validates | `.claude/policies/validation.md`, Section 10 |
-| Which tests an operation needs | `.claude/workflow/testing.md`, Section 6.5 |
-| The pin's operations | `src/pin.ts` |
+| Which tests an operation needs | `.claude/workflow/testing.md`, Section 6.6 |
+| The pin's operations | `.claude/examples/src/pin.ts` |
 
 ---
 
@@ -1142,8 +1443,8 @@ how, under "How the component is held to its list".
 |---|---|
 | The rules for events | `.claude/policies/event.md` |
 | Where Dispatch sits in a setter | `.claude/policies/state.md`, Section 7 |
-| Which tests an event needs | `.claude/workflow/testing.md`, Section 6.6 |
-| The pin's events | `specifications/pin.specifications.json`, `src/pin.ts` |
+| Which tests an event needs | `.claude/workflow/testing.md`, Section 6.7 |
+| The pin's events | `.claude/examples/specifications/pin.specifications.json`, `.claude/examples/src/pin.ts` |
 
 ---
 
@@ -1329,5 +1630,5 @@ Visual gestures are not tested, because a test cannot hover.
 |---|---|
 | The rules for gestures | `.claude/policies/gesture.md` |
 | Which operation a handler may call | `.claude/policies/operation.md`, Section 12 |
-| Which tests a gesture needs | `.claude/workflow/testing.md`, Section 6.7 |
-| The pin's gestures | `specifications/pin.specifications.json`, `src/pin.ts`, `src/pin.style.css` |
+| Which tests a gesture needs | `.claude/workflow/testing.md`, Section 6.8 |
+| The pin's gestures | `.claude/examples/specifications/pin.specifications.json`, `.claude/examples/src/pin.ts`, `.claude/examples/src/pin.style.css` |

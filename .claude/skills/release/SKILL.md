@@ -36,18 +36,19 @@ Prepare everything a release needs, so the human can decide with the facts in fr
    ```
 
 5. **Check the contents:** `npm pack --dry-run`. The package holds only what is meant to be public.
-6. **Write the notes** for the consumer: what they must do first, then one line for each change, starting with `New`, `Changed`, `Removed` or `Fixed`, ending with its issue number.
+6. **Write the title:** the title of the work released, several joined with ` + `, never the version.
+7. **Write the notes** for the consumer: what they must do first, then one line for each change, starting with `New`, `Changed`, `Removed` or `Fixed`, ending with its issue number.
 
 ## Stop
 
-Stop and show the level with its reason, the number, the package contents and the notes. Publishing cannot be undone, so change nothing until the human approves.
+Stop and show the level with its reason, the number, the package contents, the title and the notes. Publishing cannot be undone, so change nothing until the human approves.
 
 On approval:
 
 ```text
 npm version <level>
 git push origin main --follow-tags
-gh release create v<version> --title v<version> --notes-file <file>
+gh release create v<version> --title "<title>" --notes-file <file>
 ```
 
 Then watch the publish workflow, and confirm with `npm view <package> version`.
@@ -56,3 +57,5 @@ Then watch the publish workflow, and confirm with `npm view <package> version`.
 
 - The release exists on the tag, and the publish workflow has passed.
 - The registry reports the new version.
+
+The next step is `/close`: it checks the release, and closes the cards it delivers.

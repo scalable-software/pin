@@ -35,11 +35,12 @@ Read each document when its step starts, and only the part named. Never read all
 |---|---|---|
 | `COMPOSITION` | `composition.md` | §6.2 |
 | `STATE` | `state.md` | §6.1, §6.3 |
-| `VALIDATION` | `validation.md` | §6.4 |
-| `OPERATION` | `operation.md` | §6.1, §6.5 |
-| `EVENT` | `event.md` | §6.1, §6.6 |
+| `DATA` | `data.md` | §6.1, §6.4 |
+| `VALIDATION` | `validation.md` | §6.5 |
+| `OPERATION` | `operation.md` | §6.1, §6.6 |
+| `EVENT` | `event.md` | §6.1, §6.7 |
 | `STYLE` | `gesture.md` §9, §10 for a visual gesture | none: §8 |
-| `GESTURE` | `gesture.md` | §6.1, §6.7 |
+| `GESTURE` | `gesture.md` | §6.1, §6.8 |
 
 In a policy, read "How to Read This Policy", the numbered rules the construct needs, and the checklist. When a rule is unclear, read that construct's section of `.claude/guide/framework.md`.
 
@@ -51,8 +52,8 @@ In a policy, read "How to Read This Policy", the numbered rules the construct ne
 4. **Give it its behaviours,** one pair for each behaviour.
 5. **Complete the picture.** A spec that passes the moment it is written goes in a `TESTING:` commit.
 6. **Go through the policy's checklist** before moving to the next construct.
-7. **Style** has no specs. Commit one rule at a time, and look at the result with `npm run serve`.
-8. **Copy the change to `.claude/examples/`,** when the repository has that folder, as an `AI:` commit.
+7. **Style** has no specs. Commit one rule at a time, and look at the result with `npm run serve`. A fix that changes only the layout has no pairs: check it in the browser with values that show the defect, before and after, and report what you checked.
+8. **Copy the change to `.claude/examples/`,** in the pin's own repository only, as an `AI:` commit. Anywhere else, the pin's files in that folder are never changed from here: they are refreshed from the pin's own files.
 9. **Close the branch** as `workflow.md` §6 describes: the README, the API docs, the demo page, each a `DOCUMENTATION:` commit.
 
 One pair, every time:
@@ -63,6 +64,8 @@ write the code  →  npm test passes, the whole suite                →  commit
 ```
 
 Asking for a build is asking for these commits. Push nothing.
+
+When the work has a card, tick its checklist item once the step it names is committed (`governance.md` §5, step 6; the calls are in §8.2).
 
 ## Stop
 
@@ -77,6 +80,6 @@ Stop and report when:
 
 - Every construct in the list is built, and its policy's checklist holds.
 - `npm test` passes and `npm run build` compiles.
-- The example copy is identical, where there is one.
+- In the pin's own repository, the example copy is identical.
 
 Report the pairs you committed, and what you did not check. The next step is `/pull-request`.
