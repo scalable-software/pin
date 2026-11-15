@@ -35,7 +35,7 @@ Do not read the policies yourself. Each check runs in its own subagent, so that 
    npm test
    ```
 
-2. **Start one subagent for each check,** all at once. Give each this brief, with the names filled in:
+2. **Start one subagent for each check,** all at once, each on the `sonnet` model: a check is careful reading against a checklist, and step 3 verifies what comes back. Give each this brief, with the names filled in:
 
    > Read `<document>`. Then read the component: `specifications/`, `src/` and `test/unit/`. Go through the document's checklist item by item. For each item answer `holds`, `fails` or `does not apply`, and for every `fails` give the file and line and one sentence saying what is there instead. Where the checklist is not enough to decide, read the numbered rule it summarises. Change no file. Return the list and nothing else.
 

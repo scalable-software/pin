@@ -16,6 +16,8 @@ Rules in this policy fall into three strengths. Read each rule with its strength
 
 When applying this policy to a new component, classify each rule before reconciling conflicts. A conflict with a principle is a defect; a conflict with a template means a variation point needs to be made explicit; a conflict with a convention is a documented deviation.
 
+The examples in this policy come from the pin, the reference component; from the title, where the pin has none; and, where neither has one, from an invented case. They show how a rule turns into a specification entry, code and tests. They are illustrations, not a model to copy: a component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. Apply the rules, and the principles behind them, in the context of the component in front of you.
+
 ---
 
 # 1) Operation Contract Must Be Declared in the Specification
@@ -124,20 +126,23 @@ export type Operation = (typeof Operation)[keyof typeof Operation];
 export type Operations = Record<Operation, (...parameters: any[]) => unknown>;
 ```
 
-`Meta` combines `Operations` with the equivalent types for states and events. The component implements it, importing the type on its own line:
+`Meta` combines `Operations` with the equivalent types for states, data and events. The component implements it, importing the type on its own line:
 
 ```typescript
 // <component>.meta.ts
 export type States = Record<State, unknown>;
+export type Data = Record<Datum, unknown>;
 export type Events = Record<Event, EventListener | null>;
 
-export type Meta = States & Operations & Events;
+export type Meta = States & Data & Operations & Events;
 
 // <component>.ts
-import { type Meta } from "./pin.meta.js";
+import { type Meta } from "./title.meta.js";
 
-export class Pin extends Component implements Meta {
+export class Title extends Component implements Meta {
 ```
+
+A component that has no data, such as the pin, declares no `Datum` and leaves `Data` out: its `Meta` is `States & Operations & Events`. The data policy, Section 3, describes `Datum` and `Data`.
 
 The check runs in one direction: the class must have every member the metadata names, and it may have more. It checks that a member exists, not what it does.
 

@@ -4,7 +4,7 @@ This document describes how a piece of work moves through GitHub: from an issue,
 
 It is a workflow. How the work itself is done is described elsewhere: how to test it in `testing.md`, and what a component must look like in `.claude/policies/`.
 
-The examples are from the `pin` component.
+The examples are from the `pin` component. They illustrate the steps; a component's issues, branches and releases are its own.
 
 ---
 
@@ -14,13 +14,15 @@ Every piece of work has one title, and that title appears at every stage.
 
 | Stage | Example |
 |---|---|
+| Card | `STORY: Flat Appearance` |
 | Issue | `STORY: Flat Appearance` |
 | Branch | `story/flat-appearance` |
 | Pull request | `STORY: Flat Appearance` |
 | Merge commit | `STORY: Flat Appearance` |
+| Release title | `STORY: Flat Appearance` |
 | Release notes | `New: … (#17)` |
 
-The title is chosen once, when the issue is opened. Everything after it is derived from it, never the other way round.
+The title is chosen once: on the card, or, for work without a card, when the issue is opened (`governance.md` §3.1). Everything after it is derived from it, never the other way round.
 
 # 2) Who Does What
 
@@ -30,7 +32,9 @@ The title is chosen once, when the issue is opened. Everything after it is deriv
 | Review and merge the pull request | the human |
 | Decide on a release and make it | the human |
 
-The human may ask the developer to merge once the test check has passed. That is a decision made each time, not a standing permission.
+The human may ask the developer to merge once the test check has passed, or to make a release. Each is a decision made each time, not a standing permission.
+
+Nothing on GitHub names Claude as an author. A commit carries no `Co-Authored-By` trailer, and an issue, a pull request or a release carries no generated-by line.
 
 # 3) Define the Work
 
@@ -172,7 +176,7 @@ Then run `npm test`, but only when the branch could have changed how the compone
 
 # 9) The Release
 
-A release is made by the human. It contains every merge since the previous release.
+A release is made by the human, or by the developer when the human asks, that time. It contains every merge since the previous release.
 
 ## 9.1) Choose the level
 
@@ -200,7 +204,7 @@ Below `1.0.0`, a change the consumer must act on is a minor. `1.0.0` declares th
 
 ## 9.4) Write the notes for the consumer
 
-- The title is the tag, for example `v0.2.2`.
+- The title is the title of the work it releases, for example `STORY: Flat Appearance`; a release of several merges joins their titles with ` + `. It never holds the version: the tag carries that.
 - The description opens with what the consumer must do, when there is anything.
 - Then one line for each change, in the consumer's terms, ending with its issue number.
 - Each line starts with `New`, `Changed`, `Removed` or `Fixed`, in that order.
@@ -235,5 +239,5 @@ For each release, by the human:
 11. Decide to release and choose the level.
 12. Check that the number was never published, and what the package will contain.
 13. `npm version <level>`, then `git push origin main --follow-tags`.
-14. Write the notes for the consumer and create the release on the tag.
+14. Write the title and the notes for the consumer, and create the release on the tag.
 15. Watch the publish workflow and confirm the version on npm.

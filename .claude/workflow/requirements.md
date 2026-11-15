@@ -4,7 +4,7 @@ This document describes how the intent of a component is recorded: what a requir
 
 It is a workflow. What happens to a story after it is written — the issue, the branch, the pull request — is described in `github.md`.
 
-The examples are from the `pin` component.
+The examples are from the `pin` component. They illustrate the form; a component's features and stories are its own.
 
 ---
 
@@ -158,7 +158,7 @@ REQUIREMENTS: Record the flat appearance story
 
 # 11) A Requirements File
 
-`specifications/pin.requirements.md`, shortened:
+The pin's requirements file, `.claude/examples/specifications/pin.requirements.md`, shortened:
 
 ```markdown
 # Pin — Requirements

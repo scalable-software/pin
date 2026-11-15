@@ -4,7 +4,7 @@ This document describes how a component's specification is derived from its requ
 
 It is a workflow. The form of each entry — its fields and what they mean — is defined by the policy for that construct, in `.claude/policies/`. Writing the story comes first and is described in `requirements.md`.
 
-The example throughout is the `Flat Appearance` story of the `pin` component.
+The example throughout is the `Flat Appearance` story of the `pin` component. It illustrates the steps; a component's specification comes from its own stories.
 
 ---
 

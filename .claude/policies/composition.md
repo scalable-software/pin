@@ -16,6 +16,8 @@ Rules in this policy fall into three strengths. Read each rule with its strength
 
 When applying this policy to a new component, classify each rule before reconciling conflicts. A conflict with a principle is a defect; a conflict with a template means a variation point needs to be made explicit; a conflict with a convention is a documented deviation.
 
+The examples in this policy come from the pin, the reference component; from the title, where the pin has none; and, where neither has one, from an invented case. They show how a rule turns into a specification entry, code and tests. They are illustrations, not a model to copy: a component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. Apply the rules, and the principles behind them, in the context of the component in front of you.
+
 ---
 
 # 1) Composition Contract Must Be Declared in the Specification
@@ -242,7 +244,7 @@ This predictable transformation keeps the root composition identity directly tra
 
 Any composition part declared with `cached: true` must be cached on the component instance as an explicit element reference.
 
-This cached structure is the component's runtime access layer for realized composition. It is derived from the template structure, but it does not need to reproduce the full composition tree.
+This cached structure is the component's runtime access layer for realized composition. It is derived from the template structure and follows its nesting (Section 6), but it holds only the parts that runtime logic uses.
 
 Policy:
 
@@ -250,8 +252,8 @@ Policy:
 - cached references must be derived from the realized template structure
 - cached references form the runtime access vocabulary for internal structural parts used by the component
 - cached references must be explicit rather than relying on repeated ad hoc selector queries at the point of use
-- the cache structure does not need to mirror the full composition nesting hierarchy
-- a flat cache is valid when it preserves clear and stable traceability back to the declared composition and realized template
+- the cache structure must follow the nesting of the template: a cached reference sits in the cache where its part sits in the template (Section 6)
+- the cache holds only the `cached: true` parts and the groups needed to reach them; it does not reproduce the full composition tree
 
 Example pattern:
 
@@ -263,11 +265,15 @@ Example with multiple cached parts:
 
 ```typescript
 protected elements = {
-  label: null as HTMLElement | null,
-  name: null as HTMLInputElement | null,
-  edit: null as HTMLElement | null,
-  save: null as HTMLElement | null,
-  cancel: null as HTMLElement | null,
+  metadata: {
+    label: null as HTMLElement | null,
+    name: null as HTMLInputElement | null,
+  },
+  tasks: {
+    edit: null as HTMLElement | null,
+    save: null as HTMLElement | null,
+    cancel: null as HTMLElement | null,
+  },
 };
 ```
 
@@ -276,7 +282,7 @@ Benefits:
 - prevents repeated querying
 - makes runtime dependencies explicit
 - keeps gesture wiring, DOM updates, and internal synchronization traceable to composition
-- avoids forcing the runtime cache to duplicate the full composition tree when that would add structural noise without improving clarity
+- lets a reader find a cached reference by looking at the template, and find its element by looking at the cache
 
 The composition contract defines the full structure. The runtime cache defines only the internal structural references that runtime behavior depends on, as declared by `cached: true` in the specification.
 
@@ -299,32 +305,42 @@ Policy:
 - code that can run before the component is connected must not depend on a cached reference: a setter can run that early, when its attribute is present in markup or its property is assigned before the element is added to the page
 - code that uses a cached reference must allow for `null`, as in `this.elements.icon?.addEventListener(...)`
 
-# 6) Cached Element Reference Names Must Prefer the Deepest Unambiguous Composition Name
+# 6) The Cache Must Follow the Nesting of the Template
 
-When a composition part is cached for runtime use, its cached reference name should be derived from the class portion of its CSS-selector part name.
+The cache is nested the way the template is nested. A cached reference is named after the class portion of its CSS-selector part name, and it sits inside a group for each part that contains it.
 
-This keeps cached references compact while preserving traceability back to the composition contract and realized template.
+This lets a reader go from the template to the cache and back without a lookup: what is inside `div.metadata` in the template is inside `elements.metadata` in the cache.
 
 Policy:
 
 - cached element reference names must be derived from declared composition parts
-- the preferred cached name is the class portion of the part name when it uniquely identifies the runtime-relevant part within the cache
-- full structural path naming is not required when the class portion is already unambiguous
-- if two or more runtime-relevant parts would produce the same cached name, the implementation must add enough qualification to make the names distinct
+- the cached name is the class portion of the part name
+- a cached reference must sit inside one group for each composition part that contains it, outermost first, in the order of the template
+- a group is a plain object named after the class portion of the containing part; it is not a reference to that element, and the containing part needs no `cached: true` to have one
+- the `template` part has no group: its direct children sit at the top level of the cache
+- a containing part that is the only child of its parent has no group either: a wrapper such as `div.panel` distinguishes nothing, so what it contains sits one level up
+- a group exists only when it leads to a cached reference
+- if two cached parts in the same group would produce the same name, the implementation must add enough qualification to make the names distinct
 - cached reference naming must remain stable and predictable for the declared composition
-- cached reference names should remain as small as possible while still being unambiguous
 
-Preferred pattern:
+A part directly under the template:
 
-- composition part: `div.icon`
+- composition part: `div.icon`, contained by `template`
 - template realization: `<div class="icon" tabindex="0" role="button">`
 - runtime cache: `elements.icon`
 
-Also valid when qualification is required:
+Parts inside containers:
+
+- composition: `template` contains `div.panel`; `div.panel` contains `div.metadata` and `div.tasks`
+- `div.metadata` contains `span.label` and `input.name`; `div.tasks` contains `button.edit`, `button.cancel` and `button.save`
+- runtime cache: `elements.metadata.label`, `elements.metadata.name`, `elements.tasks.edit`, `elements.tasks.cancel`, `elements.tasks.save`
+- `div.panel` is the only child of `template`, so it has no group
+
+Nesting keeps most names distinct without qualification:
 
 - composition part: `span.title` inside `div.header`
 - composition part: `span.title` inside `div.dialog`
-- possible runtime cache: `elements.headerTitle`, `elements.dialogTitle`
+- runtime cache: `elements.header.title`, `elements.dialog.title`
 
 Examples:
 
@@ -334,21 +350,26 @@ protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
 ```typescript
 protected elements = {
-  label: null as HTMLElement | null,
-  name: null as HTMLInputElement | null,
-  edit: null as HTMLElement | null,
-  save: null as HTMLElement | null,
-  cancel: null as HTMLElement | null,
+  metadata: {
+    label: null as HTMLElement | null,
+    name: null as HTMLInputElement | null,
+  },
+  tasks: {
+    edit: null as HTMLElement | null,
+    save: null as HTMLElement | null,
+    cancel: null as HTMLElement | null,
+  },
 };
 ```
 
 In these examples:
 
-- `elements.icon` is derived from part `div.icon` — the class `icon` is the cached name
-- `elements.label` is derived from part `span.label` — the class `label` is the cached name
-- `elements.panel.metadata.label` is not required because `label` is already unambiguous
+- `elements.icon` is derived from part `div.icon` — the class `icon` is the cached name, and `template` adds no group
+- `elements.metadata.label` is derived from part `span.label` inside `div.metadata` — the class `label` is the cached name, and the class `metadata` names its group
+- `elements.panel.metadata.label` is wrong: `div.panel` is the only child of `template`, so it adds no group
+- `elements.label` is wrong: it hides that the label sits inside `div.metadata`
 
-The composition contract defines the full structural hierarchy. Cached element reference names define the smallest unambiguous runtime vocabulary derived from that hierarchy.
+The composition contract defines the full structural hierarchy. The cache repeats the part of that hierarchy that leads to a cached reference, so the template and the cache are read the same way.
 
 # 7) Only Composition Parts Declared with `cached: true` Need Cached References
 
@@ -375,7 +396,7 @@ In `Title`:
 - `span.label` is declared with `cached: true` because runtime logic writes text content to it
 - `input.name` is declared with `cached: true` because runtime logic reads, writes, and focuses the input
 - `button.edit`, `button.save`, and `button.cancel` are declared with `cached: true` because runtime gesture listeners attach to them
-- higher structural containers such as `div.panel`, `div.metadata`, and `div.tasks` do not require `cached: true` when runtime logic does not directly depend on them
+- higher structural containers such as `div.panel`, `div.metadata`, and `div.tasks` do not require `cached: true` when runtime logic does not directly depend on them; `div.metadata` and `div.tasks` appear in the cache as groups, not as references (Section 6)
 
 Examples:
 
@@ -385,15 +406,19 @@ protected elements: { icon: HTMLDivElement | null } = { icon: null };
 
 ```typescript
 protected elements = {
-  label: null as HTMLElement | null,
-  name: null as HTMLInputElement | null,
-  edit: null as HTMLElement | null,
-  save: null as HTMLElement | null,
-  cancel: null as HTMLElement | null,
+  metadata: {
+    label: null as HTMLElement | null,
+    name: null as HTMLInputElement | null,
+  },
+  tasks: {
+    edit: null as HTMLElement | null,
+    save: null as HTMLElement | null,
+    cancel: null as HTMLElement | null,
+  },
 };
 ```
 
-The composition specification defines the full internal structure. The element cache defines only the `cached: true` subset of that structure.
+The composition specification defines the full internal structure. The element cache defines only the `cached: true` subset of that structure, nested as the template nests it.
 
 # 8) Composition Must Provide Stable Structural Targets for Other Policies
 
@@ -613,7 +638,7 @@ Examples of contract-impacting changes:
 - renaming `div.icon` to `button.icon`
 - changing `.icon` to a different structural identity without updating runtime references
 - removing `svg.pinned` while CSS still depends on `.pinned`
-- renaming `span.label` to `span.title` while runtime logic still writes to `elements.label`
+- renaming `span.label` to `span.title` while runtime logic still writes to `elements.metadata.label`
 - changing the structure so that `button.edit`, `button.save`, or `button.cancel` no longer match their cached references or listener targets
 
 Examples of layers that may require coordinated updates:
@@ -670,6 +695,7 @@ How this specification is implemented:
 - the framework template mechanism is the authoritative realization path for declared composition
 - only the composition parts declared with `cached: true` are cached as explicit element references
 - cached element reference names are derived from the class portion of the CSS-selector part name
+- the cache is nested as the template is nested; `div.icon` is a direct child of `template`, so it sits at the top level
 - other policies such as gestures, state-reflective styling, and runtime DOM synchronization depend on the realized composition structure, but do not redefine it
 
 Applied to `Pin`:
@@ -778,8 +804,8 @@ A compliant component must:
 11. Avoid manual component-side DOM construction as a competing source of structural truth for declared composition.
 12. Declare `cached: true` on every composition part that runtime logic reads from, writes to, attaches listeners to, or otherwise depends on as an explicit DOM target. Assign every cached reference in `_cache`, and never depend on one in code that can run before the component is connected.
 13. Cache every composition part declared with `cached: true` as an explicit element reference on the component instance.
-14. Derive cached element reference names from the class portion of the CSS-selector part name.
-15. Add qualification to cached element reference names only when needed to avoid ambiguity.
+14. Derive cached element reference names from the class portion of the CSS-selector part name, adding qualification only when two cached parts in the same group would share a name.
+15. Nest the cache as the template is nested: put each cached reference inside a group for each part that contains it, with no group for `template` or for a container that is the only child of its parent.
 16. Cache only the `cached: true` subset of declared composition.
 17. Treat uncached composition parts as still part of the structural contract when they are realized in the template.
 18. Provide stable structural targets for gesture wiring, DOM synchronization, and CSS/state-reflective styling.
