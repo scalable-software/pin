@@ -186,6 +186,25 @@ Each construct is declared, and then given its behaviours one at a time, with a 
 
 Two checks run before any test: the specification is checked against the schema of each policy, and the code is compiled. A branch is ready when `npm test` passes and the build compiles.
 
+## 5.1) The order of a class's members
+
+Every class in `src/` lists its members in this order:
+
+1. static getters, then static properties, in the order of the example: `Tag`, `Attributes`, `Template`
+2. static methods
+3. private properties
+4. protected properties
+5. public properties
+6. the constructor
+7. public getters and setters: first the pairs that are public on both sides, then each public getter whose setter is private
+8. protected getters and setters
+9. private getters and setters
+10. public methods
+11. protected methods, with `_attributeHandlers` first, beside the lifecycle hooks, although its value is an object
+12. private methods
+
+A member whose value is a function, such as `public hide = () => …`, is a method. A getter and its setter always stay together. A commit that only moves members back into this order changes no behaviour, and is never mixed with one that does.
+
 # 6) Closing the Branch
 
 Before the pull request, bring everything that describes the component back in step with it.
@@ -207,3 +226,4 @@ These are the last commits on the branch, each a `DOCUMENTATION:` commit. The br
 7. State an outcome in the message, with identifiers in backticks.
 8. Build in the order of the concerns, skipping the ones the work does not touch.
 9. Close the branch with its `DOCUMENTATION:` commits, with `npm test` passing and the build compiling.
+10. List a class's members in the order of §5.1: static, private, protected and public properties, the constructor, the getters and setters, then the methods.
