@@ -194,6 +194,7 @@ Below `1.0.0`, a change the consumer must act on is a minor. `1.0.0` declares th
 
 - **The number must never have been published.** A version number that was published once can never be used again, even after it was removed. Read the registry's full history before choosing: `npm view <package> time`.
 - **The package must contain only what is meant to be public.** List it with `npm pack --dry-run`.
+- **The package exports its metadata on its own.** Beside `"."`, `exports` holds `"./meta"`, with `types` first and then `default`, pointing at the component's `<component>.meta` file in `dist`, as the title does. A consumer that runs outside the browser, such as the application's end-to-end suite, imports the names and values from it without loading the element, whose class needs the DOM. It is `default`, not `import`, because such a consumer may load it with `require()`. A meta file imports values only from another package's `/meta`, never from its root; a type may come from anywhere. Check it after the build: `node -e "require('<package>/meta')"` must load without a DOM.
 
 ## 9.3) Make the release
 
@@ -238,6 +239,7 @@ For each release, by the human:
 
 11. Decide to release and choose the level.
 12. Check that the number was never published, and what the package will contain.
-13. `npm version <level>`, then `git push origin main --follow-tags`.
-14. Write the title and the notes for the consumer, and create the release on the tag.
-15. Watch the publish workflow and confirm the version on npm.
+13. Check that the metadata is exported as `./meta`, and that a meta imports other packages' values only from their `/meta`.
+14. `npm version <level>`, then `git push origin main --follow-tags`.
+15. Write the title and the notes for the consumer, and create the release on the tag.
+16. Watch the publish workflow and confirm the version on npm.

@@ -13,6 +13,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./meta": {
+      "types": "./dist/pin.meta.d.ts",
+      "default": "./dist/pin.meta.js"
     }
   },
   "types": "dist/index.d.ts",

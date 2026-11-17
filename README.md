@@ -375,6 +375,12 @@ Alternatively, reference the package from a CDN:
 </script>
 ```
 
+The metadata (the tag, the attributes, the states, the events and the other names) is also importable on its own, as `@scalable.software/pin/meta`. It loads without the element, so a consumer outside the browser, such as Node, can `import` or `require()` it without a DOM:
+
+```js
+import { Tag, Attributes } from "@scalable.software/pin/meta";
+```
+
 ---
 
 ## 6. Best Practices & Extensibility
