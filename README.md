@@ -48,7 +48,8 @@ The **Pin** component provides a toggleable element that can be pinned/unpinned 
 This walkthrough demonstrates how to interact with `<pin-button>` right after installation, letting you see how the pin behaves before exploring its internal design.
 
 1. **Open** the served page in your browser.
-   - You should see a `<pin-button>` component displayed.
+   - You should see a `<pin-button>` in a band across the top, and below it three groups: **Operations**, a button for each operation; **States**, a choice for each state that follows the pin; and **Events**, a log of every event the pin sends.
+   - The steps below do the same from the console. The page logs through `onevent`, so every `on…` property stays free for you.
 
 2. **Open the Developer Tools**, select the **Console**.
 
