@@ -618,6 +618,49 @@ realized internal DOM structure
 
 The framework template mechanism is the authoritative path by which declared composition becomes actual component structure.
 
+## 11.1) The Template Hides the Component Until Its Stylesheet Applies
+
+The framework adds the stylesheet as a `<link>` and clones the template at once, but the stylesheet loads later. Until it applies, the realized composition is drawn in the browser's default look, and when it arrives every transition it declares plays from that look. This happens on the first appearance of every component, at the start of the application as much as later, and again whenever the browser must fetch the stylesheet anew. So every component hides itself until its stylesheet applies.
+
+The template opens with the gate:
+
+```html
+<template id="pin-button">
+  <style>:host { display: none; }</style>
+  ...
+</template>
+```
+
+The stylesheet reveals the component in a rule of its own:
+
+```css
+/* Reveals the pin once this stylesheet applies; the template hides it until then */
+:host(:defined) {
+  display: inline-block;
+}
+
+:host {
+  --button-background-color: #ffffff;
+  ...
+}
+
+/* State Visibility */
+:host([visibility="hidden"]) {
+  display: none;
+}
+```
+
+Policy:
+
+- the template's first child is the gate, `<style>:host { display: none; }</style>`, and it is the only presentation the template carries
+- the gate hides with `display`, never with `visibility` or `opacity`: under `display: none` no transition starts when the stylesheet arrives, and the component takes no space before it is finished
+- the stylesheet reveals the component in a rule of its own, `:host(:defined) { display: … }`, which outranks the gate; the custom properties stay in `:host`, so that a `:host` rule in a media query, such as the dark theme, can still override them
+- every rule that hides the host for a state comes after the reveal rule: the two are equally specific, so the order decides
+- the reveal is neither delayed nor animated
+- a stylesheet that replaces the component's own must carry the reveal rule, or the component stays hidden
+- the gate is template infrastructure, like the stylesheet link: it is not a composition part and is not declared in the specification
+- a `:host(:not(:defined))` rule in the stylesheet cannot replace the gate: inside the shadow root the host is always defined, and the rule applies only once the stylesheet has arrived
+
 # 12) Composition Changes Must Be Treated as Contract Changes
 
 If a declared composition part is referenced by runtime logic, styling, or other framework policies, changing that part is a contract-level change.
@@ -801,22 +844,23 @@ A compliant component must:
 8. Preserve declared parent-child containment relationships in the realized template.
 9. Keep root template identity predictably aligned across specification, metadata, configuration, and template.
 10. Use the framework template-loading mechanism as the authoritative realization path for declared composition.
-11. Avoid manual component-side DOM construction as a competing source of structural truth for declared composition.
-12. Declare `cached: true` on every composition part that runtime logic reads from, writes to, attaches listeners to, or otherwise depends on as an explicit DOM target. Assign every cached reference in `_cache`, and never depend on one in code that can run before the component is connected.
-13. Cache every composition part declared with `cached: true` as an explicit element reference on the component instance.
-14. Derive cached element reference names from the class portion of the CSS-selector part name, adding qualification only when two cached parts in the same group would share a name.
-15. Nest the cache as the template is nested: put each cached reference inside a group for each part that contains it, with no group for `template` or for a container that is the only child of its parent.
-16. Cache only the `cached: true` subset of declared composition.
-17. Treat uncached composition parts as still part of the structural contract when they are realized in the template.
-18. Provide stable structural targets for gesture wiring, DOM synchronization, and CSS/state-reflective styling.
-19. Keep runtime logic dependent on realized composition rather than inventing ad hoc structural targets.
-20. Prefer structural minimalism in the declared composition.
-21. Avoid declaring incidental markup that carries no meaningful contract value.
-22. Keep composition separate from visual styling concerns.
-23. Keep CSS as the authoritative layer for presentation.
-24. Treat renames, removals, reparenting, or structural identity changes of declared composition parts as contract changes.
-25. Reflect composition contract changes consistently across specification, template, runtime cache, styling, and dependent policy implementations.
-26. Preserve cross-layer traceability from composition specification to template realization to runtime access.
+11. Open the template with the gate, `<style>:host { display: none; }</style>`, and reveal the component in the stylesheet with `:host(:defined)`, before every rule that hides the host for a state.
+12. Avoid manual component-side DOM construction as a competing source of structural truth for declared composition.
+13. Declare `cached: true` on every composition part that runtime logic reads from, writes to, attaches listeners to, or otherwise depends on as an explicit DOM target. Assign every cached reference in `_cache`, and never depend on one in code that can run before the component is connected.
+14. Cache every composition part declared with `cached: true` as an explicit element reference on the component instance.
+15. Derive cached element reference names from the class portion of the CSS-selector part name, adding qualification only when two cached parts in the same group would share a name.
+16. Nest the cache as the template is nested: put each cached reference inside a group for each part that contains it, with no group for `template` or for a container that is the only child of its parent.
+17. Cache only the `cached: true` subset of declared composition.
+18. Treat uncached composition parts as still part of the structural contract when they are realized in the template.
+19. Provide stable structural targets for gesture wiring, DOM synchronization, and CSS/state-reflective styling.
+20. Keep runtime logic dependent on realized composition rather than inventing ad hoc structural targets.
+21. Prefer structural minimalism in the declared composition.
+22. Avoid declaring incidental markup that carries no meaningful contract value.
+23. Keep composition separate from visual styling concerns.
+24. Keep CSS as the authoritative layer for presentation.
+25. Treat renames, removals, reparenting, or structural identity changes of declared composition parts as contract changes.
+26. Reflect composition contract changes consistently across specification, template, runtime cache, styling, and dependent policy implementations.
+27. Preserve cross-layer traceability from composition specification to template realization to runtime access.
 
 ---
 
