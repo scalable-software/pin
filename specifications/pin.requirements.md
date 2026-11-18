@@ -19,6 +19,7 @@ building and styling that control themselves.
 - Operating the control with a pointer or with the keyboard.
 - Standing alone, or sitting flat inside another surface such as a toolbar.
 - Visual feedback on interaction and consistency with the device colour theme.
+- Appearing in its finished look from the moment it is first seen, in any host.
 
 **Out of scope**
 
@@ -61,3 +62,11 @@ with it, so that I do not need a pointing device.
 
 As a **host application**, when I place the pin inside a toolbar, I want it to appear without
 its own border and shadow, so that the toolbar reads as one surface.
+
+### STORY: Clean First Appearance
+
+As an **end user**, when a page with the pin opens, I want the pin to appear in its finished
+look at once, so that the interface looks steady instead of flickering into place.
+
+As a **host application**, I want the pin to appear finished without my adding anything for
+it, so that I can place it on any page and the page does not jump while it loads.

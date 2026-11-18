@@ -48,7 +48,8 @@ The **Pin** component provides a toggleable element that can be pinned/unpinned 
 This walkthrough demonstrates how to interact with `<pin-button>` right after installation, letting you see how the pin behaves before exploring its internal design.
 
 1. **Open** the served page in your browser.
-   - You should see a `<pin-button>` component displayed.
+   - You should see a `<pin-button>` in a band across the top, and below it three groups: **Operations**, a button for each operation; **States**, a choice for each state that follows the pin; and **Events**, a log of every event the pin sends.
+   - The steps below do the same from the console. The page logs through `onevent`, so every `on…` property stays free for you.
 
 2. **Open the Developer Tools**, select the **Console**.
 
@@ -117,8 +118,8 @@ For more details on **States**, **Operations**, and **Events**, consult the sect
 
 ### 3.1 Composition
 
-- **Template** (`pin.template.html`): Defines DOM structure — a `.icon` container holding the pinned and unpinned SVG icons.
-- **Style** (`pin.style.css`): Encapsulates appearance, including state-driven icon swapping, hover effects, and light/dark theme adaptation.
+- **Template** (`pin.template.html`): Defines DOM structure — a `.icon` container holding the pinned and unpinned SVG icons. Its one style rule, `:host { display: none; }`, keeps the pin hidden until its stylesheet applies, so the pin is never seen unstyled.
+- **Style** (`pin.style.css`): Encapsulates appearance, including state-driven icon swapping, hover effects, and light/dark theme adaptation. Its rule `:host(:defined) { display: inline-block; }` reveals the pin; a stylesheet that replaces this one must carry that rule, or the pin stays hidden.
 - **Class** (`pin.ts`): Extends the base component class to handle lifecycle hooks, Shadow DOM creation, attribute reflection, and event dispatch.
 
 > **Separation of Concerns**
@@ -131,12 +132,15 @@ For more details on **States**, **Operations**, and **Events**, consult the sect
 
 Lifecycle methods are implemented in the base class and extended by the **Pin** component:
 
-- **`connectedCallback()`**
+- **`constructor()`**
   1. Creates a Shadow DOM.
-  2. Clones the HTML template into the Shadow Root.
-  3. Inserts a `<link>` for scoped CSS.
-  4. Initialises default state attributes.
-  5. Sets up event listeners: a click and the Enter key on the icon.
+  2. Inserts a `<link>` for scoped CSS. The stylesheet loads after the template is in place, which is why the template hides the pin until it applies.
+  3. Clones the HTML template into the Shadow Root.
+
+- **`connectedCallback()`**
+  1. Caches the element references.
+  2. Initialises default state attributes.
+  3. Sets up event listeners: a click and the Enter key on the icon.
 
 - **`disconnectedCallback()`**
   - Removes event listeners and cleans up cached element references.

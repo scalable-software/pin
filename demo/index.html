@@ -1,20 +1,52 @@
 <!doctype html>
-<html>
-  <head>
-    <title>Pin</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="html.style.css" />
+<html lang="en">
 
-    <script src="../importmap/inject.js"></script>
-    <script src="../importmap/importmap.build.js"></script>
-  </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pin</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="html.style.css">
+  <!--
+    External Import Maps are not yet supported by browsers.
+    To avoid large Import Maps in the HTML file a script is used to inject the needed maps.
+    See the importmap.build.js file for currently injected maps.
+  -->
+  <script src="../importmap/inject.js"></script>
+  <script src="../importmap/importmap.build.js"></script>
+</head>
 
-  <body>
-    <script src="index.js" type="module"></script>
+<body>
+  <script src="index.js" type="module"></script>
+
+  <!-- The pin, in a band across the top -->
+  <header class="stage">
     <pin-button></pin-button>
+  </header>
 
-    <div class="toolbar">
-      <pin-button appearance="flat"></pin-button>
-    </div>
-  </body>
+  <!-- The controls for the pin's public API -->
+  <main class="controls">
+    <section class="group operations">
+      <h2>Operations</h2>
+      <!-- One button for each of the pin's operations, made by index.js -->
+      <div class="buttons"></div>
+    </section>
+
+    <section class="group states">
+      <h2>States</h2>
+      <!-- One choice for each writable state, made by index.js; each follows the pin -->
+      <div class="choices"></div>
+    </section>
+
+    <section class="group events">
+      <h2>Events</h2>
+      <div class="buttons">
+        <button type="button" class="clear">Clear</button>
+      </div>
+      <!-- Every event the pin sends, oldest first -->
+      <ol class="output log"></ol>
+    </section>
+  </main>
+</body>
+
 </html>
