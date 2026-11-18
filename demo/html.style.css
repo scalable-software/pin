@@ -1,46 +1,61 @@
-/* Default Styles (Light Mode) */
+/* Page: follows the device colour scheme, as the pin does */
+:root {
+  --page-background: #f3f6f8;
+  --page-text: #1d2b36;
+  --muted-text: #5b6b78;
+  --stage-background: #ffffff;
+  --group-background: #ffffff;
+  --group-border: #d9e1e7;
+  --accent: #1b7095;
+  --gap: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-background: #121212;
+    --page-text: #f0f0f0;
+    --muted-text: #a3adb5;
+    --stage-background: #1e1e1e;
+    --group-background: #1a1a1a;
+    --group-border: #333a40;
+    --accent: #6cb6d9;
+  }
+}
+
 html {
   height: 100%;
-  background-color: var(--background-color);
-  color: var(--text-color);
 }
 
 body {
   margin: 0;
-  padding: 0;
   min-height: 100%;
-  background-color: inherit;
-  color: inherit;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, sans-serif;
+  background: var(--page-background);
+  color: var(--page-text);
 }
 
-/* Root Variables */
-:root {
-  --background-color: #ffffff;
-  --text-color: #000000;
+/* The pin, in a band across the top, on the page background it is designed for */
+.stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 25vh;
+  padding: 48px var(--gap);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--group-border);
+  background: var(--stage-background);
 }
 
-/* Dark Mode Styles */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #1e1e1e;
-    --text-color: #f0f0f0;
-  }
-}
-
-pin-button {
-  position: absolute;
-  left: 48px;
-  top: 48px;
-}
-
-/* A toolbar holding a flat pin */
-.toolbar {
-  position: absolute;
-  left: 48px;
-  top: 128px;
-  display: inline-flex;
-}
-
-.toolbar pin-button {
-  position: static;
+/* The controls, in columns that stack on a narrow window */
+.controls {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-content: start;
+  align-items: stretch;
+  gap: var(--gap);
+  padding: var(--gap);
+  box-sizing: border-box;
 }
