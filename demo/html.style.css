@@ -59,3 +59,43 @@ body {
   padding: var(--gap);
   box-sizing: border-box;
 }
+
+.group {
+  min-width: 0;
+  padding: var(--gap);
+  border: 1px solid var(--group-border);
+  border-radius: 12px;
+  background: var(--group-background);
+}
+
+.group h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-text);
+}
+
+/* Controls */
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--group-background);
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent);
+  color: var(--group-background);
+}
