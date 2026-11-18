@@ -1,9 +1,12 @@
 /* =======================
   Host Element Styles
 ======================= */
-:host {
+/* Reveals the pin once this stylesheet applies; the template hides it until then */
+:host(:defined) {
   display: inline-block;
+}
 
+:host {
   --button-background-color: #ffffff;
   --button-border-color: #d1d1d1;
   --button-radius: 8px;
