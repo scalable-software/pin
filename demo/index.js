@@ -47,3 +47,23 @@ const showStates = () =>
 /* The states are attributes, so the page follows the pin by watching them */
 new MutationObserver(showStates).observe(pin, { attributes: true });
 showStates();
+
+/* Events: each one the pin sends, with its time and its detail, oldest first.
+   `onevent` receives them all, so every `on…` property stays free for the host. */
+const log = document.querySelector(".output.log");
+const time = (now = new Date()) =>
+  `${now.toTimeString().slice(0, 8)}.${String(now.getMilliseconds()).padStart(3, "0")}`;
+
+pin.onevent = (event) => {
+  const entry = document.createElement("li");
+  entry.innerHTML = `<time></time> <b></b> <code></code>`;
+  entry.querySelector("time").textContent = time();
+  entry.querySelector("b").textContent = event.type;
+  entry.querySelector("code").textContent = event.detail ? JSON.stringify(event.detail) : "";
+  log.append(entry);
+  log.scrollTop = log.scrollHeight;
+};
+
+document
+  .querySelector(".events .clear")
+  .addEventListener("click", () => log.replaceChildren());

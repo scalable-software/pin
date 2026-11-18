@@ -117,3 +117,40 @@ legend {
   font-weight: 600;
   color: var(--muted-text);
 }
+
+/* What the pin sends */
+.output {
+  margin: 0;
+  padding: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-radius: 6px;
+  background: var(--page-background);
+  font-size: 12px;
+}
+
+ol.log {
+  max-height: 360px;
+  margin-top: 12px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+ol.log:empty::before {
+  content: "No events yet";
+  color: var(--muted-text);
+}
+
+ol.log li + li {
+  margin-top: 4px;
+}
+
+ol.log time {
+  color: var(--muted-text);
+}
+
+ol.log code {
+  display: block;
+  padding-left: 12px;
+  color: var(--muted-text);
+}
