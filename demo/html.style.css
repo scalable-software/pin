@@ -36,12 +36,12 @@ body {
   color: var(--page-text);
 }
 
-/* The pin, in a band across the top, on the page background it is designed for */
+/* The pin, in a band across the top half, on the page background it is designed for */
 .stage {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 25vh;
+  min-height: 50vh;
   padding: 48px var(--gap);
   box-sizing: border-box;
   border-bottom: 1px solid var(--group-border);
