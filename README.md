@@ -117,8 +117,8 @@ For more details on **States**, **Operations**, and **Events**, consult the sect
 
 ### 3.1 Composition
 
-- **Template** (`pin.template.html`): Defines DOM structure — a `.icon` container holding the pinned and unpinned SVG icons.
-- **Style** (`pin.style.css`): Encapsulates appearance, including state-driven icon swapping, hover effects, and light/dark theme adaptation.
+- **Template** (`pin.template.html`): Defines DOM structure — a `.icon` container holding the pinned and unpinned SVG icons. Its one style rule, `:host { display: none; }`, keeps the pin hidden until its stylesheet applies, so the pin is never seen unstyled.
+- **Style** (`pin.style.css`): Encapsulates appearance, including state-driven icon swapping, hover effects, and light/dark theme adaptation. Its rule `:host(:defined) { display: inline-block; }` reveals the pin; a stylesheet that replaces this one must carry that rule, or the pin stays hidden.
 - **Class** (`pin.ts`): Extends the base component class to handle lifecycle hooks, Shadow DOM creation, attribute reflection, and event dispatch.
 
 > **Separation of Concerns**
