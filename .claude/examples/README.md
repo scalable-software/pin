@@ -1,6 +1,6 @@
 # The Example
 
-This folder holds a copy of the pin, `@scalable.software/pin`: the reference component with which the guide, the policies and the workflows are illustrated. Where the pin has no example of something, such as data, a computed state or a rich operation, the examples come from the title, and the title's demo is the reference for the demo page. A few rules are shown with an invented case instead.
+This folder holds a copy of the pin, `@scalable.software/pin`: the one complete component in this package, and the one the guide, the policies and the workflows illustrate most. It is not the only one they draw on. Where another component's implementation shows a point better, or the pin has no example of it, such as data, a computed state or a rich operation, the document uses that component and names it: most often the title, whose demo is also the reference for the demo page. A few rules are shown with an invented case instead.
 
 | Path | Holds |
 |---|---|
