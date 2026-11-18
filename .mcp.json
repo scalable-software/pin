@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "ms365": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@softeria/ms-365-mcp-server",
+        "--org-mode"
+      ],
+      "env": {
+        "MS365_MCP_CLIENT_ID": "45d8814b-04c7-4ecd-8cab-59f61bff21e2",
+        "MS365_MCP_TENANT_ID": "cbbfef46-89e4-49a0-a81b-cde09b3c0c17",
+        "ENABLED_TOOLS": "planner|plan-|list-joined-teams|team-channels|channel-tabs|channel-message|graph-batch|todo"
+      }
+    }
+  }
+}
