@@ -4,9 +4,10 @@ This guide explains how components in this framework work and why they are built
 they are. It is written for a developer who is new to the framework. The policies in
 `.claude/policies/` are the rules; this guide is the explanation behind them.
 
-The examples come from the `pin` component (`<pin-button>`), the reference component of
-the framework, whose copy is in `.claude/examples/`. Where the pin has no example of
-something, the guide says so and uses an illustration instead, most often from the `title`.
+The examples come from the `pin` component (`<pin-button>`), the one complete component in
+this package, whose copy is in `.claude/examples/`. Where the pin has no example of
+something, the guide says so and uses the implementation of another component instead,
+most often the `title`.
 
 The pin illustrates; it is not a model to copy. It shows how the pieces of a component link, so
 that the principles can be seen at work once. A component's states, operations, events,

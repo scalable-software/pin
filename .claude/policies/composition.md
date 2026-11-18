@@ -16,7 +16,7 @@ Rules in this policy fall into three strengths. Read each rule with its strength
 
 When applying this policy to a new component, classify each rule before reconciling conflicts. A conflict with a principle is a defect; a conflict with a template means a variation point needs to be made explicit; a conflict with a convention is a documented deviation.
 
-The examples in this policy come from the pin, the reference component; from the title, where the pin has none; and, where neither has one, from an invented case. They show how a rule turns into a specification entry, code and tests. They are illustrations, not a model to copy: a component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. Apply the rules, and the principles behind them, in the context of the component in front of you.
+The examples in this policy come from the component whose implementation shows a rule best: most from the pin, the one complete component in this package, and others from a component that has what the pin lacks, such as the title's data, or from an invented case. They show how a rule turns into a specification entry, code and tests. They are illustrations, not a model to copy: a component's states, operations, events, gestures, tests and specification come from its own requirements, never from the example's. Apply the rules, and the principles behind them, in the context of the component in front of you.
 
 ---
 

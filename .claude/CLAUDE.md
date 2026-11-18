@@ -1,10 +1,10 @@
 # Pin
 
-This repository is `@scalable.software/pin`: the `<pin-button>` web component. It is also the **reference component**.
+This repository is `@scalable.software/pin`: the `<pin-button>` web component. It is also the **reference component**, and it holds the canon.
 
-The guide, the policies and the workflows in `.claude/` hold for every component, and each repository applies them in the context of its own component. They are illustrated with the pin and, where the pin has no example, with the title. The pin shows how the pieces link: a rule, the specification entry it shapes, the code that follows it and the test that proves it. It is an illustration, not a model to copy: another component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. When the policies and the code here disagree, one of them is wrong; say so.
+The guide, the policies and the workflows in `.claude/` hold for every component, and each repository applies them in the context of its own component. They are illustrated with the implementation of whichever component shows a point best: mostly the pin, the one complete component in the package, and others, such as the title, where the pin has no example. The pin shows how the pieces link: a rule, the specification entry it shapes, the code that follows it and the test that proves it. It is an illustration, not a model to copy: another component's states, operations, events, gestures, tests and specification come from its own requirements, never from the pin's. When the policies and the code here disagree, one of them is wrong; say so.
 
-The package in `.claude/` is the canon. It is changed in the title first, then copied here and to every web component. Propose a change to it in the title, not here; this repository's own file is this `CLAUDE.md`.
+The package in `.claude/` is the canon, and this repository holds it. It is changed here, then copied to every web component. Propose a change to it here, as to any document in `.claude/`; this repository's own file is this `CLAUDE.md`.
 
 It is built on the base component, `@scalable.software/component`, which lives in another repository. Never change it from here. When the pin needs something from it, describe the change for the human.
 
