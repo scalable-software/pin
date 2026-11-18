@@ -132,12 +132,15 @@ For more details on **States**, **Operations**, and **Events**, consult the sect
 
 Lifecycle methods are implemented in the base class and extended by the **Pin** component:
 
-- **`connectedCallback()`**
+- **`constructor()`**
   1. Creates a Shadow DOM.
-  2. Clones the HTML template into the Shadow Root.
-  3. Inserts a `<link>` for scoped CSS.
-  4. Initialises default state attributes.
-  5. Sets up event listeners: a click and the Enter key on the icon.
+  2. Inserts a `<link>` for scoped CSS. The stylesheet loads after the template is in place, which is why the template hides the pin until it applies.
+  3. Clones the HTML template into the Shadow Root.
+
+- **`connectedCallback()`**
+  1. Caches the element references.
+  2. Initialises default state attributes.
+  3. Sets up event listeners: a click and the Enter key on the icon.
 
 - **`disconnectedCallback()`**
   - Removes event listeners and cleans up cached element references.
